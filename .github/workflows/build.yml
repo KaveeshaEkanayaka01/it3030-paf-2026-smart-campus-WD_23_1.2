@@ -10,6 +10,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
     
+    defaults:
+      run:
+        working-directory: ./smart-campus  # Set working directory to the subfolder
+    
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -20,18 +24,19 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
         cache: maven
+        cache-dependency-path: './smart-campus/pom.xml'  # Point to correct pom.xml
     
     - name: Build with Maven
-      run: SmartCampus/smart-campus  # pom.xml is in root
+      run: mvn -B clean compile  # Now runs in smart-campus folder
     
     - name: Run tests
-      run: mvn -B test --file pom.xml
+      run: mvn -B test
     
     - name: Package application
-      run: mvn -B package -DskipTests --file pom.xml
+      run: mvn -B package -DskipTests
     
     - name: Upload build artifact
       uses: actions/upload-artifact@v4
       with:
         name: smart-campus-app
-        path: target/*.jar  # JAR will be in target/ folder
+        path: smart-campus/target/*.jar  # Path from root
