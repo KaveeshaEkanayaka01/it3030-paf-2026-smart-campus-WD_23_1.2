@@ -22,7 +22,7 @@ jobs:
         cache: maven
     
     - name: Build with Maven
-      run: mvn -B clean compile --file pom.xml  # pom.xml is in root
+      run: SmartCampus/smart-campus  # pom.xml is in root
     
     - name: Run tests
       run: mvn -B test --file pom.xml
