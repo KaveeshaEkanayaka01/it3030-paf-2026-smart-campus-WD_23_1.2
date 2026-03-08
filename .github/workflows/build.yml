@@ -1,0 +1,35 @@
+name: Spring Boot CI Build
+
+# Trigger workflow on pushes to develop and PRs to main
+on:
+  push:
+    branches: [ develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the repository
+      - name: Checkout Project
+        uses: actions/checkout@v3
+
+      # Step 2: Setup Java 17
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      # Step 3: Build with Maven in the backend folder
+      - name: Build with Maven
+        working-directory: smart-campus  # <-- folder containing pom.xml
+        run: mvn clean install
+
+      # Optional: Run tests only
+      - name: Run Tests
+        working-directory: backend
+        run: mvn test
