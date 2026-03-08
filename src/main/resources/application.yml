@@ -1,0 +1,33 @@
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/smart_campus
+    username: root
+    password: yourpassword
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+  app:
+  cors:
+    allowed-origins:
+      - http://localhost:3000    # React default
+      - http://localhost:5173    # Vite default
+      - http://127.0.0.1:3000
+      - http://127.0.0.1:5173
+    allowed-methods:
+      - GET
+      - POST
+      - PUT
+      - PATCH
+      - DELETE
+      - OPTIONS
+    allowed-headers:
+      - Authorization
+      - Content-Type
+      - Accept
+      - X-Requested-With
+      - Origin
+    exposed-headers:
+      - Authorization
