@@ -20,28 +20,18 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
         cache: maven
-        cache-dependency-path: '**/pom.xml'
     
-    - name: Find and build with Maven
-      run: |
-        # Find pom.xml and run maven from that directory
-        POM_PATH=$(find . -name "pom.xml" -type f | head -1)
-        POM_DIR=$(dirname $POM_PATH)
-        echo "Found pom.xml in: $POM_DIR"
-        cd $POM_DIR
-        mvn -B clean compile
-        mvn -B test
+    - name: Build with Maven
+      run: mvn -B clean compile --file pom.xml  # pom.xml is in root
+    
+    - name: Run tests
+      run: mvn -B test --file pom.xml
     
     - name: Package application
-      run: |
-        POM_PATH=$(find . -name "pom.xml" -type f | head -1)
-        POM_DIR=$(dirname $POM_PATH)
-        cd $POM_DIR
-        mvn -B package -DskipTests
+      run: mvn -B package -DskipTests --file pom.xml
     
     - name: Upload build artifact
       uses: actions/upload-artifact@v4
       with:
         name: smart-campus-app
-        path: |
-          **/target/*.jar
+        path: target/*.jar  # JAR will be in target/ folder
