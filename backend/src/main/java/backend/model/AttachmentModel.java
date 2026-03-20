@@ -1,10 +1,12 @@
 package backend.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.util.Date;
 
 @Entity
+@Table(name = "attachment_model")
 public class AttachmentModel {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -15,6 +17,7 @@ public class AttachmentModel {
 
     @ManyToOne
     @JoinColumn(name = "ticket_id")
+    @JsonIgnore
     private TicketModel ticket;
 
     public AttachmentModel(){

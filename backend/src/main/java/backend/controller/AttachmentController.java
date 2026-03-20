@@ -9,8 +9,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -24,7 +27,7 @@ public class AttachmentController {
     @Autowired
     private TicketRepository ticketRepository;
 
-    private static final String UPLOAD_DIR = "uploads/";
+    private static final Path UPLOAD_DIR = Paths.get(System.getProperty("user.dir"), "uploads");
 
     @PostMapping("/{id}/attachments")
     public String uploadAttachment(@PathVariable Long id,
@@ -39,14 +42,15 @@ public class AttachmentController {
         TicketModel ticket = ticketOptional.get();
 
         String fileName = file.getOriginalFilename();
-        String filePath = UPLOAD_DIR + fileName;
-
-        File directory = new File(UPLOAD_DIR);
-        if(!directory.exists()) {
-            directory.mkdirs();
+        if (fileName == null || fileName.isBlank()) {
+            throw new IOException("Invalid file name");
         }
 
-        file.transferTo(new File(filePath));
+        Files.createDirectories(UPLOAD_DIR);
+        Path destination = UPLOAD_DIR.resolve(fileName).normalize();
+        file.transferTo(destination);
+
+        String filePath = destination.toString();
 
         AttachmentModel attachment = new AttachmentModel();
         attachment.setFileName(fileName);
@@ -57,5 +61,10 @@ public class AttachmentController {
         attachmentRepository.save(attachment);
 
         return "File uploaded successfully";
+    }
+
+    @GetMapping("/{id}/attachments")
+    public List<AttachmentModel> getAttachments(@PathVariable Long id) {
+        return attachmentRepository.findByTicketId(id);
     }
 }

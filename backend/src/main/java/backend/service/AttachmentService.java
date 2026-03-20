@@ -12,8 +12,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 @Service
 public class AttachmentService {
@@ -24,7 +26,7 @@ public class AttachmentService {
     @Autowired
     private TicketRepository ticketRepository;
 
-    private static final String UPLOAD_DIR = "uploads/";
+    private static final Path UPLOAD_DIR = Paths.get(System.getProperty("user.dir"), "uploads");
 
     public AttachmentModel uploadAttachment(Long ticketId, MultipartFile file) throws IOException {
 
@@ -40,14 +42,14 @@ public class AttachmentService {
         }
 
         String fileName = file.getOriginalFilename();
-        String filePath = UPLOAD_DIR + fileName;
-
-        File directory = new File(UPLOAD_DIR);
-        if(!directory.exists()){
-            directory.mkdirs();
+        if (fileName == null || fileName.isBlank()) {
+            throw new FileUploadException("Invalid file name");
         }
 
-        file.transferTo(new File(filePath));
+        Files.createDirectories(UPLOAD_DIR);
+        Path destination = UPLOAD_DIR.resolve(fileName).normalize();
+        file.transferTo(destination);
+        String filePath = destination.toString();
 
         AttachmentModel attachment = new AttachmentModel();
         attachment.setFileName(fileName);
