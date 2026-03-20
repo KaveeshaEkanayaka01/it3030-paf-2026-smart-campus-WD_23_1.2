@@ -10,6 +10,9 @@
         <module name="smart-campus" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="smart-campus" target="17" />
+    </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
