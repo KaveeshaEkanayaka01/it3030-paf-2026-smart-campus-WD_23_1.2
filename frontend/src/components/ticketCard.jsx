@@ -18,7 +18,7 @@ export const TicketCard = ({ ticket, onClick }) => {
           <h3 className="font-black text-black group-hover:underline decoration-2 underline-offset-4 transition-all">
             {ticket?.category || 'Uncategorized'}
           </h3>
-          <p className="text-[10px] text-zinc-400 mt-1 font-mono">ID: #{String(ticket?.id ?? '').slice(0, 8)}</p>
+          <p className="text-[10px] text-zinc-400 mt-1 font-mono">ID: {String(ticket?.id ?? '').slice(0, 8)}</p>
         </div>
         <TicketStatusBadge status={ticket?.status} />
       </div>

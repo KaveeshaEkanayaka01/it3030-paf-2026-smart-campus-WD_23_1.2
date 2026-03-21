@@ -1,8 +1,7 @@
 package backend.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
-
-import javax.xml.stream.events.Comment;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -34,6 +33,7 @@ public class TicketModel {
     private List<AttachmentModel> attachments;
 
     @OneToMany(mappedBy = "ticket", cascade = CascadeType.ALL)
+    @JsonIgnoreProperties("ticket")
     private List<CommentModel> comments;
 
     public TicketModel(){

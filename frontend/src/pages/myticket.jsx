@@ -18,7 +18,6 @@ export const MyTicketsPage = () => {
       const currentUserId = getCurrentUserId();
       if (!currentUserId) {
         setError('No current user found. Set localStorage currentUser, userId, or username.');
-        setLoading(false);
         return;
       }
 
@@ -131,6 +130,7 @@ export const MyTicketsPage = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {filteredTickets.map((ticket) => (
             <TicketCard 
+              onClick={() => navigate(`/tickets/${ticket.id}`)}
               key={ticket.id} 
               ticket={ticket} 
             />

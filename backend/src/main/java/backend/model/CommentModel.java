@@ -1,9 +1,9 @@
 package backend.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 
 @Entity
 public class CommentModel {
@@ -16,6 +16,7 @@ public class CommentModel {
 
     @ManyToOne
     @JoinColumn(name = "ticket_id")
+    @JsonIgnore
     private TicketModel ticket;
 
     public CommentModel(){
@@ -62,6 +63,7 @@ public class CommentModel {
         this.createdAt = createdAt;
     }
 
+    @JsonIgnore
     public TicketModel getTicket() {
         return ticket;
     }

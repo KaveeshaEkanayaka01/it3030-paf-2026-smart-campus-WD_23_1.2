@@ -80,8 +80,20 @@ export const ticketService = {
     return response.data;
   },
 
-  getTicketById: async () => {
-    throw new Error('Ticket details endpoint is not available in the current backend API.');
+  getTicketById: async (id) => {
+    const response = await api.get('/tickets');
+    const ticket = response.data.find((item) => String(item.id) === String(id));
+
+    if (!ticket) {
+      throw new Error('Ticket not found.');
+    }
+
+    return ticket;
+  },
+
+  getTicketAttachments: async (id) => {
+    const response = await api.get(`/tickets/${id}/attachments`);
+    return response.data;
   },
 
   assignTechnician: async (id, technician) => {
@@ -98,12 +110,23 @@ export const ticketService = {
     return response.data;
   },
 
-  addComment: async () => {
-    throw new Error('Comments are temporarily unavailable in this frontend build.');
+  getTicketComments: async (ticketId) => {
+    const response = await api.get(`/tickets/${ticketId}/comments`);
+    return response.data;
   },
 
-  deleteComment: async () => {
-    throw new Error('Comments are temporarily unavailable in this frontend build.');
+  addComment: async (ticketId, text, currentUserId) => {
+    const response = await api.post(`/tickets/${ticketId}/comments`, {
+      message: text,
+      createdBy: currentUserId,
+      createdAt: new Date().toISOString(),
+    });
+    return response.data;
+  },
+
+  deleteComment: async (commentId) => {
+    const response = await api.delete(`/comments/${commentId}`);
+    return response.data;
   },
 
   uploadAttachments: async (id, file) => {
