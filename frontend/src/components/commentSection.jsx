@@ -1,14 +1,37 @@
 import React, { useState } from 'react';
-import { MessageSquare, Send, Trash2, User } from 'lucide-react';
+import { MessageSquare, Pencil, Send, Trash2, User } from 'lucide-react';
 
-export const CommentSection = ({ comments, onAddComment, onDeleteComment, currentUserId }) => {
+const isPrivilegedRole = (role) => ['ADMIN', 'STAFF', 'TECHNICIAN'].includes(String(role || '').toUpperCase());
+
+export const CommentSection = ({ comments, onAddComment, onDeleteComment, onUpdateComment, currentUserId, currentUserRole }) => {
   const [newComment, setNewComment] = useState('');
+  const [editingCommentId, setEditingCommentId] = useState('');
+  const [editingText, setEditingText] = useState('');
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!newComment.trim()) return;
     onAddComment(newComment);
     setNewComment('');
+  };
+
+  const startEditing = (comment) => {
+    setEditingCommentId(comment.id);
+    setEditingText(comment.text || '');
+  };
+
+  const cancelEditing = () => {
+    setEditingCommentId('');
+    setEditingText('');
+  };
+
+  const submitEdit = async (commentId) => {
+    if (!editingText.trim()) {
+      return;
+    }
+
+    await onUpdateComment(commentId, editingText.trim());
+    cancelEditing();
   };
 
   return (
@@ -24,6 +47,12 @@ export const CommentSection = ({ comments, onAddComment, onDeleteComment, curren
             key={comment.id}
             className="bg-zinc-50 rounded-none p-6 border border-zinc-100"
           >
+              {(() => {
+                const canManage = comment.authorId === currentUserId || isPrivilegedRole(currentUserRole);
+                const isEditing = editingCommentId === comment.id;
+
+                return (
+                  <>
               <div className="flex justify-between items-start mb-4">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-none bg-black flex items-center justify-center text-white">
@@ -34,8 +63,14 @@ export const CommentSection = ({ comments, onAddComment, onDeleteComment, curren
                     <p className="text-[10px] text-zinc-400 font-bold uppercase">{new Date(comment.createdAt).toLocaleString()}</p>
                   </div>
                 </div>
-                {comment.authorId === currentUserId && (
+                {canManage && (
                   <div className="flex gap-1">
+                    <button
+                      onClick={() => (isEditing ? cancelEditing() : startEditing(comment))}
+                      className="p-2 text-zinc-300 hover:text-black transition-colors"
+                    >
+                      <Pencil size={16} />
+                    </button>
                     <button 
                       onClick={() => onDeleteComment(comment.id)}
                       className="p-2 text-zinc-300 hover:text-black transition-colors"
@@ -45,9 +80,39 @@ export const CommentSection = ({ comments, onAddComment, onDeleteComment, curren
                   </div>
                 )}
               </div>
-              <p className="text-sm text-zinc-700 leading-relaxed font-medium">
-                {comment.text}
-              </p>
+              {isEditing ? (
+                <div className="space-y-2">
+                  <textarea
+                    value={editingText}
+                    onChange={(e) => setEditingText(e.target.value)}
+                    className="w-full border border-zinc-300 bg-white p-3 text-sm outline-none focus:border-black"
+                    rows={3}
+                  />
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => submitEdit(comment.id)}
+                      className="border border-black bg-black px-3 py-1 text-[10px] font-black uppercase tracking-widest text-white"
+                    >
+                      Save
+                    </button>
+                    <button
+                      type="button"
+                      onClick={cancelEditing}
+                      className="border border-zinc-300 bg-white px-3 py-1 text-[10px] font-black uppercase tracking-widest text-zinc-700"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <p className="text-sm text-zinc-700 leading-relaxed font-medium">
+                  {comment.text}
+                </p>
+              )}
+                  </>
+                );
+              })()}
           </div>
         ))}
         

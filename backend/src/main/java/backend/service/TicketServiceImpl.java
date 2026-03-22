@@ -8,7 +8,12 @@ import backend.repository.TicketRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 
 @Service
 public class TicketServiceImpl implements TicketService {
@@ -16,10 +21,30 @@ public class TicketServiceImpl implements TicketService {
     @Autowired
     private TicketRepository ticketRepository;
 
+    private static final Map<TicketStatus, Set<TicketStatus>> ALLOWED_TRANSITIONS = new EnumMap<>(TicketStatus.class);
+
+    static {
+        ALLOWED_TRANSITIONS.put(TicketStatus.OPEN, Set.of(TicketStatus.IN_PROGRESS, TicketStatus.REJECTED));
+        ALLOWED_TRANSITIONS.put(TicketStatus.IN_PROGRESS, Set.of(TicketStatus.RESOLVED, TicketStatus.REJECTED));
+        ALLOWED_TRANSITIONS.put(TicketStatus.RESOLVED, Set.of(TicketStatus.CLOSED, TicketStatus.REJECTED));
+        ALLOWED_TRANSITIONS.put(TicketStatus.CLOSED, Set.of());
+        ALLOWED_TRANSITIONS.put(TicketStatus.REJECTED, Set.of());
+    }
+
     @Override
     public TicketModel createTicket(TicketModel ticket) {
         ticket.setStatus(TicketStatus.OPEN);
+        ticket.setRejectionReason(null);
+        ticket.setResolutionNotes(null);
+        ticket.setCreatedAt(LocalDateTime.now());
+        ticket.setUpdatedAt(LocalDateTime.now());
         return ticketRepository.save(ticket);
+    }
+
+    @Override
+    public TicketModel getTicketById(Long id) {
+        return ticketRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Ticket not found"));
     }
 
     @Override
@@ -33,24 +58,83 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
-    public TicketModel assignTechnician(Long id, String technician) {
+    public TicketModel assignTechnician(Long id, String technician, String actorRole) {
+
+        if (!isStaffOrAdmin(actorRole)) {
+            throw new IllegalArgumentException("Only staff/admin can assign a technician");
+        }
 
         TicketModel ticket = ticketRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Ticket not found"));
 
         ticket.setAssignedTechnician(technician);
+        ticket.setUpdatedAt(LocalDateTime.now());
 
         return ticketRepository.save(ticket);
     }
 
     @Override
-    public TicketModel updateStatus(Long id, TicketStatus status) {
+    public TicketModel updateStatus(Long id, TicketStatus status, String actorRole, String resolutionNotes, String rejectionReason) {
+
+        if (!isStaffOrAdmin(actorRole)) {
+            throw new IllegalArgumentException("Only staff/admin can update ticket status");
+        }
 
         TicketModel ticket = ticketRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Ticket not found"));
 
+        TicketStatus currentStatus = ticket.getStatus();
+        if (currentStatus == null) {
+            currentStatus = TicketStatus.OPEN;
+        }
+
+        if (status != currentStatus) {
+            Set<TicketStatus> allowedNext = ALLOWED_TRANSITIONS.getOrDefault(currentStatus, Set.of());
+            if (!allowedNext.contains(status)) {
+                throw new IllegalStateException("Invalid status transition: " + currentStatus + " -> " + status);
+            }
+        }
+
+        if (status == TicketStatus.REJECTED) {
+            if (!isAdmin(actorRole)) {
+                throw new IllegalArgumentException("Only admin can reject a ticket");
+            }
+
+            if (rejectionReason == null || rejectionReason.isBlank()) {
+                throw new IllegalArgumentException("Rejection reason is required when status is REJECTED");
+            }
+
+            ticket.setRejectionReason(rejectionReason.trim());
+        }
+
+        if ((status == TicketStatus.RESOLVED || status == TicketStatus.CLOSED) && resolutionNotes != null && !resolutionNotes.isBlank()) {
+            ticket.setResolutionNotes(resolutionNotes.trim());
+        }
+
+        if (status != TicketStatus.REJECTED) {
+            ticket.setRejectionReason(null);
+        }
+
         ticket.setStatus(status);
+        ticket.setUpdatedAt(LocalDateTime.now());
 
         return ticketRepository.save(ticket);
+    }
+
+    private boolean isStaffOrAdmin(String role) {
+        String normalized = normalizeRole(role);
+        return "STAFF".equals(normalized) || "ADMIN".equals(normalized) || "TECHNICIAN".equals(normalized);
+    }
+
+    private boolean isAdmin(String role) {
+        return "ADMIN".equals(normalizeRole(role));
+    }
+
+    private String normalizeRole(String role) {
+        if (role == null) {
+            return "";
+        }
+
+        return role.trim().toUpperCase(Locale.ROOT);
     }
 }

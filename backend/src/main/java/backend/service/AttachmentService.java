@@ -37,7 +37,12 @@ public class AttachmentService {
             throw new FileUploadException("File is empty");
         }
 
-        if(ticket.getAttachments() != null && ticket.getAttachments().size() >= 3){
+        String contentType = file.getContentType();
+        if (contentType == null || !contentType.startsWith("image/")) {
+            throw new FileUploadException("Only image attachments are allowed");
+        }
+
+        if(attachmentRepository.countByTicketId(ticketId) >= 3){
             throw new AttachmentLimitException("Maximum 3 attachments allowed");
         }
 
@@ -53,7 +58,7 @@ public class AttachmentService {
 
         AttachmentModel attachment = new AttachmentModel();
         attachment.setFileName(fileName);
-        attachment.setFileType(file.getContentType());
+        attachment.setFileType(contentType);
         attachment.setFilePath(filePath);
         attachment.setTicket(ticket);
 

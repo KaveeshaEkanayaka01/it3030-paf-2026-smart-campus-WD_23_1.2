@@ -9,7 +9,9 @@ import backend.repository.TicketRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Locale;
 
 @Service
 public class CommentService {
@@ -26,6 +28,9 @@ public class CommentService {
                 .orElseThrow(() -> new ResourceNotFoundException("Ticket not found"));
 
         comment.setTicket(ticket);
+        if (comment.getCreatedAt() == null) {
+            comment.setCreatedAt(LocalDateTime.now());
+        }
 
         return commentRepository.save(comment);
     }
@@ -34,18 +39,41 @@ public class CommentService {
         return commentRepository.findByTicketId(ticketId);
     }
 
-    public CommentModel updateComment(Long id, CommentModel newComment){
+    public CommentModel updateComment(Long id, CommentModel newComment, String actorUserId, String actorRole){
 
         CommentModel comment = commentRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Comment not found"));
+
+        if (!canModify(comment, actorUserId, actorRole)) {
+            throw new IllegalArgumentException("You are not allowed to edit this comment");
+        }
 
         comment.setMessage(newComment.getMessage());
 
         return commentRepository.save(comment);
     }
 
-    public void deleteComment(Long id){
+    public void deleteComment(Long id, String actorUserId, String actorRole){
+        CommentModel comment = commentRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Comment not found"));
+
+        if (!canModify(comment, actorUserId, actorRole)) {
+            throw new IllegalArgumentException("You are not allowed to delete this comment");
+        }
+
         commentRepository.deleteById(id);
+    }
+
+    private boolean canModify(CommentModel comment, String actorUserId, String actorRole) {
+        String owner = safe(comment.getCreatedBy());
+        String actor = safe(actorUserId);
+        String role = safe(actorRole).toUpperCase(Locale.ROOT);
+
+        return owner.equals(actor) || "STAFF".equals(role) || "ADMIN".equals(role) || "TECHNICIAN".equals(role);
+    }
+
+    private String safe(String value) {
+        return value == null ? "" : value.trim();
     }
 
 }

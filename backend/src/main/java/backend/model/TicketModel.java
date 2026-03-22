@@ -18,8 +18,11 @@ public class TicketModel {
     private String category;
 
     private String location;
+    private String preferredContact;
     private String createdBy;
     private String assignedTechnician;
+    private String resolutionNotes;
+    private String rejectionReason;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -40,14 +43,17 @@ public class TicketModel {
 
     }
 
-    public TicketModel(Long id, String title, String description, String category, String location, String createdBy, String assignedTechnician, LocalDateTime createdAt, LocalDateTime updatedAt, PriorityLevel priority, TicketStatus status, List<AttachmentModel> attachments, List<CommentModel> comments) {
+    public TicketModel(Long id, String title, String description, String category, String location, String preferredContact, String createdBy, String assignedTechnician, String resolutionNotes, String rejectionReason, LocalDateTime createdAt, LocalDateTime updatedAt, PriorityLevel priority, TicketStatus status, List<AttachmentModel> attachments, List<CommentModel> comments) {
         this.id = id;
         this.title = title;
         this.description = description;
         this.category = category;
         this.location = location;
+        this.preferredContact = preferredContact;
         this.createdBy = createdBy;
         this.assignedTechnician = assignedTechnician;
+        this.resolutionNotes = resolutionNotes;
+        this.rejectionReason = rejectionReason;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
         this.priority = priority;
@@ -96,6 +102,14 @@ public class TicketModel {
         this.location = location;
     }
 
+    public String getPreferredContact() {
+        return preferredContact;
+    }
+
+    public void setPreferredContact(String preferredContact) {
+        this.preferredContact = preferredContact;
+    }
+
     public String getCreatedBy() {
         return createdBy;
     }
@@ -110,6 +124,22 @@ public class TicketModel {
 
     public void setAssignedTechnician(String assignedTechnician) {
         this.assignedTechnician = assignedTechnician;
+    }
+
+    public String getResolutionNotes() {
+        return resolutionNotes;
+    }
+
+    public void setResolutionNotes(String resolutionNotes) {
+        this.resolutionNotes = resolutionNotes;
+    }
+
+    public String getRejectionReason() {
+        return rejectionReason;
+    }
+
+    public void setRejectionReason(String rejectionReason) {
+        this.rejectionReason = rejectionReason;
     }
 
     public LocalDateTime getCreatedAt() {

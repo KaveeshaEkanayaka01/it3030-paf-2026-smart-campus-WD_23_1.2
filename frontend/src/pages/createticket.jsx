@@ -63,6 +63,7 @@ export const CreateTicketPage = () => {
         description: formData.description,
         priority: formData.priority,
         location: formData.location,
+        preferredContact: formData.contact,
         createdBy: currentUserId,
       };
 

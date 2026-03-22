@@ -9,12 +9,14 @@ public interface TicketService {
 
     TicketModel createTicket(TicketModel ticket);
 
+    TicketModel getTicketById(Long id);
+
     List<TicketModel> getMyTickets(String createdBy);
 
     List<TicketModel> getAllTickets();
 
-    TicketModel assignTechnician(Long id, String technician);
+    TicketModel assignTechnician(Long id, String technician, String actorRole);
 
-    TicketModel updateStatus(Long id, TicketStatus status);
+    TicketModel updateStatus(Long id, TicketStatus status, String actorRole, String resolutionNotes, String rejectionReason);
 
 }

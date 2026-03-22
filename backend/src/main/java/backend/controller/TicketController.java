@@ -2,70 +2,74 @@ package backend.controller;
 
 import backend.model.TicketModel;
 import backend.model.TicketStatus;
-import backend.repository.TicketRepository;
+import backend.service.TicketService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
 
 @RestController
 @CrossOrigin
 @RequestMapping("/api/tickets")
 public class TicketController {
     @Autowired
-    private TicketRepository ticketRepository;
+    private TicketService ticketService;
 
     //create
     @PostMapping
     public TicketModel createTicket(@RequestBody TicketModel ticket){
-        ticket.setStatus(TicketStatus.OPEN);
-        return ticketRepository.save(ticket);
+        return ticketService.createTicket(ticket);
+    }
+
+    @GetMapping("/{id}")
+    public TicketModel getTicketById(@PathVariable Long id) {
+        return ticketService.getTicketById(id);
     }
 
     //get user ticket
     @GetMapping("/my")
     public List<TicketModel> getMyTickets(@RequestParam String createdBy){
-        return ticketRepository.findByCreatedBy(createdBy);
+        return ticketService.getMyTickets(createdBy);
     }
     //get all ticket
     @GetMapping
     public List<TicketModel> getAllTickets(){
-        return ticketRepository.findAll();
+        return ticketService.getAllTickets();
     }
 
     // Assign Technician (Admin)
     @PutMapping("/{id}/assign")
-    public TicketModel assignTechnician(@PathVariable Long id, @RequestParam String technician) {
-
-        Optional<TicketModel> ticketOptional = ticketRepository.findById(id);
-
-        if(ticketOptional.isPresent()) {
-            TicketModel ticket = ticketOptional.get();
-            ticket.setAssignedTechnician(technician);
-            return ticketRepository.save(ticket);
+    public TicketModel assignTechnician(
+            @PathVariable Long id,
+            @RequestParam String technician,
+            @RequestParam(defaultValue = "STAFF") String actorRole
+    ) {
+        try {
+            return ticketService.assignTechnician(id, technician, actorRole);
+        } catch (IllegalArgumentException | IllegalStateException ex) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, ex.getMessage());
         }
-
-        return null;
     }
 
     // Update Ticket Status (Technician)
     @PutMapping("/{id}/status")
-    public TicketModel updateStatus(@PathVariable Long id, @RequestParam TicketStatus status) {
+    public TicketModel updateStatus(@PathVariable Long id, @RequestBody Map<String, String> payload) {
+        try {
+            TicketStatus status = TicketStatus.valueOf(payload.getOrDefault("status", "").trim().toUpperCase());
+            String actorRole = payload.get("actorRole");
+            String resolutionNotes = payload.get("resolutionNotes");
+            String rejectionReason = payload.get("rejectionReason");
 
-        Optional<TicketModel> ticketOptional = ticketRepository.findById(id);
-
-        if(ticketOptional.isPresent()) {
-            TicketModel ticket = ticketOptional.get();
-            ticket.setStatus(status);
-            return ticketRepository.save(ticket);
+            return ticketService.updateStatus(id, status, actorRole, resolutionNotes, rejectionReason);
+        } catch (IllegalArgumentException ex) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid status update payload: " + ex.getMessage());
+        } catch (IllegalStateException ex) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, ex.getMessage());
         }
-
-        return null;
     }
-
-
-
 
 
 }

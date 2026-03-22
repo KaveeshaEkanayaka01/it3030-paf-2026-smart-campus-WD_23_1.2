@@ -10,4 +10,6 @@ public interface AttachmentRepository extends JpaRepository<AttachmentModel, Lon
     // Get attachments by ticket id
     List<AttachmentModel> findByTicketId(Long ticketId);
 
+    long countByTicketId(Long ticketId);
+
 }

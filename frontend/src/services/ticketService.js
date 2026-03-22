@@ -6,6 +6,7 @@ const api = axios.create({
 });
 
 const USER_KEYS = ['currentUser', 'userId', 'username'];
+const ROLE_KEYS = ['currentUserRole', 'userRole', 'role'];
 
 const normalizeStoredUser = (rawValue) => {
   if (!rawValue) {
@@ -50,6 +51,27 @@ export const setCurrentUserId = (userId) => {
   return true;
 };
 
+export const getCurrentUserRole = () => {
+  for (const key of ROLE_KEYS) {
+    const value = normalizeStoredUser(localStorage.getItem(key));
+    if (value) {
+      return value.toUpperCase();
+    }
+  }
+
+  return 'USER';
+};
+
+export const setCurrentUserRole = (role) => {
+  const normalized = String(role || '').trim().toUpperCase();
+  if (!normalized) {
+    return false;
+  }
+
+  localStorage.setItem('currentUserRole', normalized);
+  return true;
+};
+
 export const ticketService = {
   createTicket: async (ticketData) => {
     const createdBy = getCurrentUserId();
@@ -81,14 +103,8 @@ export const ticketService = {
   },
 
   getTicketById: async (id) => {
-    const response = await api.get('/tickets');
-    const ticket = response.data.find((item) => String(item.id) === String(id));
-
-    if (!ticket) {
-      throw new Error('Ticket not found.');
-    }
-
-    return ticket;
+    const response = await api.get(`/tickets/${id}`);
+    return response.data;
   },
 
   getTicketAttachments: async (id) => {
@@ -96,16 +112,19 @@ export const ticketService = {
     return response.data;
   },
 
-  assignTechnician: async (id, technician) => {
+  assignTechnician: async (id, technician, actorRole = getCurrentUserRole()) => {
     const response = await api.put(`/tickets/${id}/assign`, null, {
-      params: { technician },
+      params: { technician, actorRole },
     });
     return response.data;
   },
 
-  updateStatus: async (id, status) => {
-    const response = await api.put(`/tickets/${id}/status`, null, {
-      params: { status },
+  updateStatus: async (id, status, actorRole = getCurrentUserRole(), resolutionNotes = '', rejectionReason = '') => {
+    const response = await api.put(`/tickets/${id}/status`, {
+      status,
+      actorRole,
+      resolutionNotes,
+      rejectionReason,
     });
     return response.data;
   },
@@ -124,8 +143,21 @@ export const ticketService = {
     return response.data;
   },
 
-  deleteComment: async (commentId) => {
-    const response = await api.delete(`/comments/${commentId}`);
+  updateComment: async (commentId, text, actorUserId, actorRole = getCurrentUserRole()) => {
+    const response = await api.put(
+      `/comments/${commentId}`,
+      { message: text },
+      {
+        params: { actorUserId, actorRole },
+      },
+    );
+    return response.data;
+  },
+
+  deleteComment: async (commentId, actorUserId, actorRole = getCurrentUserRole()) => {
+    const response = await api.delete(`/comments/${commentId}`, {
+      params: { actorUserId, actorRole },
+    });
     return response.data;
   },
 

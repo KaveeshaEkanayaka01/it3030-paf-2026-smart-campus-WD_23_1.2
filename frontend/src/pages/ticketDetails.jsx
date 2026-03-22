@@ -2,19 +2,22 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   ArrowLeft,
+  CheckCircle2,
   User,
   Calendar,
   MapPin,
   FileText,
   Image as ImageIcon,
+  MessageCircleWarning,
   Wrench,
 } from 'lucide-react';
-import { getCurrentUserId, ticketService } from '../services/ticketService';
+import { getCurrentUserId, getCurrentUserRole, ticketService } from '../services/ticketService';
 import { TicketStatusBadge } from '../components/TicketStatusBadge';
 import { CommentSection } from '../components/commentSection';
 import { cn } from '../utils/cn';
 
 const UPDATE_STATUSES = ['IN_PROGRESS', 'RESOLVED', 'CLOSED', 'REJECTED'];
+const PRIVILEGED_ROLES = ['ADMIN', 'STAFF', 'TECHNICIAN'];
 
 export const TicketDetailsPage = () => {
   const { id } = useParams();
@@ -25,7 +28,14 @@ export const TicketDetailsPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [statusUpdating, setStatusUpdating] = useState(false);
+  const [selectedStatus, setSelectedStatus] = useState('IN_PROGRESS');
+  const [resolutionNotes, setResolutionNotes] = useState('');
+  const [rejectionReason, setRejectionReason] = useState('');
+  const [technician, setTechnician] = useState('');
+  const [assigning, setAssigning] = useState(false);
   const currentUserId = getCurrentUserId() || 'wd23-student';
+  const currentUserRole = getCurrentUserRole();
+  const canManageTicket = PRIVILEGED_ROLES.includes(currentUserRole);
 
   const mapCommentForUI = (comment) => ({
     id: String(comment.id),
@@ -87,7 +97,7 @@ export const TicketDetailsPage = () => {
     }
 
     try {
-      await ticketService.deleteComment(commentId);
+      await ticketService.deleteComment(commentId, currentUserId, currentUserRole);
       await loadComments(id);
     } catch (err) {
       console.error('Failed to delete comment:', err);
@@ -95,20 +105,67 @@ export const TicketDetailsPage = () => {
     }
   };
 
-  const handleUpdateStatus = async (status) => {
-    if (!id || !ticket || statusUpdating) {
+  const handleUpdateComment = async (commentId, text) => {
+    if (!id) {
+      return;
+    }
+
+    try {
+      await ticketService.updateComment(commentId, text, currentUserId, currentUserRole);
+      await loadComments(id);
+    } catch (err) {
+      console.error('Failed to update comment:', err);
+      setError('Failed to update comment.');
+    }
+  };
+
+  const handleUpdateStatus = async () => {
+    if (!id || !ticket || statusUpdating || !canManageTicket) {
+      return;
+    }
+
+    if (selectedStatus === 'REJECTED' && !rejectionReason.trim()) {
+      setError('Rejection reason is required when setting status to REJECTED.');
       return;
     }
 
     setStatusUpdating(true);
+    setError('');
     try {
-      const updated = await ticketService.updateStatus(id, status);
-      setTicket(updated || { ...ticket, status });
+      const updated = await ticketService.updateStatus(
+        id,
+        selectedStatus,
+        currentUserRole,
+        resolutionNotes,
+        rejectionReason,
+      );
+      setTicket(updated || { ...ticket, status: selectedStatus });
     } catch (err) {
       console.error('Failed to update status:', err);
-      setError('Failed to update ticket status.');
+      const backendMessage = err?.response?.data?.message || err?.response?.data?.error;
+      setError(backendMessage || 'Failed to update ticket status.');
     } finally {
       setStatusUpdating(false);
+    }
+  };
+
+  const handleAssignTechnician = async () => {
+    if (!id || !canManageTicket || !technician.trim()) {
+      return;
+    }
+
+    setAssigning(true);
+    setError('');
+    try {
+      const updated = await ticketService.assignTechnician(id, technician.trim(), currentUserRole);
+      setTicket(updated || { ...ticket, assignedTechnician: technician.trim() });
+      setTechnician('');
+    } catch (err) {
+      console.error('Failed to assign technician:', err);
+      const backendMessage = err?.response?.data?.message || err?.response?.data?.error;
+      setError(backendMessage || 'Failed to assign technician.');
+    } finally {
+      setAssigning(false);
     }
   };
 
@@ -203,6 +260,27 @@ export const TicketDetailsPage = () => {
               </p>
             </div>
 
+            <div className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div className="border border-zinc-100 bg-zinc-50 p-4">
+                <p className="text-[9px] font-black uppercase tracking-widest text-zinc-400">Preferred Contact</p>
+                <p className="mt-2 text-sm font-semibold text-zinc-700">{ticket.preferredContact || 'N/A'}</p>
+              </div>
+              <div className="border border-zinc-100 bg-zinc-50 p-4">
+                <p className="text-[9px] font-black uppercase tracking-widest text-zinc-400">Resolution Notes</p>
+                <p className="mt-2 text-sm font-semibold text-zinc-700">{ticket.resolutionNotes || 'N/A'}</p>
+              </div>
+            </div>
+
+            {ticket.status === 'REJECTED' && (
+              <div className="mt-4 border border-red-200 bg-red-50 p-4">
+                <p className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-red-700">
+                  <MessageCircleWarning size={14} />
+                  Rejection Reason
+                </p>
+                <p className="mt-2 text-sm font-semibold text-red-700">{ticket.rejectionReason || 'N/A'}</p>
+              </div>
+            )}
+
             <div className="mt-8">
               <h3 className="mb-4 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-black">
                 <ImageIcon size={16} />
@@ -228,7 +306,9 @@ export const TicketDetailsPage = () => {
                 comments={comments}
                 onAddComment={handleAddComment}
                 onDeleteComment={handleDeleteComment}
+                onUpdateComment={handleUpdateComment}
                 currentUserId={currentUserId}
+                currentUserRole={currentUserRole}
               />
             </div>
           </div>
@@ -240,24 +320,82 @@ export const TicketDetailsPage = () => {
               <Wrench size={16} />
               Technician Actions
             </h3>
-            <div className="grid grid-cols-1 gap-2">
-              {UPDATE_STATUSES.map((status) => (
-                <button
-                  key={status}
-                  type="button"
-                  disabled={statusUpdating}
-                  onClick={() => handleUpdateStatus(status)}
-                  className={cn(
-                    'border px-4 py-3 text-[10px] font-black uppercase tracking-widest transition-all',
-                    ticket.status === status
-                      ? 'border-black bg-black text-white'
-                      : 'border-zinc-200 bg-white text-zinc-500 hover:border-black hover:text-black',
-                    statusUpdating ? 'cursor-not-allowed opacity-50' : '',
-                  )}
-                >
-                  {status.replace('_', ' ')}
-                </button>
-              ))}
+            <div className="space-y-3">
+              {!canManageTicket && (
+                <p className="text-xs font-semibold text-zinc-500">
+                  Status updates are available only for ADMIN/STAFF/TECHNICIAN roles.
+                </p>
+              )}
+              <select
+                value={selectedStatus}
+                onChange={(e) => setSelectedStatus(e.target.value)}
+                disabled={!canManageTicket || statusUpdating}
+                className="w-full border border-zinc-300 bg-white px-3 py-2 text-xs font-bold uppercase tracking-wider outline-none focus:border-black disabled:opacity-60"
+              >
+                {UPDATE_STATUSES.map((status) => (
+                  <option key={status} value={status}>{status.replace('_', ' ')}</option>
+                ))}
+              </select>
+
+              <textarea
+                value={resolutionNotes}
+                onChange={(e) => setResolutionNotes(e.target.value)}
+                placeholder="Resolution notes (used for RESOLVED/CLOSED updates)"
+                disabled={!canManageTicket || statusUpdating}
+                rows={3}
+                className="w-full border border-zinc-300 bg-white px-3 py-2 text-xs outline-none focus:border-black disabled:opacity-60"
+              />
+
+              {selectedStatus === 'REJECTED' && (
+                <textarea
+                  value={rejectionReason}
+                  onChange={(e) => setRejectionReason(e.target.value)}
+                  placeholder="Rejection reason (required for REJECTED)"
+                  disabled={!canManageTicket || statusUpdating}
+                  rows={3}
+                  className="w-full border border-red-300 bg-red-50 px-3 py-2 text-xs outline-none focus:border-red-500 disabled:opacity-60"
+                />
+              )}
+
+              <button
+                type="button"
+                disabled={!canManageTicket || statusUpdating}
+                onClick={handleUpdateStatus}
+                className={cn(
+                  'w-full border border-black bg-black px-4 py-3 text-[10px] font-black uppercase tracking-widest text-white transition-all',
+                  (!canManageTicket || statusUpdating) ? 'cursor-not-allowed opacity-50' : 'hover:bg-zinc-800',
+                )}
+              >
+                {statusUpdating ? 'Updating...' : 'Update Status'}
+              </button>
+            </div>
+          </div>
+
+          <div className="border border-zinc-200 bg-white p-8 shadow-sm">
+            <h3 className="mb-6 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-black">
+              <CheckCircle2 size={16} />
+              Assign Technician
+            </h3>
+            <div className="space-y-3">
+              <input
+                type="text"
+                value={technician}
+                onChange={(e) => setTechnician(e.target.value)}
+                placeholder="Technician username or id"
+                disabled={!canManageTicket || assigning}
+                className="w-full border border-zinc-300 bg-white px-3 py-2 text-xs font-semibold outline-none focus:border-black disabled:opacity-60"
+              />
+              <button
+                type="button"
+                onClick={handleAssignTechnician}
+                disabled={!canManageTicket || assigning || !technician.trim()}
+                className={cn(
+                  'w-full border border-black bg-black px-4 py-3 text-[10px] font-black uppercase tracking-widest text-white transition-all',
+                  (!canManageTicket || assigning || !technician.trim()) ? 'cursor-not-allowed opacity-50' : 'hover:bg-zinc-800',
+                )}
+              >
+                {assigning ? 'Assigning...' : 'Assign'}
+              </button>
             </div>
           </div>
 
