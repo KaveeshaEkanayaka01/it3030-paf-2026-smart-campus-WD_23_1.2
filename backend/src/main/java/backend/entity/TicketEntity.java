@@ -1,20 +1,20 @@
-package backend.model;
+package backend.entity;
 
+import backend.enums.PriorityLevel;
+import backend.enums.TicketStatus;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+
 import java.time.LocalDateTime;
 
-
 @Document(collection = "tickets")
-public class TicketModel {
+public class TicketEntity {
 
     @Id
     private String id;
-
     private String title;
     private String description;
     private String category;
-
     private String location;
     private String preferredContact;
     private String createdBy;
@@ -23,31 +23,8 @@ public class TicketModel {
     private String rejectionReason;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-
-    private  PriorityLevel priority;
-
+    private PriorityLevel priority;
     private TicketStatus status;
-
-    public TicketModel(){
-
-    }
-
-    public TicketModel(String id, String title, String description, String category, String location, String preferredContact, String createdBy, String assignedTechnician, String resolutionNotes, String rejectionReason, LocalDateTime createdAt, LocalDateTime updatedAt, PriorityLevel priority, TicketStatus status) {
-        this.id = id;
-        this.title = title;
-        this.description = description;
-        this.category = category;
-        this.location = location;
-        this.preferredContact = preferredContact;
-        this.createdBy = createdBy;
-        this.assignedTechnician = assignedTechnician;
-        this.resolutionNotes = resolutionNotes;
-        this.rejectionReason = rejectionReason;
-        this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
-        this.priority = priority;
-        this.status = status;
-    }
 
     public String getId() {
         return id;
@@ -160,5 +137,4 @@ public class TicketModel {
     public void setStatus(TicketStatus status) {
         this.status = status;
     }
-
 }

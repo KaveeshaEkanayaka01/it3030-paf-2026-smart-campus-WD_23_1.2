@@ -1,42 +1,37 @@
 package backend.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
-import java.util.Date;
-
-@Entity
-@Table(name = "attachment_model")
+@Document(collection = "attachments")
 public class AttachmentModel {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String id;
     private String fileName;
     private String filePath;
     private String fileType;
 
-    @ManyToOne
-    @JoinColumn(name = "ticket_id")
-    @JsonIgnore
-    private TicketModel ticket;
+    @Field("ticketId")
+    private String ticketId;
 
     public AttachmentModel(){
 
     }
 
-    public AttachmentModel(Long id, String fileName, String filePath, String fileType, TicketModel ticket) {
+    public AttachmentModel(String id, String fileName, String filePath, String fileType, String ticketId) {
         this.id = id;
         this.fileName = fileName;
         this.filePath = filePath;
         this.fileType = fileType;
-        this.ticket = ticket;
+        this.ticketId = ticketId;
     }
 
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -64,11 +59,11 @@ public class AttachmentModel {
         this.fileType = fileType;
     }
 
-    public TicketModel getTicket() {
-        return ticket;
+    public String getTicketId() {
+        return ticketId;
     }
 
-    public void setTicket(TicketModel ticket) {
-        this.ticket = ticket;
+    public void setTicketId(String ticketId) {
+        this.ticketId = ticketId;
     }
 }

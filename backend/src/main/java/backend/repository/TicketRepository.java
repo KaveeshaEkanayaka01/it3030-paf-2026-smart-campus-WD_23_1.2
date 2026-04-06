@@ -1,11 +1,11 @@
 package backend.repository;
 
 import backend.model.TicketModel;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.mongodb.repository.MongoRepository;
 
 import java.util.List;
 
-public interface TicketRepository extends JpaRepository<TicketModel, Long> {
+public interface TicketRepository extends MongoRepository<TicketModel, String> {
     List<TicketModel> findByCreatedBy(String createdBy);
 
 

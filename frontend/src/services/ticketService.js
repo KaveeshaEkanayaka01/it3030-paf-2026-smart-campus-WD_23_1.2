@@ -129,6 +129,13 @@ export const ticketService = {
     return response.data;
   },
 
+  deleteTicket: async (id, actorRole = getCurrentUserRole()) => {
+    const response = await api.delete(`/tickets/${id}`, {
+      params: { actorRole },
+    });
+    return response.data;
+  },
+
   getTicketComments: async (ticketId) => {
     const response = await api.get(`/tickets/${ticketId}/comments`);
     return response.data;

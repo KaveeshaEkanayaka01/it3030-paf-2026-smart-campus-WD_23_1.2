@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.UUID;
 
 @Service
 public class AttachmentService {
@@ -28,7 +29,7 @@ public class AttachmentService {
 
     private static final Path UPLOAD_DIR = Paths.get(System.getProperty("user.dir"), "uploads");
 
-    public AttachmentModel uploadAttachment(Long ticketId, MultipartFile file) throws IOException {
+    public AttachmentModel uploadAttachment(String ticketId, MultipartFile file) throws IOException {
 
         TicketModel ticket = ticketRepository.findById(ticketId)
                 .orElseThrow(() -> new ResourceNotFoundException("Ticket not found"));
@@ -57,10 +58,13 @@ public class AttachmentService {
         String filePath = destination.toString();
 
         AttachmentModel attachment = new AttachmentModel();
+        if (attachment.getId() == null || attachment.getId().isBlank()) {
+            attachment.setId(UUID.randomUUID().toString());
+        }
         attachment.setFileName(fileName);
         attachment.setFileType(contentType);
         attachment.setFilePath(filePath);
-        attachment.setTicket(ticket);
+        attachment.setTicketId(ticket.getId());
 
         return attachmentRepository.save(attachment);
     }

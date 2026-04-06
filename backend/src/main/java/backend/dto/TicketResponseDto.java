@@ -1,53 +1,26 @@
-package backend.model;
+package backend.dto;
 
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
+import backend.enums.PriorityLevel;
+import backend.enums.TicketStatus;
+
 import java.time.LocalDateTime;
 
+public class TicketResponseDto {
 
-@Document(collection = "tickets")
-public class TicketModel {
-
-    @Id
     private String id;
-
     private String title;
     private String description;
     private String category;
-
     private String location;
     private String preferredContact;
     private String createdBy;
     private String assignedTechnician;
     private String resolutionNotes;
     private String rejectionReason;
+    private PriorityLevel priority;
+    private TicketStatus status;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-
-    private  PriorityLevel priority;
-
-    private TicketStatus status;
-
-    public TicketModel(){
-
-    }
-
-    public TicketModel(String id, String title, String description, String category, String location, String preferredContact, String createdBy, String assignedTechnician, String resolutionNotes, String rejectionReason, LocalDateTime createdAt, LocalDateTime updatedAt, PriorityLevel priority, TicketStatus status) {
-        this.id = id;
-        this.title = title;
-        this.description = description;
-        this.category = category;
-        this.location = location;
-        this.preferredContact = preferredContact;
-        this.createdBy = createdBy;
-        this.assignedTechnician = assignedTechnician;
-        this.resolutionNotes = resolutionNotes;
-        this.rejectionReason = rejectionReason;
-        this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
-        this.priority = priority;
-        this.status = status;
-    }
 
     public String getId() {
         return id;
@@ -129,22 +102,6 @@ public class TicketModel {
         this.rejectionReason = rejectionReason;
     }
 
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
-    }
-
     public PriorityLevel getPriority() {
         return priority;
     }
@@ -161,4 +118,19 @@ public class TicketModel {
         this.status = status;
     }
 
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
 }

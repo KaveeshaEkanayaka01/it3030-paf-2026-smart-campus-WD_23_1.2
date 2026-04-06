@@ -1,41 +1,38 @@
 package backend.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.*;
-
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 import java.time.LocalDateTime;
 
-@Entity
+@Document(collection = "comments")
 public class CommentModel {
     @Id
-    @GeneratedValue
-    private Long id;
+    private String id;
     private String message;
     private String createdBy;
     private LocalDateTime createdAt;
 
-    @ManyToOne
-    @JoinColumn(name = "ticket_id")
-    @JsonIgnore
-    private TicketModel ticket;
+    @Field("ticketId")
+    private String ticketId;
 
     public CommentModel(){
 
     }
 
-    public CommentModel(Long id, String message, String createdBy, LocalDateTime createdAt, TicketModel ticket) {
+    public CommentModel(String id, String message, String createdBy, LocalDateTime createdAt, String ticketId) {
         this.id = id;
         this.message = message;
         this.createdBy = createdBy;
         this.createdAt = createdAt;
-        this.ticket = ticket;
+        this.ticketId = ticketId;
     }
 
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -63,12 +60,11 @@ public class CommentModel {
         this.createdAt = createdAt;
     }
 
-    @JsonIgnore
-    public TicketModel getTicket() {
-        return ticket;
+    public String getTicketId() {
+        return ticketId;
     }
 
-    public void setTicket(TicketModel ticket) {
-        this.ticket = ticket;
+    public void setTicketId(String ticketId) {
+        this.ticketId = ticketId;
     }
 }

@@ -5,27 +5,27 @@ import { cn } from '../utils/cn';
 const STATUS_META = {
   OPEN: {
     icon: AlertCircle,
-    ringClass: 'ring-blue-200/70',
+    ringClass: 'ring-indigo-200/40',
   },
   IN_PROGRESS: {
     icon: Clock3,
-    ringClass: 'ring-amber-200/70',
+    ringClass: 'ring-violet-200/40',
   },
   RESOLVED: {
     icon: CheckCircle2,
-    ringClass: 'ring-emerald-200/70',
+    ringClass: 'ring-emerald-200/40',
   },
   CLOSED: {
     icon: Circle,
-    ringClass: 'ring-zinc-300/70',
+    ringClass: 'ring-zinc-200/35',
   },
   REJECTED: {
     icon: XCircle,
-    ringClass: 'ring-rose-200/70',
+    ringClass: 'ring-rose-200/45',
   },
   DEFAULT: {
     icon: Circle,
-    ringClass: 'ring-zinc-300/70',
+    ringClass: 'ring-zinc-200/35',
   },
 };
 

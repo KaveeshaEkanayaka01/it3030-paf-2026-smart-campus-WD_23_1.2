@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Search, Filter, LayoutGrid, List } from 'lucide-react';
+import { Plus, Search, Filter, LayoutGrid, List, Shield, Wrench } from 'lucide-react';
 import { getCurrentUserId, setCurrentUserId, ticketService } from '../services/ticketService';
 import { TicketCard } from '../components/ticketCard';
 
@@ -58,13 +58,29 @@ export const MyTicketsPage = () => {
           <h1 className="text-4xl font-black text-black tracking-tighter uppercase">Incident Tickets</h1>
           <p className="text-zinc-500 mt-2 font-bold uppercase text-[10px] tracking-widest">Track and manage your reported issues.</p>
         </div>
-        <button
-          onClick={() => navigate('/create-ticket')}
-          className="bg-black text-white font-black px-8 py-4 rounded-none hover:bg-zinc-800 transition-all shadow-xl shadow-black/10 flex items-center gap-3 uppercase tracking-widest text-sm"
-        >
-          <Plus size={20} />
-          New Ticket
-        </button>
+        <div className="flex flex-wrap gap-3">
+          <button
+            onClick={() => navigate('/create-ticket')}
+            className="bg-black text-white font-black px-8 py-4 rounded-none hover:bg-zinc-800 transition-all shadow-xl shadow-black/10 flex items-center gap-3 uppercase tracking-widest text-sm"
+          >
+            <Plus size={20} />
+            New Ticket
+          </button>
+          <button
+            onClick={() => navigate('/technician')}
+            className="border border-black bg-white text-black font-black px-8 py-4 rounded-none hover:bg-black hover:text-white transition-all shadow-xl shadow-black/10 flex items-center gap-3 uppercase tracking-widest text-sm"
+          >
+            <Wrench size={20} />
+            Technician
+          </button>
+          <button
+            onClick={() => navigate('/admin')}
+            className="border border-black bg-white text-black font-black px-8 py-4 rounded-none hover:bg-black hover:text-white transition-all shadow-xl shadow-black/10 flex items-center gap-3 uppercase tracking-widest text-sm"
+          >
+            <Shield size={20} />
+            Admin Panel
+          </button>
+        </div>
       </div>
 
       {!getCurrentUserId() && (

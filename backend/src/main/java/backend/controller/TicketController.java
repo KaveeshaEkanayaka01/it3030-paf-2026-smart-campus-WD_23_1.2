@@ -25,7 +25,7 @@ public class TicketController {
     }
 
     @GetMapping("/{id}")
-    public TicketModel getTicketById(@PathVariable Long id) {
+    public TicketModel getTicketById(@PathVariable String id) {
         return ticketService.getTicketById(id);
     }
 
@@ -43,7 +43,7 @@ public class TicketController {
     // Assign Technician (Admin)
     @PutMapping("/{id}/assign")
     public TicketModel assignTechnician(
-            @PathVariable Long id,
+            @PathVariable String id,
             @RequestParam String technician,
             @RequestParam(defaultValue = "STAFF") String actorRole
     ) {
@@ -56,7 +56,7 @@ public class TicketController {
 
     // Update Ticket Status (Technician)
     @PutMapping("/{id}/status")
-    public TicketModel updateStatus(@PathVariable Long id, @RequestBody Map<String, String> payload) {
+    public TicketModel updateStatus(@PathVariable String id, @RequestBody Map<String, String> payload) {
         try {
             TicketStatus status = TicketStatus.valueOf(payload.getOrDefault("status", "").trim().toUpperCase());
             String actorRole = payload.get("actorRole");
@@ -66,6 +66,21 @@ public class TicketController {
             return ticketService.updateStatus(id, status, actorRole, resolutionNotes, rejectionReason);
         } catch (IllegalArgumentException ex) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid status update payload: " + ex.getMessage());
+        } catch (IllegalStateException ex) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, ex.getMessage());
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    public String deleteTicket(
+            @PathVariable String id,
+            @RequestParam(defaultValue = "USER") String actorRole
+    ) {
+        try {
+            ticketService.deleteTicket(id, actorRole);
+            return "Ticket deleted";
+        } catch (IllegalArgumentException ex) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, ex.getMessage());
         } catch (IllegalStateException ex) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, ex.getMessage());
         }

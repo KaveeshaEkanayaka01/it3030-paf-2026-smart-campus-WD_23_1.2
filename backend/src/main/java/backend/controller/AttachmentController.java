@@ -25,7 +25,7 @@ public class AttachmentController {
     private AttachmentService attachmentService;
 
     @PostMapping("/{id}/attachments")
-    public AttachmentModel uploadAttachment(@PathVariable Long id,
+    public AttachmentModel uploadAttachment(@PathVariable String id,
                                    @RequestParam("file") MultipartFile file) throws IOException {
         try {
             return attachmentService.uploadAttachment(id, file);
@@ -35,7 +35,7 @@ public class AttachmentController {
     }
 
     @GetMapping("/{id}/attachments")
-    public List<AttachmentModel> getAttachments(@PathVariable Long id) {
+    public List<AttachmentModel> getAttachments(@PathVariable String id) {
         return attachmentRepository.findByTicketId(id);
     }
 }

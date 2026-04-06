@@ -1,12 +1,12 @@
 package backend.repository;
 
 import backend.model.CommentModel;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.mongodb.repository.MongoRepository;
 import java.util.List;
 
-public interface CommentRepository extends JpaRepository<CommentModel, Long> {
+public interface CommentRepository extends MongoRepository<CommentModel, String> {
 
     // Get comments for a specific ticket
-    List<CommentModel> findByTicketId(Long ticketId);
+    List<CommentModel> findByTicketId(String ticketId);
 
 }

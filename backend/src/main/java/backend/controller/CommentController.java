@@ -20,20 +20,20 @@ public class CommentController {
 
     // Add Comment
     @PostMapping("/tickets/{ticketId}/comments")
-    public CommentModel addComment(@PathVariable Long ticketId,
+    public CommentModel addComment(@PathVariable String ticketId,
                                    @RequestBody CommentModel comment) {
         return commentService.addComment(ticketId, comment);
     }
 
     // Get Comments by Ticket
     @GetMapping("/tickets/{ticketId}/comments")
-    public List<CommentModel> getComments(@PathVariable Long ticketId) {
+    public List<CommentModel> getComments(@PathVariable String ticketId) {
         return commentService.getComments(ticketId);
     }
 
     // Update Comment
     @PutMapping("/comments/{id}")
-    public CommentModel updateComment(@PathVariable Long id,
+    public CommentModel updateComment(@PathVariable String id,
                                       @RequestBody CommentModel newComment,
                                       @RequestParam String actorUserId,
                                       @RequestParam(defaultValue = "USER") String actorRole) {
@@ -46,7 +46,7 @@ public class CommentController {
 
     // Delete Comment
     @DeleteMapping("/comments/{id}")
-    public String deleteComment(@PathVariable Long id,
+    public String deleteComment(@PathVariable String id,
                                 @RequestParam String actorUserId,
                                 @RequestParam(defaultValue = "USER") String actorRole) {
         try {

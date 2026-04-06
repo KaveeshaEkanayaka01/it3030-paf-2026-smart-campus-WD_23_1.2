@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
 
 @Service
 public class CommentService {
@@ -22,12 +23,16 @@ public class CommentService {
     @Autowired
     private TicketRepository ticketRepository;
 
-    public CommentModel addComment(Long ticketId, CommentModel comment){
+    public CommentModel addComment(String ticketId, CommentModel comment){
 
         TicketModel ticket = ticketRepository.findById(ticketId)
                 .orElseThrow(() -> new ResourceNotFoundException("Ticket not found"));
 
-        comment.setTicket(ticket);
+        if (comment.getId() == null || comment.getId().isBlank()) {
+            comment.setId(UUID.randomUUID().toString());
+        }
+
+        comment.setTicketId(ticket.getId());
         if (comment.getCreatedAt() == null) {
             comment.setCreatedAt(LocalDateTime.now());
         }
@@ -35,11 +40,11 @@ public class CommentService {
         return commentRepository.save(comment);
     }
 
-    public List<CommentModel> getComments(Long ticketId){
+    public List<CommentModel> getComments(String ticketId){
         return commentRepository.findByTicketId(ticketId);
     }
 
-    public CommentModel updateComment(Long id, CommentModel newComment, String actorUserId, String actorRole){
+    public CommentModel updateComment(String id, CommentModel newComment, String actorUserId, String actorRole){
 
         CommentModel comment = commentRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Comment not found"));
@@ -53,7 +58,7 @@ public class CommentService {
         return commentRepository.save(comment);
     }
 
-    public void deleteComment(Long id, String actorUserId, String actorRole){
+    public void deleteComment(String id, String actorUserId, String actorRole){
         CommentModel comment = commentRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Comment not found"));
 

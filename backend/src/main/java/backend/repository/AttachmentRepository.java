@@ -1,15 +1,15 @@
 package backend.repository;
 
 import backend.model.AttachmentModel;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.mongodb.repository.MongoRepository;
 
 import java.util.List;
 
-public interface AttachmentRepository extends JpaRepository<AttachmentModel, Long> {
+public interface AttachmentRepository extends MongoRepository<AttachmentModel, String> {
 
     // Get attachments by ticket id
-    List<AttachmentModel> findByTicketId(Long ticketId);
+    List<AttachmentModel> findByTicketId(String ticketId);
 
-    long countByTicketId(Long ticketId);
+    long countByTicketId(String ticketId);
 
 }

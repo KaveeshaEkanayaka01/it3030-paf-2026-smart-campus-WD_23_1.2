@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 @Service
 public class TicketServiceImpl implements TicketService {
@@ -33,6 +34,9 @@ public class TicketServiceImpl implements TicketService {
 
     @Override
     public TicketModel createTicket(TicketModel ticket) {
+        if (ticket.getId() == null || ticket.getId().isBlank()) {
+            ticket.setId(UUID.randomUUID().toString());
+        }
         ticket.setStatus(TicketStatus.OPEN);
         ticket.setRejectionReason(null);
         ticket.setResolutionNotes(null);
@@ -42,7 +46,7 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
-    public TicketModel getTicketById(Long id) {
+    public TicketModel getTicketById(String id) {
         return ticketRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Ticket not found"));
     }
@@ -58,7 +62,7 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
-    public TicketModel assignTechnician(Long id, String technician, String actorRole) {
+    public TicketModel assignTechnician(String id, String technician, String actorRole) {
 
         if (!isStaffOrAdmin(actorRole)) {
             throw new IllegalArgumentException("Only staff/admin can assign a technician");
@@ -74,7 +78,7 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
-    public TicketModel updateStatus(Long id, TicketStatus status, String actorRole, String resolutionNotes, String rejectionReason) {
+    public TicketModel updateStatus(String id, TicketStatus status, String actorRole, String resolutionNotes, String rejectionReason) {
 
         if (!isStaffOrAdmin(actorRole)) {
             throw new IllegalArgumentException("Only staff/admin can update ticket status");
@@ -119,6 +123,18 @@ public class TicketServiceImpl implements TicketService {
         ticket.setUpdatedAt(LocalDateTime.now());
 
         return ticketRepository.save(ticket);
+    }
+
+    @Override
+    public void deleteTicket(String id, String actorRole) {
+        if (!isAdmin(actorRole)) {
+            throw new IllegalArgumentException("Only admin can delete a ticket");
+        }
+
+        TicketModel ticket = ticketRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Ticket not found"));
+
+        ticketRepository.delete(ticket);
     }
 
     private boolean isStaffOrAdmin(String role) {
