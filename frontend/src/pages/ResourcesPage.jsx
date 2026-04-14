@@ -1,56 +1,92 @@
-import { useEffect, useState } from "react";
-import { getAllResources, getAvailableResources, getResourcesByType, searchResources } from "../api/resourceApi";
+import { useEffect, useMemo, useState } from "react";
+import { getAllResources } from "../api/resourceApi";
 import ResourceCard from "../components/resources/ResourceCard";
 import ResourceFilter from "../components/resources/ResourceFilter";
+import Loader from "../components/common/Loader";
+import "./ResourcesPage.css";
 
 const ResourcesPage = () => {
   const [resources, setResources] = useState([]);
-  const [keyword, setKeyword] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
   const [type, setType] = useState("");
-  const [showAvailableOnly, setShowAvailableOnly] = useState(false);
-
-  const loadResources = async () => {
-    try {
-      let data = [];
-
-      if (keyword.trim()) {
-        data = await searchResources(keyword);
-      } else if (type.trim()) {
-        data = await getResourcesByType(type);
-      } else if (showAvailableOnly) {
-        data = await getAvailableResources();
-      } else {
-        data = await getAllResources();
-      }
-
-      setResources(data);
-    } catch (error) {
-      console.error("Failed to load resources:", error);
-    }
-  };
+  const [availableOnly, setAvailableOnly] = useState(false);
 
   useEffect(() => {
-    loadResources();
-  }, [keyword, type, showAvailableOnly]);
+    const fetchResources = async () => {
+      try {
+        const data = await getAllResources();
+        setResources(Array.isArray(data) ? data : []);
+      } catch (error) {
+        console.error("Failed to fetch resources:", error);
+        setResources([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchResources();
+  }, []);
+
+  const filteredResources = useMemo(() => {
+    return resources.filter((resource) => {
+      const matchesSearch =
+        !search ||
+        resource?.name?.toLowerCase().includes(search.toLowerCase());
+
+      const matchesType =
+        !type || resource?.type?.toLowerCase().includes(type.toLowerCase());
+
+      const matchesAvailability =
+        !availableOnly || resource?.available === true;
+
+      return matchesSearch && matchesType && matchesAvailability;
+    });
+  }, [resources, search, type, availableOnly]);
+
+  if (loading) return <Loader />;
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-3xl font-bold text-gray-900">Resources</h1>
+    <div className="resources-page">
+      <div className="resources-page__header">
+        <div>
+          <h1>Resources</h1>
+          <p>Browse and check available campus resources.</p>
+        </div>
+
+        <div className="resources-page__summary">
+          <div className="summary-card">
+            <span>Total Resources</span>
+            <strong>{resources.length}</strong>
+          </div>
+          <div className="summary-card">
+            <span>Available Now</span>
+            <strong>{resources.filter((r) => r.available).length}</strong>
+          </div>
+        </div>
+      </div>
 
       <ResourceFilter
-        keyword={keyword}
-        setKeyword={setKeyword}
+        search={search}
+        setSearch={setSearch}
         type={type}
         setType={setType}
-        showAvailableOnly={showAvailableOnly}
-        setShowAvailableOnly={setShowAvailableOnly}
+        availableOnly={availableOnly}
+        setAvailableOnly={setAvailableOnly}
       />
 
-      <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
-        {resources.map((resource) => (
-          <ResourceCard key={resource.id} resource={resource} />
-        ))}
-      </div>
+      {filteredResources.length === 0 ? (
+        <div className="resources-empty">
+          <h3>No resources found</h3>
+          <p>Try changing your search or filter options.</p>
+        </div>
+      ) : (
+        <div className="resources-grid">
+          {filteredResources.map((resource) => (
+            <ResourceCard key={resource.id || resource._id} resource={resource} />
+          ))}
+        </div>
+      )}
     </div>
   );
 };

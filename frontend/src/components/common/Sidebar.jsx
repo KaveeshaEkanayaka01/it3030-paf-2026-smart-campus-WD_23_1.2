@@ -3,11 +3,11 @@ import useAuth from "../../hooks/useAuth";
 import { isAdmin } from "../../utils/roleUtils";
 import "./Sidebar.css";
 
-const Sidebar = () => {
+const Sidebar = ({ isOpen }) => {
   const { user } = useAuth();
 
   return (
-    <aside className="sidebar">
+    <aside className={`sidebar ${isOpen ? "sidebar--open" : "sidebar--closed"}`}>
       <div className="sidebar__brand">
         <h2>Smart Campus</h2>
         <p>Manage everything smoothly</p>

@@ -32,26 +32,26 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         String email = oAuth2User.getAttribute("email");
         String name = oAuth2User.getAttribute("name");
 
-        if (email == null) {
+        if (email == null || email.isBlank()) {
             response.sendRedirect("http://localhost:5173/login?error=oauth_failed");
             return;
         }
 
-        // ✅ FIND OR CREATE USER
         User user = userRepository.findByEmail(email)
                 .orElseGet(() -> {
-                    User newUser = new User();
-                    newUser.setEmail(email);
-                    newUser.setFullName(name != null ? name : "Google User");
-                    newUser.setRole("USER");
-                    newUser.setActive(true);
+                    User newUser = User.builder()
+                            .email(email)
+                            .fullName(name != null && !name.isBlank() ? name : "Google User")
+                            .password(null)
+                            .role("STUDENT")
+                            .active(true)
+                            .build();
+
                     return userRepository.save(newUser);
                 });
 
-        // ✅ GENERATE JWT
         String token = jwtService.generateToken(user.getEmail(), user.getRole());
 
-        // ✅ REDIRECT WITH TOKEN
         response.sendRedirect("http://localhost:5173/oauth-success?token=" + token);
     }
 }

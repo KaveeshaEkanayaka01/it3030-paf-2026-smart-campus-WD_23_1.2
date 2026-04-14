@@ -1,11 +1,14 @@
 .layout {
   min-height: 100vh;
   background: #f3f6fb;
+  display: flex;
 }
 
-.layout__body {
+.layout__main {
+  flex: 1;
   display: flex;
-  align-items: stretch;
+  flex-direction: column;
+  min-width: 0;
 }
 
 .layout__content {
@@ -14,8 +17,8 @@
 }
 
 @media (max-width: 900px) {
-  .layout__body {
-    flex-direction: column;
+  .layout {
+    flex-direction: row;
   }
 
   .layout__content {

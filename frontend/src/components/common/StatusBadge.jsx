@@ -1,34 +1,32 @@
-import React from "react";
+import "./StatusBadge.css";
 
 const StatusBadge = ({ status }) => {
-  const getColor = () => {
-    switch (status?.toLowerCase()) {
-      case "approved":
-      case "available":
-      case "resolved":
-        return "bg-green-100 text-green-700";
+  const normalized = (status || "").toLowerCase();
 
-      case "pending":
-      case "in-progress":
-        return "bg-yellow-100 text-yellow-700";
+  let className = "status-badge";
 
-      case "rejected":
-      case "cancelled":
-      case "unavailable":
-        return "bg-red-100 text-red-700";
+  if (
+    normalized === "approved" ||
+    normalized === "available" ||
+    normalized === "resolved"
+  ) {
+    className += " status-badge--success";
+  } else if (
+    normalized === "pending" ||
+    normalized === "in-progress"
+  ) {
+    className += " status-badge--warning";
+  } else if (
+    normalized === "rejected" ||
+    normalized === "cancelled" ||
+    normalized === "unavailable"
+  ) {
+    className += " status-badge--danger";
+  } else {
+    className += " status-badge--default";
+  }
 
-      default:
-        return "bg-gray-100 text-gray-700";
-    }
-  };
-
-  return (
-    <span
-      className={`px-3 py-1 rounded-full text-sm font-medium ${getColor()}`}
-    >
-      {status || "N/A"}
-    </span>
-  );
+  return <span className={className}>{status || "N/A"}</span>;
 };
 
 export default StatusBadge;

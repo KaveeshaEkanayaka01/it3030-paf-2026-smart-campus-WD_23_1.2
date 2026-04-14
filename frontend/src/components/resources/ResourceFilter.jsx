@@ -1,36 +1,38 @@
+import "./ResourceFilter.css";
+
 const ResourceFilter = ({
-  keyword,
-  setKeyword,
+  search,
+  setSearch,
   type,
   setType,
-  showAvailableOnly,
-  setShowAvailableOnly,
+  availableOnly,
+  setAvailableOnly,
 }) => {
   return (
-    <div className="bg-white rounded-xl shadow-sm border p-4 grid md:grid-cols-3 gap-4">
-      <input
-        type="text"
-        placeholder="Search resource name..."
-        value={keyword}
-        onChange={(e) => setKeyword(e.target.value)}
-        className="border rounded-lg px-4 py-3"
-      />
+    <div className="resource-filter">
+      <div className="resource-filter__group">
+        <input
+          type="text"
+          placeholder="Search resource name..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
 
-      <input
-        type="text"
-        placeholder="Filter by type..."
-        value={type}
-        onChange={(e) => setType(e.target.value)}
-        className="border rounded-lg px-4 py-3"
-      />
+        <input
+          type="text"
+          placeholder="Filter by type..."
+          value={type}
+          onChange={(e) => setType(e.target.value)}
+        />
+      </div>
 
-      <label className="flex items-center gap-2 text-sm text-gray-700">
+      <label className="resource-filter__checkbox">
         <input
           type="checkbox"
-          checked={showAvailableOnly}
-          onChange={(e) => setShowAvailableOnly(e.target.checked)}
+          checked={availableOnly}
+          onChange={(e) => setAvailableOnly(e.target.checked)}
         />
-        Show available only
+        <span>Show available only</span>
       </label>
     </div>
   );

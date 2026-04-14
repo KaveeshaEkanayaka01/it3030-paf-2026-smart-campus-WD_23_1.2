@@ -49,6 +49,7 @@ public class AuthService {
                 .fullName(savedUser.getFullName())
                 .role(savedUser.getRole())
                 .message("Registration successful")
+                .requiresPasswordSetup(false)
                 .build();
     }
 
@@ -56,7 +57,6 @@ public class AuthService {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-        // Google-created users will not have a local password yet
         if (user.getPassword() == null || user.getPassword().isBlank()) {
             throw new BadCredentialsException(
                     "This account was created with Google. Please continue with Google or set a password first.");
@@ -75,6 +75,7 @@ public class AuthService {
                 .fullName(user.getFullName())
                 .role(user.getRole())
                 .message("Login successful")
+                .requiresPasswordSetup(false)
                 .build();
     }
 
@@ -82,8 +83,8 @@ public class AuthService {
         return userRepository.findByEmail(email).orElseGet(() -> {
             User newUser = User.builder()
                     .email(email)
-                    .fullName(fullName)
-                    .password(null) // Google users do not have a local password initially
+                    .fullName(fullName != null ? fullName : "Google User")
+                    .password(null)
                     .role("STUDENT")
                     .active(true)
                     .build();
