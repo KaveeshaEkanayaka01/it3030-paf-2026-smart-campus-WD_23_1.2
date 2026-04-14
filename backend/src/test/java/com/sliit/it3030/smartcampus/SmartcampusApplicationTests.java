@@ -1,10 +1,10 @@
-package lk.sliit.it3030.smartcampus;
+package com.sliit.it3030.smartcampus;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class SmartCampusApplicationTests {
+class SmartcampusApplicationTests {
 
 	@Test
 	void contextLoads() {

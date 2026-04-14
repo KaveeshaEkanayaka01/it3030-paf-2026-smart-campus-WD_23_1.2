@@ -1,13 +1,13 @@
-package lk.sliit.it3030.smartcampus;
+package com.sliit.it3030.smartcampus;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class SmartCampusApplication {
+public class SmartcampusApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(SmartCampusApplication.class, args);
+		SpringApplication.run(SmartcampusApplication.class, args);
 	}
 
 }
