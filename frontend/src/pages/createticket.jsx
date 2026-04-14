@@ -16,12 +16,19 @@ const CATEGORIES = [
 ];
 
 const PRIORITIES = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'];
+const MIN_DESCRIPTION_LENGTH = 5;
+const MAX_DESCRIPTION_LENGTH = 1000;
+const MAX_LOCATION_LENGTH = 10;
+const MAX_CONTACT_LENGTH = 10;
+
+const CONTACT_PATTERN = /(^[^\s@]+@[^\s@]+\.[^\s@]+$)|(^\+?[0-9\s()-]{7,20}$)/;
 
 export const CreateTicketPage = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [files, setFiles] = useState([]);
   const [error, setError] = useState('');
+  const [validationErrors, setValidationErrors] = useState({});
   const [uploadInfo, setUploadInfo] = useState('');
   const [currentUser, setCurrentUser] = useState(getCurrentUserId() || '');
   const [testUserInput, setTestUserInput] = useState(getCurrentUserId() || '');
@@ -43,10 +50,79 @@ export const CreateTicketPage = () => {
     setError('');
   };
 
+  const validateForm = (data) => {
+    const nextErrors = {};
+
+    if (!data.category.trim()) {
+      nextErrors.category = 'Please select a category.';
+    }
+
+    if (!data.priority.trim()) {
+      nextErrors.priority = 'Please select a priority.';
+    }
+
+    const location = data.location.trim();
+    if (!location) {
+      nextErrors.location = 'Location is required.';
+    } else if (location.length > MAX_LOCATION_LENGTH) {
+      nextErrors.location = `Location must be ${MAX_LOCATION_LENGTH} characters or less.`;
+    }
+
+    const description = data.description.trim();
+    if (!description) {
+      nextErrors.description = 'Description is required.';
+    } else if (description.length < MIN_DESCRIPTION_LENGTH) {
+      nextErrors.description = `Description must be at least ${MIN_DESCRIPTION_LENGTH} characters.`;
+    } else if (description.length > MAX_DESCRIPTION_LENGTH) {
+      nextErrors.description = `Description must be ${MAX_DESCRIPTION_LENGTH} characters or less.`;
+    }
+
+    const contact = data.contact.trim();
+    if (!contact) {
+      nextErrors.contact = 'Preferred contact is required.';
+    } else if (contact.length > MAX_CONTACT_LENGTH) {
+      nextErrors.contact = `Preferred contact must be ${MAX_CONTACT_LENGTH} characters or less.`;
+    } else if (!CONTACT_PATTERN.test(contact)) {
+      nextErrors.contact = 'Enter a valid email address or phone number.';
+    }
+
+    return nextErrors;
+  };
+
+  const handleFieldChange = (field, value) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+
+    setValidationErrors((prev) => {
+      if (!prev[field]) {
+        return prev;
+      }
+
+      const refreshedErrors = validateForm({ ...formData, [field]: value });
+      return { ...prev, [field]: refreshedErrors[field] };
+    });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setUploadInfo('');
+
+    const trimmedData = {
+      category: formData.category,
+      description: formData.description.trim(),
+      priority: formData.priority,
+      location: formData.location.trim(),
+      contact: formData.contact.trim(),
+    };
+
+    const formErrors = validateForm(trimmedData);
+    if (Object.keys(formErrors).length > 0) {
+      setValidationErrors(formErrors);
+      setError('Please fix the highlighted fields and submit again.');
+      return;
+    }
+
+    setValidationErrors({});
     setLoading(true);
 
     const currentUserId = getCurrentUserId();
@@ -58,12 +134,12 @@ export const CreateTicketPage = () => {
 
     try {
       const payload = {
-        title: `${formData.category} issue`,
-        category: formData.category,
-        description: formData.description,
-        priority: formData.priority,
-        location: formData.location,
-        preferredContact: formData.contact,
+        title: `${trimmedData.category} issue`,
+        category: trimmedData.category,
+        description: trimmedData.description,
+        priority: trimmedData.priority,
+        location: trimmedData.location,
+        preferredContact: trimmedData.contact,
         createdBy: currentUserId,
       };
 
@@ -202,14 +278,17 @@ export const CreateTicketPage = () => {
                   <select
                     required
                     value={formData.category}
-                    onChange={e => setFormData({ ...formData, category: e.target.value })}
-                    className="w-full glass-input rounded-xl px-4 py-3.5 text-sm font-medium outline-none text-slate-200 cursor-pointer appearance-none bg-slate-900/50 focus:bg-slate-800/80 transition-all border border-white/10"
+                    onChange={(e) => handleFieldChange('category', e.target.value)}
+                    className={`w-full glass-input rounded-xl px-4 py-3.5 text-sm font-medium outline-none text-slate-200 cursor-pointer appearance-none bg-slate-900/50 focus:bg-slate-800/80 transition-all border ${validationErrors.category ? 'border-rose-400/70 focus:border-rose-400' : 'border-white/10'}`}
                   >
                     <option value="" className="bg-slate-900 text-slate-400">Select a category</option>
                     {CATEGORIES.map(cat => (
                       <option key={cat} value={cat} className="bg-slate-900 text-slate-200">{cat}</option>
                     ))}
                   </select>
+                  {validationErrors.category && (
+                    <p className="text-[11px] font-semibold text-rose-300">{validationErrors.category}</p>
+                  )}
                 </div>
 
                 <div className="space-y-2.5">
@@ -219,13 +298,16 @@ export const CreateTicketPage = () => {
                   <select
                     required
                     value={formData.priority}
-                    onChange={e => setFormData({ ...formData, priority: e.target.value })}
-                    className="w-full glass-input rounded-xl px-4 py-3.5 text-sm font-medium outline-none text-slate-200 cursor-pointer appearance-none bg-slate-900/50 focus:bg-slate-800/80 transition-all border border-white/10"
+                    onChange={(e) => handleFieldChange('priority', e.target.value)}
+                    className={`w-full glass-input rounded-xl px-4 py-3.5 text-sm font-medium outline-none text-slate-200 cursor-pointer appearance-none bg-slate-900/50 focus:bg-slate-800/80 transition-all border ${validationErrors.priority ? 'border-rose-400/70 focus:border-rose-400' : 'border-white/10'}`}
                   >
                     {PRIORITIES.map(prio => (
                       <option key={prio} value={prio} className="bg-slate-900 text-slate-200">{prio}</option>
                     ))}
                   </select>
+                  {validationErrors.priority && (
+                    <p className="text-[11px] font-semibold text-rose-300">{validationErrors.priority}</p>
+                  )}
                 </div>
 
                 <div className="space-y-2.5 md:col-span-2">
@@ -237,9 +319,12 @@ export const CreateTicketPage = () => {
                     type="text"
                     placeholder="e.g. Building A, Room 302"
                     value={formData.location}
-                    onChange={e => setFormData({ ...formData, location: e.target.value })}
-                    className="w-full glass-input rounded-xl px-4 py-3.5 text-sm outline-none text-slate-200 placeholder:text-slate-500 font-medium transition-all"
+                    onChange={(e) => handleFieldChange('location', e.target.value)}
+                    className={`w-full glass-input rounded-xl px-4 py-3.5 text-sm outline-none text-slate-200 placeholder:text-slate-500 font-medium transition-all border ${validationErrors.location ? 'border-rose-400/70 focus:border-rose-400' : 'border-white/10'}`}
                   />
+                  {validationErrors.location && (
+                    <p className="text-[11px] font-semibold text-rose-300">{validationErrors.location}</p>
+                  )}
                 </div>
 
                 <div className="space-y-2.5 md:col-span-2">
@@ -251,9 +336,12 @@ export const CreateTicketPage = () => {
                     rows={5}
                     placeholder="Describe the issue in detail..."
                     value={formData.description}
-                    onChange={e => setFormData({ ...formData, description: e.target.value })}
-                    className="w-full resize-none glass-input rounded-xl px-4 py-3.5 text-sm outline-none text-slate-200 placeholder:text-slate-500 font-medium transition-all"
+                    onChange={(e) => handleFieldChange('description', e.target.value)}
+                    className={`w-full resize-none glass-input rounded-xl px-4 py-3.5 text-sm outline-none text-slate-200 placeholder:text-slate-500 font-medium transition-all border ${validationErrors.description ? 'border-rose-400/70 focus:border-rose-400' : 'border-white/10'}`}
                   />
+                  {validationErrors.description && (
+                    <p className="text-[11px] font-semibold text-rose-300">{validationErrors.description}</p>
+                  )}
                   <p className="text-right text-[10px] font-bold uppercase tracking-widest text-slate-500 pt-1">
                     {formData.description.length} characters
                   </p>
@@ -268,9 +356,12 @@ export const CreateTicketPage = () => {
                     type="text"
                     placeholder="Email or phone number"
                     value={formData.contact}
-                    onChange={e => setFormData({ ...formData, contact: e.target.value })}
-                    className="w-full glass-input rounded-xl px-4 py-3.5 text-sm outline-none text-slate-200 placeholder:text-slate-500 font-medium transition-all"
+                    onChange={(e) => handleFieldChange('contact', e.target.value)}
+                    className={`w-full glass-input rounded-xl px-4 py-3.5 text-sm outline-none text-slate-200 placeholder:text-slate-500 font-medium transition-all border ${validationErrors.contact ? 'border-rose-400/70 focus:border-rose-400' : 'border-white/10'}`}
                   />
+                  {validationErrors.contact && (
+                    <p className="text-[11px] font-semibold text-rose-300">{validationErrors.contact}</p>
+                  )}
                 </div>
               </div>
             </div>
