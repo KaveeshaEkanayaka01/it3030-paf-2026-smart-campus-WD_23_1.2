@@ -1,0 +1,24 @@
+.layout {
+  min-height: 100vh;
+  background: #f3f6fb;
+}
+
+.layout__body {
+  display: flex;
+  align-items: stretch;
+}
+
+.layout__content {
+  flex: 1;
+  padding: 28px;
+}
+
+@media (max-width: 900px) {
+  .layout__body {
+    flex-direction: column;
+  }
+
+  .layout__content {
+    padding: 18px;
+  }
+}
