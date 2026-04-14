@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AlertCircle, ArrowLeft, Send, MapPin, Phone, Info, Tag, Sparkles } from 'lucide-react';
+import { ArrowLeft, Send, Info, Tag, Sparkles } from 'lucide-react';
 import { AttachmentUpload } from '../components/AttachmentUpload';
-import { getCurrentUserId, setCurrentUserId, ticketService } from '../services/ticketService';
+import { getCurrentUserId, ticketService } from '../services/ticketService';
 
 const CATEGORIES = [
   'Classroom Equipment',
@@ -30,8 +30,7 @@ export const CreateTicketPage = () => {
   const [error, setError] = useState('');
   const [validationErrors, setValidationErrors] = useState({});
   const [uploadInfo, setUploadInfo] = useState('');
-  const [currentUser, setCurrentUser] = useState(getCurrentUserId() || '');
-  const [testUserInput, setTestUserInput] = useState(getCurrentUserId() || '');
+  const currentUser = getCurrentUserId() || '';
   const [formData, setFormData] = useState({
     category: '',
     description: '',
@@ -39,16 +38,6 @@ export const CreateTicketPage = () => {
     location: '',
     contact: ''
   });
-
-  const applyTestUser = () => {
-    if (!setCurrentUserId(testUserInput)) {
-      setError('Enter a valid user id before continuing.');
-      return;
-    }
-
-    setCurrentUser(getCurrentUserId() || '');
-    setError('');
-  };
 
   const validateForm = (data) => {
     const nextErrors = {};
@@ -231,29 +220,6 @@ export const CreateTicketPage = () => {
         </aside>
 
         <section className="space-y-6">
-          {!currentUser && (
-            <div className="glass-panel border-amber-500/30 bg-amber-500/10 p-6 rounded-2xl backdrop-blur-md">
-              <p className="text-xs font-bold uppercase tracking-wider text-amber-400">Testing Mode User Setup</p>
-              <p className="mt-1 text-sm text-amber-200/80">Login module is not connected yet. Set a temporary user id to test ticket creation.</p>
-              <div className="mt-4 flex flex-col gap-3 sm:flex-row">
-                <input
-                  type="text"
-                  value={testUserInput}
-                  onChange={(e) => setTestUserInput(e.target.value)}
-                  placeholder="e.g. wd23-student"
-                  className="w-full glass-input rounded-xl px-4 py-3 text-sm font-medium outline-none text-slate-200 placeholder:text-slate-500"
-                />
-                <button
-                  type="button"
-                  onClick={applyTestUser}
-                  className="bg-amber-500 text-white px-6 py-3 rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-amber-600 transition-colors shadow-lg shadow-amber-500/20"
-                >
-                  Use This User
-                </button>
-              </div>
-            </div>
-          )}
-
           <form onSubmit={handleSubmit} className="space-y-6">
             {error && (
               <div className="glass-panel border-rose-500/30 bg-rose-500/10 p-5 rounded-2xl text-sm font-semibold text-rose-300">
