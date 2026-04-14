@@ -23,6 +23,8 @@ public class TicketEntity {
     private String rejectionReason;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private LocalDateTime firstRespondedAt;
+    private LocalDateTime resolvedAt;
     private PriorityLevel priority;
     private TicketStatus status;
 
@@ -136,5 +138,21 @@ public class TicketEntity {
 
     public void setStatus(TicketStatus status) {
         this.status = status;
+    }
+
+    public LocalDateTime getFirstRespondedAt() {
+        return firstRespondedAt;
+    }
+
+    public void setFirstRespondedAt(LocalDateTime firstRespondedAt) {
+        this.firstRespondedAt = firstRespondedAt;
+    }
+
+    public LocalDateTime getResolvedAt() {
+        return resolvedAt;
+    }
+
+    public void setResolvedAt(LocalDateTime resolvedAt) {
+        this.resolvedAt = resolvedAt;
     }
 }

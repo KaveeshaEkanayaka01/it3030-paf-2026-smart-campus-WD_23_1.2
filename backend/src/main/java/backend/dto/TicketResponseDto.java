@@ -21,6 +21,8 @@ public class TicketResponseDto {
     private TicketStatus status;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private LocalDateTime firstRespondedAt;
+    private LocalDateTime resolvedAt;
 
     public String getId() {
         return id;
@@ -132,5 +134,21 @@ public class TicketResponseDto {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public LocalDateTime getFirstRespondedAt() {
+        return firstRespondedAt;
+    }
+
+    public void setFirstRespondedAt(LocalDateTime firstRespondedAt) {
+        this.firstRespondedAt = firstRespondedAt;
+    }
+
+    public LocalDateTime getResolvedAt() {
+        return resolvedAt;
+    }
+
+    public void setResolvedAt(LocalDateTime resolvedAt) {
+        this.resolvedAt = resolvedAt;
     }
 }

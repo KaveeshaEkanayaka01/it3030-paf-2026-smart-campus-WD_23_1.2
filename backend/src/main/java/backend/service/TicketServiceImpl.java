@@ -73,6 +73,10 @@ public class TicketServiceImpl implements TicketService {
 
         ticket.setAssignedTechnician(technician);
         ticket.setUpdatedAt(LocalDateTime.now());
+        
+        if (ticket.getFirstRespondedAt() == null) {
+            ticket.setFirstRespondedAt(LocalDateTime.now());
+        }
 
         return ticketRepository.save(ticket);
     }
@@ -121,6 +125,16 @@ public class TicketServiceImpl implements TicketService {
 
         ticket.setStatus(status);
         ticket.setUpdatedAt(LocalDateTime.now());
+        
+        if (ticket.getFirstRespondedAt() == null && isStaffOrAdmin(actorRole)) {
+            ticket.setFirstRespondedAt(LocalDateTime.now());
+        }
+        
+        if (status == TicketStatus.RESOLVED || status == TicketStatus.CLOSED || status == TicketStatus.REJECTED) {
+            if (ticket.getResolvedAt() == null) {
+                ticket.setResolvedAt(LocalDateTime.now());
+            }
+        }
 
         return ticketRepository.save(ticket);
     }

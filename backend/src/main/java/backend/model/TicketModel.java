@@ -23,6 +23,8 @@ public class TicketModel {
     private String rejectionReason;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private LocalDateTime firstRespondedAt;
+    private LocalDateTime resolvedAt;
 
     private  PriorityLevel priority;
 
@@ -32,7 +34,7 @@ public class TicketModel {
 
     }
 
-    public TicketModel(String id, String title, String description, String category, String location, String preferredContact, String createdBy, String assignedTechnician, String resolutionNotes, String rejectionReason, LocalDateTime createdAt, LocalDateTime updatedAt, PriorityLevel priority, TicketStatus status) {
+    public TicketModel(String id, String title, String description, String category, String location, String preferredContact, String createdBy, String assignedTechnician, String resolutionNotes, String rejectionReason, LocalDateTime createdAt, LocalDateTime updatedAt, LocalDateTime firstRespondedAt, LocalDateTime resolvedAt, PriorityLevel priority, TicketStatus status) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -45,6 +47,8 @@ public class TicketModel {
         this.rejectionReason = rejectionReason;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
+        this.firstRespondedAt = firstRespondedAt;
+        this.resolvedAt = resolvedAt;
         this.priority = priority;
         this.status = status;
     }
@@ -161,4 +165,18 @@ public class TicketModel {
         this.status = status;
     }
 
-}
+    public LocalDateTime getFirstRespondedAt() {
+        return firstRespondedAt;
+    }
+
+    public void setFirstRespondedAt(LocalDateTime firstRespondedAt) {
+        this.firstRespondedAt = firstRespondedAt;
+    }
+
+    public LocalDateTime getResolvedAt() {
+        return resolvedAt;
+    }
+
+    public void setResolvedAt(LocalDateTime resolvedAt) {
+        this.resolvedAt = resolvedAt;
+    }}
