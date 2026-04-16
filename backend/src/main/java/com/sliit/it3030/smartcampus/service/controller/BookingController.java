@@ -1,4 +1,4 @@
-package com.sliit.it3030.smartcampus.controller;
+package com.sliit.it3030.smartcampus.service.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
