@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+#root {
+  min-height: 100vh;
+}
+
 @theme {
   --font-sans: 'Inter', 'Outfit', sans-serif;
   --font-display: 'Outfit', sans-serif;

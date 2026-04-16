@@ -1,5 +1,4 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
-import './App.css'
 import { AdminPanelPage } from './pages/adminpanel'
 import { CreateTicketPage } from './pages/createticket'
 import { MyTicketsPage } from './pages/myticket'
