@@ -1,4 +1,4 @@
-package backend.model;
+package com.sliit.it3030.smartcampus.model;
 
 public enum PriorityLevel {
 

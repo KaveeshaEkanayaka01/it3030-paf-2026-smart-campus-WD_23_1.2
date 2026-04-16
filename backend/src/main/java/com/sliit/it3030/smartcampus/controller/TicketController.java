@@ -1,8 +1,8 @@
-package backend.controller;
+package com.sliit.it3030.smartcampus.controller;
 
-import backend.model.TicketModel;
-import backend.model.TicketStatus;
-import backend.service.TicketService;
+import com.sliit.it3030.smartcampus.model.TicketModel;
+import com.sliit.it3030.smartcampus.model.TicketStatus;
+import com.sliit.it3030.smartcampus.service.TicketService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;

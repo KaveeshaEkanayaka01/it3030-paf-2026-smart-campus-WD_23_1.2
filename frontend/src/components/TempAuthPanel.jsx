@@ -5,7 +5,7 @@ import {
   getCurrentUserRole,
   setCurrentUserId,
   setCurrentUserRole,
-} from '../services/ticketService';
+} from '../api/ticketService';
 
 const ROLES = ['USER', 'TECHNICIAN', 'STAFF', 'ADMIN'];
 

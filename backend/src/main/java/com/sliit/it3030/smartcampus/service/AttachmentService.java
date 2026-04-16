@@ -1,12 +1,12 @@
-package backend.service;
+package com.sliit.it3030.smartcampus.service;
 
-import backend.exception.AttachmentLimitException;
-import backend.exception.FileUploadException;
-import backend.exception.ResourceNotFoundException;
-import backend.model.AttachmentModel;
-import backend.model.TicketModel;
-import backend.repository.AttachmentRepository;
-import backend.repository.TicketRepository;
+import com.sliit.it3030.smartcampus.exception.AttachmentLimitException;
+import com.sliit.it3030.smartcampus.exception.FileUploadException;
+import com.sliit.it3030.smartcampus.exception.ResourceNotFoundException;
+import com.sliit.it3030.smartcampus.model.AttachmentModel;
+import com.sliit.it3030.smartcampus.model.TicketModel;
+import com.sliit.it3030.smartcampus.repository.AttachmentRepository;
+import com.sliit.it3030.smartcampus.repository.TicketRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

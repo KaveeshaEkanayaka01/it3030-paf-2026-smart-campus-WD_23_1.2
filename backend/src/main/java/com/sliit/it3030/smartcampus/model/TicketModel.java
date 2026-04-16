@@ -1,4 +1,4 @@
-package backend.model;
+package com.sliit.it3030.smartcampus.model;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;

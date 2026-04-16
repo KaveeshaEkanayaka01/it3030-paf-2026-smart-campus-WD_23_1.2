@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CheckCircle2, ClipboardList, RefreshCcw, ShieldCheck, UserCheck, Wrench } from 'lucide-react';
 import { TicketStatusBadge } from '../components/TicketStatusBadge';
-import { getCurrentUserId, getCurrentUserRole, setCurrentUserRole, ticketService } from '../services/ticketService';
+import { getCurrentUserId, getCurrentUserRole, setCurrentUserRole, ticketService } from '../api/ticketService';
 
 const TECH_ROLES = ['ADMIN', 'STAFF', 'TECHNICIAN'];
 

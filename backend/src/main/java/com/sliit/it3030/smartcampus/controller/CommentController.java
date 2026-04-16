@@ -1,7 +1,7 @@
-package backend.controller;
+package com.sliit.it3030.smartcampus.controller;
 
-import backend.model.CommentModel;
-import backend.service.CommentService;
+import com.sliit.it3030.smartcampus.model.CommentModel;
+import com.sliit.it3030.smartcampus.service.CommentService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

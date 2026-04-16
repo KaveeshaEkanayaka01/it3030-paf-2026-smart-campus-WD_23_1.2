@@ -1,7 +1,7 @@
-package backend.service;
+package com.sliit.it3030.smartcampus.service;
 
-import backend.model.TicketModel;
-import backend.model.TicketStatus;
+import com.sliit.it3030.smartcampus.model.TicketModel;
+import com.sliit.it3030.smartcampus.model.TicketStatus;
 
 import java.util.List;
 

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AlertCircle, ArrowLeft, Send, MapPin, Phone, Info, Tag, Sparkles } from 'lucide-react';
 import { AttachmentUpload } from '../components/AttachmentUpload';
-import { getCurrentUserId, setCurrentUserId, ticketService } from '../services/ticketService';
+import { getCurrentUserId, setCurrentUserId, ticketService } from '../api/ticketService';
 
 const CATEGORIES = [
   'Classroom Equipment',

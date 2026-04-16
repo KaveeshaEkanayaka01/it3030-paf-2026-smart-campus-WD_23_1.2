@@ -1,7 +1,7 @@
-package backend.dto;
+package com.sliit.it3030.smartcampus.dto;
 
-import backend.enums.PriorityLevel;
-import backend.enums.TicketStatus;
+import com.sliit.it3030.smartcampus.model.PriorityLevel;
+import com.sliit.it3030.smartcampus.model.TicketStatus;
 
 import java.time.LocalDateTime;
 

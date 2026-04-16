@@ -1,4 +1,4 @@
-package backend.security;
+package com.sliit.it3030.smartcampus.security;
 
 public class AuthContext {
 

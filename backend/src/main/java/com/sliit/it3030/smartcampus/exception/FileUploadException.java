@@ -1,4 +1,4 @@
-package backend.exception;
+package com.sliit.it3030.smartcampus.exception;
 
 public class FileUploadException extends RuntimeException {
 

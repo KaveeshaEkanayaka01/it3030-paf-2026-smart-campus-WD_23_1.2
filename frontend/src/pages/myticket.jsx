@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus, Search, Filter, LayoutGrid, List, Shield, Wrench } from 'lucide-react';
-import { getCurrentUserId, setCurrentUserId, ticketService } from '../services/ticketService';
+import { getCurrentUserId, setCurrentUserId, ticketService } from '../api/ticketService';
 import { TicketCard } from '../components/ticketCard';
 
 export const MyTicketsPage = () => {

@@ -1,6 +1,6 @@
-package backend.repository;
+package com.sliit.it3030.smartcampus.repository;
 
-import backend.model.CommentModel;
+import com.sliit.it3030.smartcampus.model.CommentModel;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import java.util.List;
 

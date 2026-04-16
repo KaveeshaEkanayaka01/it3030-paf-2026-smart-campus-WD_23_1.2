@@ -2,7 +2,8 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Shield, RefreshCcw, Search, UserCheck, Wrench, Trash2 } from 'lucide-react';
 import { TicketStatusBadge } from '../components/TicketStatusBadge';
-import { getCurrentUserId, getCurrentUserRole, setCurrentUserRole, ticketService } from '../services/ticketService';
+import { PriorityBadge } from '../components/PriorityBadge';
+import { getCurrentUserId, getCurrentUserRole, setCurrentUserRole, ticketService } from '../api/ticketService';
 
 const PRIVILEGED_ROLES = ['ADMIN', 'STAFF', 'TECHNICIAN'];
 
@@ -355,7 +356,9 @@ export const AdminPanelPage = () => {
                   </div>
                   <div className="glass-panel bg-black/20 p-4 rounded-xl border border-white/5">
                     <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Priority</p>
-                    <p className="mt-2 text-sm font-semibold text-slate-200 truncate">{selectedTicket.priority || 'N/A'}</p>
+                    <div className="mt-2">
+                      <PriorityBadge priority={selectedTicket.priority} className="text-[11px]" />
+                    </div>
                   </div>
                   <div className="glass-panel bg-black/20 p-4 rounded-xl border border-white/5">
                     <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Preferred Contact</p>

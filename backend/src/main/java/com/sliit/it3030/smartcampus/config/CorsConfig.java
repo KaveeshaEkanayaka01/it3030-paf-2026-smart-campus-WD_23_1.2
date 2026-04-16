@@ -1,4 +1,4 @@
-package backend.config;
+package com.sliit.it3030.smartcampus.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

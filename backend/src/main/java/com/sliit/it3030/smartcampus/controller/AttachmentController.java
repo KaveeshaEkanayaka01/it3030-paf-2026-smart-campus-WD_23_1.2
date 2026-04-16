@@ -1,8 +1,8 @@
-package backend.controller;
+package com.sliit.it3030.smartcampus.controller;
 
-import backend.model.AttachmentModel;
-import backend.service.AttachmentService;
-import backend.repository.AttachmentRepository;
+import com.sliit.it3030.smartcampus.model.AttachmentModel;
+import com.sliit.it3030.smartcampus.service.AttachmentService;
+import com.sliit.it3030.smartcampus.repository.AttachmentRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

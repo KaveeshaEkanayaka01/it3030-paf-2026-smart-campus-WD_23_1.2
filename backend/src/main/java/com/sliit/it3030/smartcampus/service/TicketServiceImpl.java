@@ -1,9 +1,9 @@
-package backend.service;
+package com.sliit.it3030.smartcampus.service;
 
-import backend.exception.ResourceNotFoundException;
-import backend.model.TicketModel;
-import backend.model.TicketStatus;
-import backend.repository.TicketRepository;
+import com.sliit.it3030.smartcampus.exception.ResourceNotFoundException;
+import com.sliit.it3030.smartcampus.model.TicketModel;
+import com.sliit.it3030.smartcampus.model.TicketStatus;
+import com.sliit.it3030.smartcampus.repository.TicketRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

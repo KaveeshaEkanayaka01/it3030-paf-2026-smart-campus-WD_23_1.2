@@ -1,10 +1,10 @@
-package backend.service;
+package com.sliit.it3030.smartcampus.service;
 
-import backend.exception.ResourceNotFoundException;
-import backend.model.CommentModel;
-import backend.model.TicketModel;
-import backend.repository.CommentRepository;
-import backend.repository.TicketRepository;
+import com.sliit.it3030.smartcampus.exception.ResourceNotFoundException;
+import com.sliit.it3030.smartcampus.model.CommentModel;
+import com.sliit.it3030.smartcampus.model.TicketModel;
+import com.sliit.it3030.smartcampus.repository.CommentRepository;
+import com.sliit.it3030.smartcampus.repository.TicketRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

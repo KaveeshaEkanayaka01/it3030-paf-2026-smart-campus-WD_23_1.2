@@ -1,6 +1,6 @@
-package backend.dto;
+package com.sliit.it3030.smartcampus.dto;
 
-import backend.enums.PriorityLevel;
+import com.sliit.it3030.smartcampus.model.PriorityLevel;
 
 public class TicketCreateRequestDto {
 

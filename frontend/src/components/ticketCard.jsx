@@ -1,11 +1,9 @@
 import React from 'react';
-import { MapPin, Clock, User, AlertCircle } from 'lucide-react';
+import { MapPin, Clock, User } from 'lucide-react';
 import { TicketStatusBadge } from './TicketStatusBadge';
-import { PRIORITY_COLORS } from '../utils/statusColors';
-import { cn } from '../utils/cn';
+import { PriorityBadge } from './PriorityBadge';
 
 export const TicketCard = ({ ticket, onClick }) => {
-  const priorityClass = PRIORITY_COLORS[ticket?.priority] || PRIORITY_COLORS.DEFAULT;
   const createdAt = ticket?.createdAt ? new Date(ticket.createdAt).toLocaleDateString() : 'N/A';
 
   return (
@@ -36,11 +34,8 @@ export const TicketCard = ({ ticket, onClick }) => {
           <Clock size={12} className="text-violet-400" />
           <span>{createdAt}</span>
         </div>
-        <div className={cn('flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider', priorityClass)}>
-          <AlertCircle size={12} />
-          <span>
-            {ticket?.priority || 'UNKNOWN'}
-          </span>
+        <div className="flex items-center">
+          <PriorityBadge priority={ticket?.priority} />
         </div>
         {ticket?.assignedTechnician && (
           <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
