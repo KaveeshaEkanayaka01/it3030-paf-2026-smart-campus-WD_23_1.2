@@ -1,9 +1,11 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
+import './App.css'
 import { AdminPanelPage } from './pages/adminpanel'
 import { CreateTicketPage } from './pages/createticket'
 import { MyTicketsPage } from './pages/myticket'
 import { TechnicianPanelPage } from './pages/technicianpanel'
 import { TicketDetailsPage } from './pages/ticketDetails'
+import { TempAuthPanel } from './components/TempAuthPanel'
 
 function App() {
   return (
@@ -18,6 +20,7 @@ function App() {
           <Route path="/tickets/:id" element={<TicketDetailsPage />} />
         </Routes>
       </main>
+      <TempAuthPanel />
     </div>
   )
 }

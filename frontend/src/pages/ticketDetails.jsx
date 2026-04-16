@@ -379,88 +379,89 @@ export const TicketDetailsPage = () => {
         </div>
 
         <div className="space-y-8">
-          {canManageTicket && (
-            <>
-              <div className="glass-panel-strong rounded-3xl p-8 shadow-2xl backdrop-blur-md">
-                <h3 className="mb-6 flex items-center gap-3 border-b border-white/10 pb-5 text-xs font-bold uppercase tracking-widest text-slate-100">
-                  <Wrench size={18} className="text-indigo-400" />
-                  Technician Actions
-                </h3>
-                <div className="space-y-4">
-                  <select
-                    value={selectedStatus}
-                    onChange={(e) => setSelectedStatus(e.target.value)}
-                    disabled={statusUpdating}
-                    className="w-full glass-input rounded-xl px-4 py-3.5 text-xs font-bold uppercase tracking-wider outline-none text-slate-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                  >
-                    {UPDATE_STATUSES.map((status) => (
-                      <option key={status} value={status} className="bg-slate-900 text-slate-200">{status.replace('_', ' ')}</option>
-                    ))}
-                  </select>
+          <div className="glass-panel-strong rounded-3xl p-8 shadow-2xl backdrop-blur-md">
+            <h3 className="mb-6 flex items-center gap-3 border-b border-white/10 pb-5 text-xs font-bold uppercase tracking-widest text-slate-100">
+              <Wrench size={18} className="text-indigo-400" />
+              Technician Actions
+            </h3>
+            <div className="space-y-4">
+              {!canManageTicket && (
+                <p className="text-xs font-semibold text-slate-400 bg-white/5 p-3 rounded-xl">
+                   Updates are restricted to ADMIN, STAFF, and TECHNICIAN roles.
+                </p>
+              )}
+              <select
+                value={selectedStatus}
+                onChange={(e) => setSelectedStatus(e.target.value)}
+                disabled={!canManageTicket || statusUpdating}
+                className="w-full glass-input rounded-xl px-4 py-3.5 text-xs font-bold uppercase tracking-wider outline-none text-slate-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              >
+                {UPDATE_STATUSES.map((status) => (
+                  <option key={status} value={status} className="bg-slate-900 text-slate-200">{status.replace('_', ' ')}</option>
+                ))}
+              </select>
 
-                  <textarea
-                    value={resolutionNotes}
-                    onChange={(e) => setResolutionNotes(e.target.value)}
-                    placeholder="Resolution notes (for RESOLVED/CLOSED)"
-                    disabled={statusUpdating}
-                    rows={3}
-                    className="w-full resize-none glass-input rounded-xl px-4 py-3.5 text-xs outline-none text-slate-200 placeholder:text-slate-500 disabled:opacity-50 transition-all font-medium"
-                  />
+              <textarea
+                value={resolutionNotes}
+                onChange={(e) => setResolutionNotes(e.target.value)}
+                placeholder="Resolution notes (for RESOLVED/CLOSED)"
+                disabled={!canManageTicket || statusUpdating}
+                rows={3}
+                className="w-full resize-none glass-input rounded-xl px-4 py-3.5 text-xs outline-none text-slate-200 placeholder:text-slate-500 disabled:opacity-50 transition-all font-medium"
+              />
 
-                  {selectedStatus === 'REJECTED' && (
-                    <textarea
-                      value={rejectionReason}
-                      onChange={(e) => setRejectionReason(e.target.value)}
-                      placeholder="Rejection reason (required)"
-                      disabled={statusUpdating}
-                      rows={3}
-                      className="w-full resize-none bg-rose-500/10 border border-rose-500/30 rounded-xl px-4 py-3.5 text-xs outline-none text-rose-200 placeholder:text-rose-500/50 disabled:opacity-50 transition-all"
-                    />
-                  )}
+              {selectedStatus === 'REJECTED' && (
+                <textarea
+                  value={rejectionReason}
+                  onChange={(e) => setRejectionReason(e.target.value)}
+                  placeholder="Rejection reason (required)"
+                  disabled={!canManageTicket || statusUpdating}
+                  rows={3}
+                  className="w-full resize-none bg-rose-500/10 border border-rose-500/30 rounded-xl px-4 py-3.5 text-xs outline-none text-rose-200 placeholder:text-rose-500/50 disabled:opacity-50 transition-all"
+                />
+              )}
 
-                  <button
-                    type="button"
-                    disabled={statusUpdating}
-                    onClick={handleUpdateStatus}
-                    className={cn(
-                      'w-full rounded-2xl bg-gradient-to-r from-indigo-500 to-purple-600 px-4 py-4 text-xs font-bold uppercase tracking-widest text-white transition-all shadow-[0_0_20px_rgba(168,85,247,0.3)]',
-                      statusUpdating ? 'opacity-50 cursor-not-allowed shadow-none' : 'hover:scale-[1.02] active:scale-95'
-                    )}
-                  >
-                    {statusUpdating ? 'Updating...' : 'Update Status'}
-                  </button>
-                </div>
-              </div>
+              <button
+                type="button"
+                disabled={!canManageTicket || statusUpdating}
+                onClick={handleUpdateStatus}
+                className={cn(
+                  'w-full rounded-2xl bg-gradient-to-r from-indigo-500 to-purple-600 px-4 py-4 text-xs font-bold uppercase tracking-widest text-white transition-all shadow-[0_0_20px_rgba(168,85,247,0.3)]',
+                  (!canManageTicket || statusUpdating) ? 'opacity-50 cursor-not-allowed shadow-none' : 'hover:scale-[1.02] active:scale-95'
+                )}
+              >
+                {statusUpdating ? 'Updating...' : 'Update Status'}
+              </button>
+            </div>
+          </div>
 
-              <div className="glass-panel rounded-3xl p-8 shadow-xl backdrop-blur-md">
-                <h3 className="mb-6 flex items-center gap-3 border-b border-white/10 pb-5 text-xs font-bold uppercase tracking-widest text-slate-100">
-                  <CheckCircle2 size={18} className="text-emerald-400" />
-                  Assign Technician
-                </h3>
-                <div className="space-y-4">
-                  <input
-                    type="text"
-                    value={technician}
-                    onChange={(e) => setTechnician(e.target.value)}
-                    placeholder="Technician username or id"
-                    disabled={assigning}
-                    className="w-full glass-input rounded-xl px-4 py-3.5 text-sm font-medium outline-none text-slate-200 placeholder:text-slate-500 disabled:opacity-50 transition-all focus:glass-panel-strong"
-                  />
-                  <button
-                    type="button"
-                    onClick={handleAssignTechnician}
-                    disabled={assigning || !technician.trim()}
-                    className={cn(
-                      'w-full rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 px-4 py-3.5 text-xs font-bold uppercase tracking-widest text-white transition-all shadow-[0_0_20px_rgba(16,185,129,0.2)]',
-                      (assigning || !technician.trim()) ? 'opacity-50 cursor-not-allowed shadow-none' : 'hover:scale-[1.02] active:scale-95'
-                    )}
-                  >
-                    {assigning ? 'Assigning...' : 'Assign Technician'}
-                  </button>
-                </div>
-              </div>
-            </>
-          )}
+          <div className="glass-panel rounded-3xl p-8 shadow-xl backdrop-blur-md">
+            <h3 className="mb-6 flex items-center gap-3 border-b border-white/10 pb-5 text-xs font-bold uppercase tracking-widest text-slate-100">
+              <CheckCircle2 size={18} className="text-emerald-400" />
+              Assign Technician
+            </h3>
+            <div className="space-y-4">
+              <input
+                type="text"
+                value={technician}
+                onChange={(e) => setTechnician(e.target.value)}
+                placeholder="Technician username or id"
+                disabled={!canManageTicket || assigning}
+                className="w-full glass-input rounded-xl px-4 py-3.5 text-sm font-medium outline-none text-slate-200 placeholder:text-slate-500 disabled:opacity-50 transition-all focus:glass-panel-strong"
+              />
+              <button
+                type="button"
+                onClick={handleAssignTechnician}
+                disabled={!canManageTicket || assigning || !technician.trim()}
+                className={cn(
+                  'w-full rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 px-4 py-3.5 text-xs font-bold uppercase tracking-widest text-white transition-all shadow-[0_0_20px_rgba(16,185,129,0.2)]',
+                  (!canManageTicket || assigning || !technician.trim()) ? 'opacity-50 cursor-not-allowed shadow-none' : 'hover:scale-[1.02] active:scale-95'
+                )}
+              >
+                {assigning ? 'Assigning...' : 'Assign Technician'}
+              </button>
+            </div>
+          </div>
 
           {ticket.assignedTechnician && (
             <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-600 to-purple-800 p-8 text-white shadow-2xl">

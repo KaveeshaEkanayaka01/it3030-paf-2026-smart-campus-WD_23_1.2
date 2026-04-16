@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Send, Info, Tag, Sparkles } from 'lucide-react';
+import { AlertCircle, ArrowLeft, Send, MapPin, Phone, Info, Tag, Sparkles } from 'lucide-react';
 import { AttachmentUpload } from '../components/AttachmentUpload';
-import { getCurrentUserId, ticketService } from '../services/ticketService';
+import { getCurrentUserId, setCurrentUserId, ticketService } from '../services/ticketService';
 
 const CATEGORIES = [
   'Classroom Equipment',
@@ -16,21 +16,15 @@ const CATEGORIES = [
 ];
 
 const PRIORITIES = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'];
-const MIN_DESCRIPTION_LENGTH = 5;
-const MAX_DESCRIPTION_LENGTH = 1000;
-const MAX_LOCATION_LENGTH = 10;
-const MAX_CONTACT_LENGTH = 10;
-
-const CONTACT_PATTERN = /(^[^\s@]+@[^\s@]+\.[^\s@]+$)|(^\+?[0-9\s()-]{7,20}$)/;
 
 export const CreateTicketPage = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [files, setFiles] = useState([]);
   const [error, setError] = useState('');
-  const [validationErrors, setValidationErrors] = useState({});
   const [uploadInfo, setUploadInfo] = useState('');
-  const currentUser = getCurrentUserId() || '';
+  const [currentUser, setCurrentUser] = useState(getCurrentUserId() || '');
+  const [testUserInput, setTestUserInput] = useState(getCurrentUserId() || '');
   const [formData, setFormData] = useState({
     category: '',
     description: '',
@@ -39,79 +33,20 @@ export const CreateTicketPage = () => {
     contact: ''
   });
 
-  const validateForm = (data) => {
-    const nextErrors = {};
-
-    if (!data.category.trim()) {
-      nextErrors.category = 'Please select a category.';
+  const applyTestUser = () => {
+    if (!setCurrentUserId(testUserInput)) {
+      setError('Enter a valid user id before continuing.');
+      return;
     }
 
-    if (!data.priority.trim()) {
-      nextErrors.priority = 'Please select a priority.';
-    }
-
-    const location = data.location.trim();
-    if (!location) {
-      nextErrors.location = 'Location is required.';
-    } else if (location.length > MAX_LOCATION_LENGTH) {
-      nextErrors.location = `Location must be ${MAX_LOCATION_LENGTH} characters or less.`;
-    }
-
-    const description = data.description.trim();
-    if (!description) {
-      nextErrors.description = 'Description is required.';
-    } else if (description.length < MIN_DESCRIPTION_LENGTH) {
-      nextErrors.description = `Description must be at least ${MIN_DESCRIPTION_LENGTH} characters.`;
-    } else if (description.length > MAX_DESCRIPTION_LENGTH) {
-      nextErrors.description = `Description must be ${MAX_DESCRIPTION_LENGTH} characters or less.`;
-    }
-
-    const contact = data.contact.trim();
-    if (!contact) {
-      nextErrors.contact = 'Preferred contact is required.';
-    } else if (contact.length > MAX_CONTACT_LENGTH) {
-      nextErrors.contact = `Preferred contact must be ${MAX_CONTACT_LENGTH} characters or less.`;
-    } else if (!CONTACT_PATTERN.test(contact)) {
-      nextErrors.contact = 'Enter a valid email address or phone number.';
-    }
-
-    return nextErrors;
-  };
-
-  const handleFieldChange = (field, value) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-
-    setValidationErrors((prev) => {
-      if (!prev[field]) {
-        return prev;
-      }
-
-      const refreshedErrors = validateForm({ ...formData, [field]: value });
-      return { ...prev, [field]: refreshedErrors[field] };
-    });
+    setCurrentUser(getCurrentUserId() || '');
+    setError('');
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setUploadInfo('');
-
-    const trimmedData = {
-      category: formData.category,
-      description: formData.description.trim(),
-      priority: formData.priority,
-      location: formData.location.trim(),
-      contact: formData.contact.trim(),
-    };
-
-    const formErrors = validateForm(trimmedData);
-    if (Object.keys(formErrors).length > 0) {
-      setValidationErrors(formErrors);
-      setError('Please fix the highlighted fields and submit again.');
-      return;
-    }
-
-    setValidationErrors({});
     setLoading(true);
 
     const currentUserId = getCurrentUserId();
@@ -123,12 +58,12 @@ export const CreateTicketPage = () => {
 
     try {
       const payload = {
-        title: `${trimmedData.category} issue`,
-        category: trimmedData.category,
-        description: trimmedData.description,
-        priority: trimmedData.priority,
-        location: trimmedData.location,
-        preferredContact: trimmedData.contact,
+        title: `${formData.category} issue`,
+        category: formData.category,
+        description: formData.description,
+        priority: formData.priority,
+        location: formData.location,
+        preferredContact: formData.contact,
         createdBy: currentUserId,
       };
 
@@ -220,6 +155,29 @@ export const CreateTicketPage = () => {
         </aside>
 
         <section className="space-y-6">
+          {!currentUser && (
+            <div className="glass-panel border-amber-500/30 bg-amber-500/10 p-6 rounded-2xl backdrop-blur-md">
+              <p className="text-xs font-bold uppercase tracking-wider text-amber-400">Testing Mode User Setup</p>
+              <p className="mt-1 text-sm text-amber-200/80">Login module is not connected yet. Set a temporary user id to test ticket creation.</p>
+              <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+                <input
+                  type="text"
+                  value={testUserInput}
+                  onChange={(e) => setTestUserInput(e.target.value)}
+                  placeholder="e.g. wd23-student"
+                  className="w-full glass-input rounded-xl px-4 py-3 text-sm font-medium outline-none text-slate-200 placeholder:text-slate-500"
+                />
+                <button
+                  type="button"
+                  onClick={applyTestUser}
+                  className="bg-amber-500 text-white px-6 py-3 rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-amber-600 transition-colors shadow-lg shadow-amber-500/20"
+                >
+                  Use This User
+                </button>
+              </div>
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-6">
             {error && (
               <div className="glass-panel border-rose-500/30 bg-rose-500/10 p-5 rounded-2xl text-sm font-semibold text-rose-300">
@@ -244,17 +202,14 @@ export const CreateTicketPage = () => {
                   <select
                     required
                     value={formData.category}
-                    onChange={(e) => handleFieldChange('category', e.target.value)}
-                    className={`w-full glass-input rounded-xl px-4 py-3.5 text-sm font-medium outline-none text-slate-200 cursor-pointer appearance-none bg-slate-900/50 focus:bg-slate-800/80 transition-all border ${validationErrors.category ? 'border-rose-400/70 focus:border-rose-400' : 'border-white/10'}`}
+                    onChange={e => setFormData({ ...formData, category: e.target.value })}
+                    className="w-full glass-input rounded-xl px-4 py-3.5 text-sm font-medium outline-none text-slate-200 cursor-pointer appearance-none bg-slate-900/50 focus:bg-slate-800/80 transition-all border border-white/10"
                   >
                     <option value="" className="bg-slate-900 text-slate-400">Select a category</option>
                     {CATEGORIES.map(cat => (
                       <option key={cat} value={cat} className="bg-slate-900 text-slate-200">{cat}</option>
                     ))}
                   </select>
-                  {validationErrors.category && (
-                    <p className="text-[11px] font-semibold text-rose-300">{validationErrors.category}</p>
-                  )}
                 </div>
 
                 <div className="space-y-2.5">
@@ -264,16 +219,13 @@ export const CreateTicketPage = () => {
                   <select
                     required
                     value={formData.priority}
-                    onChange={(e) => handleFieldChange('priority', e.target.value)}
-                    className={`w-full glass-input rounded-xl px-4 py-3.5 text-sm font-medium outline-none text-slate-200 cursor-pointer appearance-none bg-slate-900/50 focus:bg-slate-800/80 transition-all border ${validationErrors.priority ? 'border-rose-400/70 focus:border-rose-400' : 'border-white/10'}`}
+                    onChange={e => setFormData({ ...formData, priority: e.target.value })}
+                    className="w-full glass-input rounded-xl px-4 py-3.5 text-sm font-medium outline-none text-slate-200 cursor-pointer appearance-none bg-slate-900/50 focus:bg-slate-800/80 transition-all border border-white/10"
                   >
                     {PRIORITIES.map(prio => (
                       <option key={prio} value={prio} className="bg-slate-900 text-slate-200">{prio}</option>
                     ))}
                   </select>
-                  {validationErrors.priority && (
-                    <p className="text-[11px] font-semibold text-rose-300">{validationErrors.priority}</p>
-                  )}
                 </div>
 
                 <div className="space-y-2.5 md:col-span-2">
@@ -285,12 +237,9 @@ export const CreateTicketPage = () => {
                     type="text"
                     placeholder="e.g. Building A, Room 302"
                     value={formData.location}
-                    onChange={(e) => handleFieldChange('location', e.target.value)}
-                    className={`w-full glass-input rounded-xl px-4 py-3.5 text-sm outline-none text-slate-200 placeholder:text-slate-500 font-medium transition-all border ${validationErrors.location ? 'border-rose-400/70 focus:border-rose-400' : 'border-white/10'}`}
+                    onChange={e => setFormData({ ...formData, location: e.target.value })}
+                    className="w-full glass-input rounded-xl px-4 py-3.5 text-sm outline-none text-slate-200 placeholder:text-slate-500 font-medium transition-all"
                   />
-                  {validationErrors.location && (
-                    <p className="text-[11px] font-semibold text-rose-300">{validationErrors.location}</p>
-                  )}
                 </div>
 
                 <div className="space-y-2.5 md:col-span-2">
@@ -302,12 +251,9 @@ export const CreateTicketPage = () => {
                     rows={5}
                     placeholder="Describe the issue in detail..."
                     value={formData.description}
-                    onChange={(e) => handleFieldChange('description', e.target.value)}
-                    className={`w-full resize-none glass-input rounded-xl px-4 py-3.5 text-sm outline-none text-slate-200 placeholder:text-slate-500 font-medium transition-all border ${validationErrors.description ? 'border-rose-400/70 focus:border-rose-400' : 'border-white/10'}`}
+                    onChange={e => setFormData({ ...formData, description: e.target.value })}
+                    className="w-full resize-none glass-input rounded-xl px-4 py-3.5 text-sm outline-none text-slate-200 placeholder:text-slate-500 font-medium transition-all"
                   />
-                  {validationErrors.description && (
-                    <p className="text-[11px] font-semibold text-rose-300">{validationErrors.description}</p>
-                  )}
                   <p className="text-right text-[10px] font-bold uppercase tracking-widest text-slate-500 pt-1">
                     {formData.description.length} characters
                   </p>
@@ -322,12 +268,9 @@ export const CreateTicketPage = () => {
                     type="text"
                     placeholder="Email or phone number"
                     value={formData.contact}
-                    onChange={(e) => handleFieldChange('contact', e.target.value)}
-                    className={`w-full glass-input rounded-xl px-4 py-3.5 text-sm outline-none text-slate-200 placeholder:text-slate-500 font-medium transition-all border ${validationErrors.contact ? 'border-rose-400/70 focus:border-rose-400' : 'border-white/10'}`}
+                    onChange={e => setFormData({ ...formData, contact: e.target.value })}
+                    className="w-full glass-input rounded-xl px-4 py-3.5 text-sm outline-none text-slate-200 placeholder:text-slate-500 font-medium transition-all"
                   />
-                  {validationErrors.contact && (
-                    <p className="text-[11px] font-semibold text-rose-300">{validationErrors.contact}</p>
-                  )}
                 </div>
               </div>
             </div>
