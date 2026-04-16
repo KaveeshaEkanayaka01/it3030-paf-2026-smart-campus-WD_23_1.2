@@ -94,7 +94,7 @@ export const CreateTicketPage = () => {
         '';
 
       if (!err?.response) {
-        setError('Cannot reach backend API. Make sure backend is running on http://localhost:8090.');
+        setError('Cannot reach backend API. Make sure backend is running on http://localhost:8091.');
       } else {
         setError(backendMessage || `Failed to create ticket (HTTP ${err.response.status}).`);
       }
@@ -104,8 +104,8 @@ export const CreateTicketPage = () => {
   };
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8 md:py-12 relative">
-      <div className="pointer-events-none absolute right-0 top-0 h-[500px] w-[500px] rounded-full bg-[radial-gradient(circle,_rgba(99,102,241,0.15)_0%,_rgba(99,102,241,0)_70%)] opacity-60 blur-3xl shadow-none" />
+    <div className="mx-auto max-w-6xl px-4 py-8 md:py-12 relative page-enter">
+      <div className="pointer-events-none absolute right-0 top-0 h-[500px] w-[500px] rounded-full bg-[radial-gradient(circle,_rgba(14,165,233,0.2)_0%,_rgba(14,165,233,0)_70%)] opacity-60 blur-3xl shadow-none" />
       
       <button
         type="button"
@@ -119,11 +119,11 @@ export const CreateTicketPage = () => {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[0.9fr_1.1fr] relative z-10">
         <aside className="glass-panel-strong rounded-3xl p-8 shadow-xl backdrop-blur-md flex flex-col justify-between">
           <div>
-            <p className="inline-flex items-center gap-2 rounded-full border border-indigo-500/30 bg-indigo-500/10 px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest text-indigo-300 mb-6 w-fit">
-              <Sparkles size={12} className="text-indigo-400" />
+            <p className="inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest mb-6 w-fit" style={{ borderColor: 'rgba(56,189,248,0.35)', background: 'rgba(14,165,233,0.12)', color: 'var(--accent-mid)' }}>
+              <Sparkles size={12} style={{ color: 'var(--accent-mid)' }} />
               Incident Desk
             </p>
-            <h1 className="text-4xl font-extrabold uppercase tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-fuchsia-400 md:text-5xl">Create Ticket</h1>
+            <h1 className="text-4xl font-extrabold uppercase tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-teal-400 md:text-5xl">Create Ticket</h1>
             <p className="mt-4 max-w-md text-sm leading-relaxed text-slate-300 font-medium">
               Report maintenance issues with clear details so technicians can respond faster and accurately.
             </p>

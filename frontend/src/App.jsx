@@ -1,15 +1,15 @@
 import './index.css';
-import { BrowserRouter } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 
 import { AppProvider } from './context/AppContext';
+import { UserProvider } from './context/UserContext';
 import AppRoutes from './routes/AppRoutes';
 
 function App() {
   return (
-    <BrowserRouter>
+    <UserProvider>
       <AppProvider>
-        <div className="min-h-screen font-sans text-slate-100 bg-slate-900">
+        <div className="min-h-screen font-sans text-slate-100 bg-transparent">
           <main>
             <AppRoutes />
           </main>
@@ -36,7 +36,7 @@ function App() {
           />
         </div>
       </AppProvider>
-    </BrowserRouter>
+    </UserProvider>
   );
 }
 

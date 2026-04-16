@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
-import { CalendarDays, LayoutDashboard, PlusCircle, BookOpen, User, Shield, ArrowLeftRight } from 'lucide-react';
+import { CalendarDays, LayoutDashboard, PlusCircle, BookOpen, User, Shield, ArrowLeftRight, Wrench, ClipboardList } from 'lucide-react';
 
 export default function Navbar() {
   const { currentUser, toggleRole } = useUser();
@@ -10,22 +10,26 @@ export default function Navbar() {
   const userLinks = [
     { to: '/create', icon: <PlusCircle size={18} />, label: 'New Booking' },
     { to: '/my-bookings', icon: <BookOpen size={18} />, label: 'My Bookings' },
+    { to: '/create-ticket', icon: <Wrench size={18} />, label: 'New Ticket' },
+    { to: '/my-tickets', icon: <ClipboardList size={18} />, label: 'My Tickets' },
     { to: '/calendar', icon: <CalendarDays size={18} />, label: 'Calendar' },
   ];
 
   const adminLinks = [
-    { to: '/admin', icon: <LayoutDashboard size={18} />, label: 'Dashboard' },
+    { to: '/admin-dashboard', icon: <LayoutDashboard size={18} />, label: 'Booking Admin' },
+    { to: '/admin', icon: <Shield size={18} />, label: 'Ticket Admin' },
+    { to: '/technician', icon: <Wrench size={18} />, label: 'Technician' },
     { to: '/calendar', icon: <CalendarDays size={18} />, label: 'Calendar' },
   ];
 
   const links = isAdmin ? adminLinks : userLinks;
 
   return (
-    <nav className="sticky top-0 z-50" style={{ background: 'rgba(248,250,252,0.9)', backdropFilter: 'blur(8px)', borderBottom: '1px solid rgba(15,23,42,0.04)' }}>
+    <nav className="sticky top-0 z-50" style={{ background: 'rgba(2,6,23,0.72)', backdropFilter: 'blur(12px)', borderBottom: '1px solid rgba(148,163,184,0.2)' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link to={isAdmin ? '/admin' : '/create'} className="flex items-center gap-2 group">
+          <Link to={isAdmin ? '/admin-dashboard' : '/create'} className="flex items-center gap-2 group">
             <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, var(--accent-start), var(--accent-end))' }}>
               <CalendarDays size={16} className="text-white" />
             </div>
@@ -46,7 +50,7 @@ export default function Navbar() {
                   style={{
                     background: active ? 'rgba(99,102,241,0.06)' : 'transparent',
                     color: active ? 'var(--accent-mid)' : 'var(--text-secondary)',
-                    border: active ? '1px solid rgba(99,102,241,0.08)' : '1px solid transparent',
+                    border: active ? '1px solid rgba(56,189,248,0.3)' : '1px solid transparent',
                   }}
                 >
                   {link.icon}
@@ -59,7 +63,7 @@ export default function Navbar() {
           {/* User Info + Role Toggle */}
           <div className="flex items-center gap-3">
             {/* User Badge */}
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl" style={{ background: 'transparent', border: '1px solid rgba(15,23,42,0.04)' }}>
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl" style={{ background: 'rgba(15,23,42,0.45)', border: '1px solid rgba(148,163,184,0.2)' }}>
               <div className="w-7 h-7 rounded-full flex items-center justify-center" style={{ background: isAdmin ? 'linear-gradient(135deg, var(--status-pending), var(--accent-mid))' : 'linear-gradient(135deg, var(--accent-start), var(--accent-end))' }}>
                 {isAdmin ? <Shield size={14} className="text-white" /> : <User size={14} className="text-white" />}
               </div>
@@ -76,7 +80,7 @@ export default function Navbar() {
               style={{
                 background: isAdmin ? 'rgba(99,102,241,0.06)' : 'var(--status-pending-bg)',
                 color: isAdmin ? 'var(--accent-mid)' : 'var(--status-pending)',
-                border: isAdmin ? '1px solid rgba(99,102,241,0.08)' : '1px solid var(--status-pending-border)',
+                border: isAdmin ? '1px solid rgba(56,189,248,0.3)' : '1px solid var(--status-pending-border)',
               }}
               title="Switch Role"
             >

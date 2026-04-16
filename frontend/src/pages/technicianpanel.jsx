@@ -134,16 +134,16 @@ export const TechnicianPanelPage = () => {
   const unassigned = filteredTickets.filter((ticket) => !String(ticket.assignedTechnician || '').trim());
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-10 relative">
-      <div className="pointer-events-none absolute right-0 top-0 h-[400px] w-[400px] rounded-full bg-[radial-gradient(circle,_rgba(168,85,247,0.15)_0%,_rgba(168,85,247,0)_70%)] opacity-60 blur-3xl" />
+    <div className="mx-auto max-w-7xl px-4 py-10 relative page-enter">
+      <div className="pointer-events-none absolute right-0 top-0 h-[400px] w-[400px] rounded-full bg-[radial-gradient(circle,_rgba(14,165,233,0.18)_0%,_rgba(14,165,233,0)_70%)] opacity-60 blur-3xl" />
       
       <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between relative z-10">
         <div>
-          <p className="inline-flex items-center gap-2 rounded-full border border-violet-500/30 bg-violet-500/10 px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest text-violet-300 mb-4">
-            <Wrench size={12} className="text-violet-400" />
+          <p className="inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest mb-4" style={{ borderColor: 'rgba(56,189,248,0.35)', background: 'rgba(14,165,233,0.12)', color: 'var(--accent-mid)' }}>
+            <Wrench size={12} style={{ color: 'var(--accent-mid)' }} />
             Technician Workspace
           </p>
-          <h1 className="mt-2 text-4xl font-extrabold uppercase tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-indigo-400">Action Queue</h1>
+          <h1 className="mt-2 text-4xl font-extrabold uppercase tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-teal-400">Action Queue</h1>
           <p className="mt-2 max-w-2xl text-sm text-slate-300 font-medium">
             Focused board for your assigned work and available tickets you can claim.
           </p>
@@ -155,7 +155,7 @@ export const TechnicianPanelPage = () => {
             onClick={loadTickets}
             className="flex items-center gap-2 glass-panel px-5 py-3.5 rounded-xl text-xs font-bold uppercase tracking-widest text-slate-300 hover:glass-panel-strong transition-all hover:-translate-y-0.5"
           >
-            <RefreshCcw size={16} className="text-indigo-400" />
+            <RefreshCcw size={16} style={{ color: 'var(--accent-mid)' }} />
             Refresh
           </button>
           <button
@@ -168,7 +168,8 @@ export const TechnicianPanelPage = () => {
           <button
             type="button"
             onClick={() => navigate('/admin')}
-            className="bg-gradient-to-r from-slate-800 to-slate-900 border border-slate-700 shadow-lg shadow-black/20 px-5 py-3.5 rounded-xl text-xs font-bold uppercase tracking-widest text-slate-200 hover:scale-[1.02] active:scale-95 transition-all"
+            className="px-5 py-3.5 rounded-xl text-xs font-bold uppercase tracking-widest text-white hover:scale-[1.02] active:scale-95 transition-all"
+            style={{ background: 'linear-gradient(135deg, var(--accent-start), var(--accent-end))', boxShadow: '0 10px 24px rgba(14, 165, 233, 0.24)' }}
           >
             Admin Panel
           </button>
