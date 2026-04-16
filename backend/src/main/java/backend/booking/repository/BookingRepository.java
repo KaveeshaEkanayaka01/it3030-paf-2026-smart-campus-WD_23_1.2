@@ -1,7 +1,7 @@
-package com.booking.app.repository;
+package backend.booking.repository;
 
-import com.booking.app.entity.Booking;
-import com.booking.app.entity.BookingStatus;
+import backend.booking.entity.Booking;
+import backend.booking.entity.BookingStatus;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;

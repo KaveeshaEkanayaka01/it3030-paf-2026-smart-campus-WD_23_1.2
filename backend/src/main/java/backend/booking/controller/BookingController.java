@@ -1,10 +1,10 @@
-package com.booking.app.controller;
+package backend.booking.controller;
 
-import com.booking.app.dto.BookingRequest;
-import com.booking.app.dto.CancelRequest;
-import com.booking.app.dto.RejectRequest;
-import com.booking.app.entity.Booking;
-import com.booking.app.service.BookingService;
+import backend.booking.dto.BookingRequest;
+import backend.booking.dto.CancelRequest;
+import backend.booking.dto.RejectRequest;
+import backend.booking.entity.Booking;
+import backend.booking.service.BookingService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

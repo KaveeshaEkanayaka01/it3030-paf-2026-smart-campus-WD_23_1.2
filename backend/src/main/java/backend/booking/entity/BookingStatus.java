@@ -1,4 +1,4 @@
-package com.booking.app.entity;
+package backend.booking.entity;
 
 public enum BookingStatus {
     PENDING,

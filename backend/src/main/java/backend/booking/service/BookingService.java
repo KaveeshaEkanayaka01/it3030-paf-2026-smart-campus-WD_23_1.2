@@ -1,14 +1,14 @@
-package com.booking.app.service;
+package backend.booking.service;
 
-import com.booking.app.dto.BookingRequest;
-import com.booking.app.dto.CancelRequest;
-import com.booking.app.dto.RejectRequest;
-import com.booking.app.entity.Booking;
-import com.booking.app.entity.BookingStatus;
-import com.booking.app.exception.BookingConflictException;
-import com.booking.app.exception.InvalidStatusTransitionException;
-import com.booking.app.exception.UnauthorizedException;
-import com.booking.app.repository.BookingRepository;
+import backend.booking.dto.BookingRequest;
+import backend.booking.dto.CancelRequest;
+import backend.booking.dto.RejectRequest;
+import backend.booking.entity.Booking;
+import backend.booking.entity.BookingStatus;
+import backend.booking.exception.BookingConflictException;
+import backend.booking.exception.InvalidStatusTransitionException;
+import backend.booking.exception.UnauthorizedException;
+import backend.booking.repository.BookingRepository;
 import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

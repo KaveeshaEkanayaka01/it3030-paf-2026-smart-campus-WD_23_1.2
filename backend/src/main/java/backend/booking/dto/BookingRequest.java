@@ -1,23 +1,13 @@
-package com.booking.app.entity;
+package backend.booking.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.*;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
+import lombok.Data;
 
 import java.util.Date;
 
-@Document(collection = "bookings")
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-public class Booking {
-
-    @Id
-    private String id;
+public class BookingRequest {
 
     @NotBlank(message = "Resource ID is required")
     private String resourceId;
@@ -39,12 +29,4 @@ public class Booking {
 
     @NotBlank(message = "Purpose is required")
     private String purpose;
-
-    @Builder.Default
-    private BookingStatus status = BookingStatus.PENDING;
-
-    private String rejectionReason;
-
-    @CreatedDate
-    private Date createdAt;
 }

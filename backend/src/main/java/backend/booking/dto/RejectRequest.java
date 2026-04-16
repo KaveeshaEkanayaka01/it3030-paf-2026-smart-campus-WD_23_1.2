@@ -1,4 +1,4 @@
-package com.booking.app.dto;
+package backend.booking.dto;
 
 import lombok.Data;
 

@@ -1,4 +1,4 @@
-package com.booking.app.exception;
+package backend.booking.exception;
 
 public class InvalidStatusTransitionException extends RuntimeException {
     public InvalidStatusTransitionException(String message) {
