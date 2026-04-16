@@ -1,4 +1,4 @@
-package com.sliit.it3030;
+package com.sliit.it3030.smartcampus;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
