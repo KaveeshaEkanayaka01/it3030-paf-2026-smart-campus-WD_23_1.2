@@ -1,4 +1,5 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8090'
+// Default to the backend server port defined in backend application.properties
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8091'
 
 export class ApiError extends Error {
   constructor(message, response) {

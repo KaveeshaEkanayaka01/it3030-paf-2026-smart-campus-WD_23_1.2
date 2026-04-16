@@ -94,7 +94,7 @@ export const CreateTicketPage = () => {
         '';
 
       if (!err?.response) {
-        setError('Cannot reach backend API. Make sure backend is running on http://localhost:8090.');
+        setError('Cannot reach backend API. Make sure backend is running on http://localhost:8091.');
       } else {
         setError(backendMessage || `Failed to create ticket (HTTP ${err.response.status}).`);
       }
