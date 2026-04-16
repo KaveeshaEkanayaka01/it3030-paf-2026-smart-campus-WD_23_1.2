@@ -2,7 +2,7 @@ package backend.service;
 
 import backend.exception.ResourceNotFoundException;
 import backend.model.TicketModel;
-import backend.model.TicketStatus;
+import backend.enums.TicketStatus;
 import backend.repository.TicketRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;

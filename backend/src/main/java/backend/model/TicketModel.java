@@ -1,5 +1,7 @@
 package backend.model;
 
+import backend.enums.PriorityLevel;
+import backend.enums.TicketStatus;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -36,13 +38,8 @@ public class TicketModel {
     private LocalDateTime firstRespondedAt;
     private LocalDateTime resolvedAt;
 
-    private  PriorityLevel priority;
+    private PriorityLevel priority;
 
     private TicketStatus status;
 
-     
-
-    
-
-    
 }

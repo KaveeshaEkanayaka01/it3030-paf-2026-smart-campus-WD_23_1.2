@@ -1,7 +1,7 @@
 package backend.service;
 
 import backend.model.TicketModel;
-import backend.model.TicketStatus;
+import backend.enums.TicketStatus;
 
 import java.util.List;
 

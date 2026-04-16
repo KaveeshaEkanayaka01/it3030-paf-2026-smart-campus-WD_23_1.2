@@ -1,7 +1,7 @@
 package backend.controller;
 
 import backend.model.TicketModel;
-import backend.model.TicketStatus;
+import backend.enums.TicketStatus;
 import backend.service.TicketService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
