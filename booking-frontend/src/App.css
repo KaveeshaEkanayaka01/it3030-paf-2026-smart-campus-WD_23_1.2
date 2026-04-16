@@ -1,0 +1,62 @@
+:root{
+  --max-width:1280px;
+  --page-padding:2rem;
+  --accent-start:#0ea5a4; /* teal */
+  --accent-end:#6366f1; /* indigo */
+  --muted:#64748b; /* slate-500 */
+  --accent-mid: #818cf8;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --status-pending: #fbbf24;
+  --status-pending-bg: rgba(251,191,36,0.12);
+  --status-pending-border: rgba(251,191,36,0.2);
+  --status-approved: #4ade80;
+  --status-approved-bg: rgba(34,197,94,0.12);
+  --status-approved-border: rgba(34,197,94,0.18);
+  --status-rejected: #f87171;
+  --status-rejected-bg: rgba(239,68,68,0.12);
+  --status-rejected-border: rgba(239,68,68,0.18);
+  --status-cancelled: #9ca3af;
+  --status-cancelled-bg: rgba(107,114,128,0.12);
+  --status-cancelled-border: rgba(107,114,128,0.18);
+}
+
+#root {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: var(--page-padding);
+  text-align: center;
+}
+
+.logo {
+  height: 6em;
+  padding: 1.2em;
+  will-change: filter;
+  transition: filter 220ms ease, transform 220ms ease;
+}
+.logo:hover {
+  filter: drop-shadow(0 8px 28px rgba(99,102,241,0.18));
+  transform: translateY(-4px);
+}
+.logo.react:hover {
+  filter: drop-shadow(0 8px 28px rgba(6,182,212,0.16));
+}
+
+@keyframes logo-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo { animation: logo-spin infinite 20s linear; }
+}
+
+.card {
+  padding: 1.5em;
+  border-radius: 12px;
+  background: white;
+  box-shadow: 0 8px 24px rgba(15,23,42,0.06);
+  text-align: left;
+}
+
+.read-the-docs { color: var(--muted); }
