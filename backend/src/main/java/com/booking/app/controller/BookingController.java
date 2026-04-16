@@ -1,0 +1,107 @@
+package com.booking.app.controller;
+
+import com.booking.app.dto.BookingRequest;
+import com.booking.app.dto.CancelRequest;
+import com.booking.app.dto.RejectRequest;
+import com.booking.app.entity.Booking;
+import com.booking.app.service.BookingService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Map;
+
+@RestController
+@RequestMapping("/api/bookings")
+@RequiredArgsConstructor
+public class BookingController {
+
+    private final BookingService bookingService;
+
+    // ──────────────────────────────────────────────
+    // 1. POST /api/bookings — Create a new booking
+    // ──────────────────────────────────────────────
+    @PostMapping
+    public ResponseEntity<Booking> createBooking(@Valid @RequestBody BookingRequest request) {
+        Booking booking = bookingService.createBooking(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(booking);
+    }
+
+    // ──────────────────────────────────────────────
+    // 2. GET /api/bookings/my?userId=xxx — My bookings
+    // ──────────────────────────────────────────────
+    @GetMapping("/my")
+    public ResponseEntity<List<Booking>> getMyBookings(@RequestParam String userId) {
+        return ResponseEntity.ok(bookingService.getMyBookings(userId));
+    }
+
+    // ──────────────────────────────────────────────
+    // 3. GET /api/bookings — All bookings (Admin)
+    // ──────────────────────────────────────────────
+    @GetMapping
+    public ResponseEntity<List<Booking>> getAllBookings() {
+        return ResponseEntity.ok(bookingService.getAllBookings());
+    }
+
+    // ──────────────────────────────────────────────
+    // 4. PUT /api/bookings/{id}/approve — Approve
+    // ──────────────────────────────────────────────
+    @PutMapping("/{id}/approve")
+    public ResponseEntity<Booking> approveBooking(@PathVariable String id) {
+        try {
+            Booking booking = bookingService.approveBooking(id);
+            return ResponseEntity.ok(booking);
+        } catch (Exception e) {
+            throw e;
+        }
+    }
+
+    // ──────────────────────────────────────────────
+    // 5. PUT /api/bookings/{id}/reject — Reject
+    // ──────────────────────────────────────────────
+    @PutMapping("/{id}/reject")
+    public ResponseEntity<Booking> rejectBooking(
+            @PathVariable String id,
+            @RequestBody RejectRequest rejectRequest) {
+        try {
+            Booking booking = bookingService.rejectBooking(id, rejectRequest);
+            return ResponseEntity.ok(booking);
+        } catch (Exception e) {
+            throw e;
+        }
+    }
+
+    // ──────────────────────────────────────────────
+    // 6. PUT /api/bookings/{id}/cancel — Cancel
+    // ──────────────────────────────────────────────
+    @PutMapping("/{id}/cancel")
+    public ResponseEntity<Booking> cancelBooking(
+            @PathVariable String id,
+            @RequestBody CancelRequest cancelRequest) {
+        try {
+            Booking booking = bookingService.cancelBooking(id, cancelRequest);
+            return ResponseEntity.ok(booking);
+        } catch (Exception e) {
+            throw e;
+        }
+    }
+
+    // ──────────────────────────────────────────────
+    // 7. GET /api/bookings/resource/{resourceId} — Resource calendar
+    // ──────────────────────────────────────────────
+    @GetMapping("/resource/{resourceId}")
+    public ResponseEntity<List<Booking>> getBookingsByResource(@PathVariable String resourceId) {
+        return ResponseEntity.ok(bookingService.getBookingsByResource(resourceId));
+    }
+
+    // ──────────────────────────────────────────────
+    // BONUS: GET /api/bookings/stats — Admin dashboard stats
+    // ──────────────────────────────────────────────
+    @GetMapping("/stats")
+    public ResponseEntity<Map<String, Long>> getStats() {
+        return ResponseEntity.ok(bookingService.getStats());
+    }
+}
