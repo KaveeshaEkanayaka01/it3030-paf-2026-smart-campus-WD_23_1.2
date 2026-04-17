@@ -15,7 +15,7 @@ export default function AuthCallbackPage() {
     
     if (token) {
       loginWithToken(token);
-      navigate('/dashboard', { replace: true });
+      navigate('/', { replace: true });
     } else {
       navigate('/login', { replace: true });
     }

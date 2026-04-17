@@ -61,15 +61,36 @@ export default function AppRoutes() {
                   <Route path="/create" element={<CreateBookingPage />} />
                   <Route path="/create-booking" element={<CreateBookingPage />} />
                   <Route path="/my-bookings" element={<MyBookingsPage />} />
-                  <Route path="/admin-dashboard" element={<AdminDashboardPage />} />
+                  <Route
+                    path="/admin-dashboard"
+                    element={
+                      <ProtectedRoute requiredRole="ROLE_ADMIN">
+                        <AdminDashboardPage />
+                      </ProtectedRoute>
+                    }
+                  />
                   <Route path="/calendar" element={<ResourceCalendarPage />} />
 
                   {/* Ticket Routes */}
                   <Route path="/my-tickets" element={<MyTicketsPage />} />
                   <Route path="/create-ticket" element={<CreateTicketPage />} />
                   <Route path="/tickets/:id" element={<TicketDetailsPage />} />
-                  <Route path="/technician" element={<TechnicianPanelPage />} />
-                  <Route path="/admin" element={<AdminPanelPage />} />
+                  <Route
+                    path="/technician"
+                    element={
+                      <ProtectedRoute requiredRoles={["ROLE_TECHNICIAN", "ROLE_ADMIN"]}>
+                        <TechnicianPanelPage />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/admin"
+                    element={
+                      <ProtectedRoute requiredRole="ROLE_ADMIN">
+                        <AdminPanelPage />
+                      </ProtectedRoute>
+                    }
+                  />
 
                   {/* Fallback */}
                   <Route path="*" element={<Navigate to="/" replace />} />

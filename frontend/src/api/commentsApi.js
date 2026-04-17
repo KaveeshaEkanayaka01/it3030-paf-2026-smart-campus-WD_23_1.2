@@ -5,30 +5,27 @@ export const commentsApi = {
     return apiRequest(`/api/tickets/${ticketId}/comments`)
   },
 
-  addComment(ticketId, message, createdBy) {
+  addComment(ticketId, content) {
     return apiRequest(`/api/tickets/${ticketId}/comments`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        message,
-        createdBy,
+        content,
       }),
     })
   },
 
-  updateComment(commentId, message, actorUserId, actorRole = 'USER') {
-    return apiRequest(`/api/comments/${commentId}`, {
+  updateComment(commentId, content) {
+    return apiRequest(`/api/tickets/comments/${commentId}`, {
       method: 'PUT',
-      query: { actorUserId, actorRole },
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message }),
+      body: JSON.stringify({ content }),
     })
   },
 
-  deleteComment(commentId, actorUserId, actorRole = 'USER') {
-    return apiRequest(`/api/comments/${commentId}`, {
+  deleteComment(commentId) {
+    return apiRequest(`/api/tickets/comments/${commentId}`, {
       method: 'DELETE',
-      query: { actorUserId, actorRole },
     })
   },
 }

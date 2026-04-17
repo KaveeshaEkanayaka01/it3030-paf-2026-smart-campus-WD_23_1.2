@@ -1,11 +1,24 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
-import { CalendarDays, LayoutDashboard, PlusCircle, BookOpen, User, Shield, ArrowLeftRight, Wrench, ClipboardList } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { CalendarDays, LayoutDashboard, PlusCircle, BookOpen, User, Shield, Wrench, ClipboardList, LogOut } from 'lucide-react';
+import NotificationBell from './notifications/NotificationBell';
 
 export default function Navbar() {
-  const { currentUser, toggleRole } = useUser();
+  const { currentUser } = useUser();
+  const { logout } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
   const isAdmin = currentUser.role === 'ADMIN';
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+
+  const goToDashboard = () => {
+    navigate(isAdmin ? '/admin-dashboard' : '/dashboard');
+  };
 
   const userLinks = [
     { to: '/create', icon: <PlusCircle size={18} />, label: 'New Booking' },
@@ -60,10 +73,17 @@ export default function Navbar() {
             })}
           </div>
 
-          {/* User Info + Role Toggle */}
+          {/* Notifications + User Info + Logout */}
           <div className="flex items-center gap-3">
+            <NotificationBell buttonClassName="text-slate-300 hover:text-white rounded-lg hover:bg-white/10" />
+
             {/* User Badge */}
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl" style={{ background: 'rgba(15,23,42,0.45)', border: '1px solid rgba(148,163,184,0.2)' }}>
+            <button
+              onClick={goToDashboard}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-xl transition-all duration-200 hover:scale-105 active:scale-95"
+              style={{ background: 'rgba(15,23,42,0.45)', border: '1px solid rgba(148,163,184,0.2)' }}
+              title="Go to dashboard"
+            >
               <div className="w-7 h-7 rounded-full flex items-center justify-center" style={{ background: isAdmin ? 'linear-gradient(135deg, var(--status-pending), var(--accent-mid))' : 'linear-gradient(135deg, var(--accent-start), var(--accent-end))' }}>
                 {isAdmin ? <Shield size={14} className="text-white" /> : <User size={14} className="text-white" />}
               </div>
@@ -71,23 +91,20 @@ export default function Navbar() {
                 <p className="text-xs font-semibold" style={{ color: 'var(--text-primary)' }}>{currentUser.userName}</p>
                 <p className="text-xs" style={{ color: isAdmin ? 'var(--status-pending)' : 'var(--accent-mid)' }}>{currentUser.role}</p>
               </div>
-            </div>
+            </button>
 
-            {/* Role Toggle Button */}
             <button
-              onClick={toggleRole}
+              onClick={handleLogout}
               className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold transition-all duration-200 hover:scale-105 active:scale-95"
               style={{
-                background: isAdmin ? 'rgba(99,102,241,0.06)' : 'var(--status-pending-bg)',
-                color: isAdmin ? 'var(--accent-mid)' : 'var(--status-pending)',
-                border: isAdmin ? '1px solid rgba(56,189,248,0.3)' : '1px solid var(--status-pending-border)',
+                background: 'rgba(239,68,68,0.12)',
+                color: 'rgb(252,165,165)',
+                border: '1px solid rgba(239,68,68,0.35)',
               }}
-              title="Switch Role"
+              title="Logout"
             >
-              <ArrowLeftRight size={14} />
-              <span className="hidden sm:inline">
-                Switch to {isAdmin ? 'USER' : 'ADMIN'}
-              </span>
+              <LogOut size={14} />
+              <span className="hidden sm:inline">Logout</span>
             </button>
           </div>
         </div>

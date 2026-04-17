@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AlertCircle, ArrowLeft, Send, MapPin, Phone, Info, Tag, Sparkles } from 'lucide-react';
 import { AttachmentUpload } from '../components/AttachmentUpload';
+import { API_BASE_URL } from '../api/httpClient';
 import { getCurrentUserId, setCurrentUserId, ticketService } from '../api/ticketService';
+import { useAuth } from '../context/AuthContext';
 
 const CATEGORIES = [
   'Classroom Equipment',
@@ -19,6 +21,7 @@ const PRIORITIES = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'];
 
 export const CreateTicketPage = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [files, setFiles] = useState([]);
   const [error, setError] = useState('');
@@ -32,6 +35,24 @@ export const CreateTicketPage = () => {
     location: '',
     contact: ''
   });
+
+  useEffect(() => {
+    // Keep legacy ticket flows working while preferring authenticated user identity.
+    if (user?.id) {
+      setCurrentUserId(user.id);
+      setCurrentUser(user.id);
+      setTestUserInput(user.id);
+      return;
+    }
+
+    setCurrentUser(getCurrentUserId() || '');
+  }, [user]);
+
+  const displayUserName = useMemo(() => {
+    if (user?.name) return user.name;
+    if (user?.email) return user.email;
+    return currentUser;
+  }, [user, currentUser]);
 
   const applyTestUser = () => {
     if (!setCurrentUserId(testUserInput)) {
@@ -49,7 +70,7 @@ export const CreateTicketPage = () => {
     setUploadInfo('');
     setLoading(true);
 
-    const currentUserId = getCurrentUserId();
+    const currentUserId = user?.id || getCurrentUserId();
     if (!currentUserId) {
       setError('No current user found. Set localStorage currentUser, userId, or username.');
       setLoading(false);
@@ -94,7 +115,7 @@ export const CreateTicketPage = () => {
         '';
 
       if (!err?.response) {
-        setError('Cannot reach backend API. Make sure backend is running on http://localhost:8091.');
+        setError(`Cannot reach backend API. Make sure backend is running on ${API_BASE_URL}.`);
       } else {
         setError(backendMessage || `Failed to create ticket (HTTP ${err.response.status}).`);
       }
@@ -135,7 +156,10 @@ export const CreateTicketPage = () => {
                 <Info size={100} />
               </div>
               <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Current User</p>
-              <p className="text-sm font-bold text-slate-200 truncate">{currentUser || 'Not set yet'}</p>
+              <p className="text-sm font-bold text-slate-200 truncate">{displayUserName || 'Not set yet'}</p>
+              {currentUser && (
+                <p className="mt-1 text-[10px] font-bold uppercase tracking-widest text-slate-500 truncate">ID: {currentUser}</p>
+              )}
             </div>
             <div className="glass-panel rounded-xl p-5 border-l-[3px] border-l-fuchsia-500 relative overflow-hidden group">
               <div className="absolute right-[-10px] top-[-10px] opacity-5 group-hover:opacity-10 transition-opacity">

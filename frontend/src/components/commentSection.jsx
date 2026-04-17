@@ -48,7 +48,7 @@ export const CommentSection = ({ comments, onAddComment, onDeleteComment, onUpda
             className="glass-panel rounded-2xl p-6 transition-all hover:glass-panel-strong"
           >
               {(() => {
-                const canManage = comment.authorId === currentUserId || isPrivilegedRole(currentUserRole);
+                const canManage = comment.isOwner || comment.authorId === currentUserId || isPrivilegedRole(currentUserRole);
                 const isEditing = editingCommentId === comment.id;
 
                 return (

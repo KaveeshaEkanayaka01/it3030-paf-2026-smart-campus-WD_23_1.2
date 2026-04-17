@@ -6,6 +6,7 @@ import com.sliit.it3030.smartcampus.exception.UnauthorizedException;
 import com.sliit.it3030.smartcampus.model.Notification;
 import com.sliit.it3030.smartcampus.model.Notification.NotificationType;
 import com.sliit.it3030.smartcampus.repository.NotificationRepository;
+import com.sliit.it3030.smartcampus.repository.TicketRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,7 @@ import java.util.stream.Collectors;
 public class NotificationService {
 
     private final NotificationRepository notificationRepository;
+    private final TicketRepository ticketRepository;
 
     // ========== QUERY METHODS ==========
 
@@ -121,11 +123,22 @@ public class NotificationService {
 
     // Called when a new comment is added
     public void sendNewCommentNotification(String ticketId, String commenterName) {
-        // NOTE: In real implementation, you would fetch the ticket owner's userId
-        // and notify them. Here we show the pattern.
-        // This would be called from CommentService
-        log.info("New comment notification triggered for ticket {} by {}", ticketId, commenterName);
-        // Actual notification creation happens when ticketService provides userId
+        ticketRepository.findById(ticketId).ifPresentOrElse(ticket -> {
+            String ticketOwnerId = ticket.getCreatedBy();
+
+            if (ticketOwnerId == null || ticketOwnerId.isBlank()) {
+                log.warn("Skipping comment notification for ticket {} because owner is missing", ticketId);
+                return;
+            }
+
+            createNotification(
+                    ticketOwnerId,
+                    "New Comment",
+                    commenterName + " commented on your ticket.",
+                    NotificationType.NEW_COMMENT,
+                    ticketId
+            );
+        }, () -> log.warn("Skipping comment notification because ticket {} was not found", ticketId));
     }
 
     // Called by other services with full details

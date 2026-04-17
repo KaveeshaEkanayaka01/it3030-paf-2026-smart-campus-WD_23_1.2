@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Search, Filter, LayoutGrid, List, Shield, Wrench } from 'lucide-react';
+import { Plus, Search, Filter, LayoutGrid, List } from 'lucide-react';
 import { getCurrentUserId, setCurrentUserId, ticketService } from '../api/ticketService';
 import { TicketCard } from '../components/ticketCard';
 
@@ -66,22 +66,6 @@ export const MyTicketsPage = () => {
           >
             <Plus size={20} />
             New Ticket
-          </button>
-          <button
-            onClick={() => navigate('/technician')}
-            className="glass-card font-bold px-8 py-3.5 rounded-xl hover:glass-panel-strong hover:-translate-y-0.5 transition-all flex items-center gap-3 uppercase tracking-wider text-xs"
-            style={{ color: 'var(--text-primary)' }}
-          >
-            <Wrench size={18} style={{ color: 'var(--accent-mid)' }} />
-            Technician
-          </button>
-          <button
-            onClick={() => navigate('/admin')}
-            className="glass-card font-bold px-8 py-3.5 rounded-xl hover:glass-panel-strong hover:-translate-y-0.5 transition-all flex items-center gap-3 uppercase tracking-wider text-xs"
-            style={{ color: 'var(--text-primary)' }}
-          >
-            <Shield size={18} style={{ color: 'var(--status-pending)' }} />
-            Admin Panel
           </button>
         </div>
       </div>

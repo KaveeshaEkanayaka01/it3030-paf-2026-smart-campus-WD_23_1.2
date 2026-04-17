@@ -1,7 +1,7 @@
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 
-export default function ProtectedRoute({ children, requiredRole }) {
+export default function ProtectedRoute({ children, requiredRole, requiredRoles }) {
   const { isAuthenticated, user, loading } = useAuth();
 
   if (loading) {
@@ -16,7 +16,12 @@ export default function ProtectedRoute({ children, requiredRole }) {
     return <Navigate to="/login" replace />;
   }
 
-  if (requiredRole && !user?.roles?.includes(requiredRole)) {
+  const hasRequiredRole = requiredRole ? user?.roles?.includes(requiredRole) : true;
+  const hasAnyRequiredRole = Array.isArray(requiredRoles) && requiredRoles.length > 0
+    ? requiredRoles.some((role) => user?.roles?.includes(role))
+    : true;
+
+  if (!hasRequiredRole || !hasAnyRequiredRole) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">

@@ -1,24 +1,46 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useMemo } from 'react';
+import { useAuth } from './AuthContext';
 
 const UserContext = createContext(null);
 
-// Mock users for demo purposes (no login required)
-const MOCK_USERS = {
-  USER: { userId: 'user_001', userName: 'Alice Johnson', role: 'USER' },
-  ADMIN: { userId: 'admin_001', userName: 'Admin User', role: 'ADMIN' },
+const DEFAULT_USER = {
+  userId: '',
+  userName: 'Guest',
+  role: 'USER',
+  roles: ['ROLE_USER'],
 };
 
 export function UserProvider({ children }) {
-  const [currentUser, setCurrentUser] = useState(MOCK_USERS.USER);
+  const { user } = useAuth();
+
+  const currentUser = useMemo(() => {
+    if (!user) {
+      return DEFAULT_USER;
+    }
+
+    const roles = Array.isArray(user.roles) ? user.roles : [];
+
+    let role = 'USER';
+    if (roles.includes('ROLE_ADMIN')) {
+      role = 'ADMIN';
+    } else if (roles.includes('ROLE_TECHNICIAN')) {
+      role = 'TECHNICIAN';
+    }
+
+    return {
+      userId: user.id || '',
+      userName: user.name || user.email || 'User',
+      role,
+      roles,
+    };
+  }, [user]);
 
   const toggleRole = () => {
-    setCurrentUser(prev =>
-      prev.role === 'USER' ? MOCK_USERS.ADMIN : MOCK_USERS.USER
-    );
+    // Disable local role switching; role comes from authenticated backend user roles.
   };
 
-  const switchToUser = (userId) => {
-    setCurrentUser(prev => ({ ...prev, userId }));
+  const switchToUser = () => {
+    // Disable local user switching in integrated auth flow.
   };
 
   return (

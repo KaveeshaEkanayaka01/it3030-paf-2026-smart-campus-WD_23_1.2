@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   ArrowLeft,
@@ -14,6 +14,7 @@ import {
   Clock
 } from 'lucide-react';
 import { getCurrentUserId, getCurrentUserRole, ticketService } from '../api/ticketService';
+import { useAuth } from '../context/AuthContext';
 import { TicketStatusBadge } from '../components/TicketStatusBadge';
 import { CommentSection } from '../components/commentSection';
 
@@ -25,6 +26,7 @@ const PRIVILEGED_ROLES = ['ADMIN', 'STAFF', 'TECHNICIAN'];
 export const TicketDetailsPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [ticket, setTicket] = useState(null);
   const [attachments, setAttachments] = useState([]);
   const [comments, setComments] = useState([]);
@@ -36,16 +38,25 @@ export const TicketDetailsPage = () => {
   const [rejectionReason, setRejectionReason] = useState('');
   const [technician, setTechnician] = useState('');
   const [assigning, setAssigning] = useState(false);
-  const currentUserId = getCurrentUserId() || 'wd23-student';
-  const currentUserRole = getCurrentUserRole();
+  const currentUserId = user?.id || getCurrentUserId() || 'wd23-student';
+  const currentUserRole = useMemo(() => {
+    const roles = Array.isArray(user?.roles) ? user.roles : [];
+    if (roles.includes('ROLE_ADMIN')) return 'ADMIN';
+    if (roles.includes('ROLE_STAFF')) return 'STAFF';
+    if (roles.includes('ROLE_TECHNICIAN')) return 'TECHNICIAN';
+    if (roles.includes('ROLE_USER')) return 'USER';
+    return getCurrentUserRole();
+  }, [user]);
   const canManageTicket = PRIVILEGED_ROLES.includes(currentUserRole);
+  const hasSidePanel = canManageTicket || Boolean(ticket?.assignedTechnician);
 
   const mapCommentForUI = (comment) => ({
     id: String(comment.id),
-    text: comment.message || '',
-    authorName: comment.createdBy || 'Unknown',
-    authorId: comment.createdBy || '',
+    text: comment.content || '',
+    authorName: comment.authorName || comment.authorId || 'Unknown',
+    authorId: comment.authorId || '',
     createdAt: comment.createdAt || new Date().toISOString(),
+    isOwner: Boolean(comment.isOwner),
   });
 
   const loadComments = useCallback(async (ticketId) => {
@@ -86,7 +97,7 @@ export const TicketDetailsPage = () => {
     }
 
     try {
-      await ticketService.addComment(id, text, currentUserId);
+      await ticketService.addComment(id, text);
       await loadComments(id);
     } catch (err) {
       console.error('Failed to add comment:', err);
@@ -100,7 +111,7 @@ export const TicketDetailsPage = () => {
     }
 
     try {
-      await ticketService.deleteComment(commentId, currentUserId, currentUserRole);
+      await ticketService.deleteComment(commentId);
       await loadComments(id);
     } catch (err) {
       console.error('Failed to delete comment:', err);
@@ -114,7 +125,7 @@ export const TicketDetailsPage = () => {
     }
 
     try {
-      await ticketService.updateComment(commentId, text, currentUserId, currentUserRole);
+      await ticketService.updateComment(commentId, text);
       await loadComments(id);
     } catch (err) {
       console.error('Failed to update comment:', err);
@@ -241,8 +252,8 @@ export const TicketDetailsPage = () => {
         <span className="text-[10px] font-bold uppercase tracking-widest">Back to Tickets</span>
       </button>
 
-      <div className="grid grid-cols-1 gap-10 lg:grid-cols-3 relative z-10">
-        <div className="space-y-8 lg:col-span-2">
+      <div className={cn('grid grid-cols-1 gap-10 relative z-10', hasSidePanel ? 'lg:grid-cols-3' : 'max-w-4xl mx-auto')}>
+        <div className={cn('space-y-8', hasSidePanel ? 'lg:col-span-2' : '')}>
           <div className="glass-panel rounded-3xl p-8 shadow-xl backdrop-blur-md">
             <div className="mb-8 flex items-center justify-between gap-4 border-b border-white/10 pb-6">
               <div>

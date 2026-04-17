@@ -1,18 +1,20 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { API_BASE_URL } from '../api/httpClient';
 import { FaGithub, FaShieldAlt, FaBell, FaTicketAlt, FaCalendarCheck, FaUsers, FaArrowRight, FaStar } from 'react-icons/fa';
 
 export default function LoginPage() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
     if (isAuthenticated) {
-      navigate('/dashboard');
+      const isAdmin = Array.isArray(user?.roles) && user.roles.includes('ROLE_ADMIN');
+      navigate(isAdmin ? '/admin-dashboard' : '/dashboard');
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, user, navigate]);
 
   // Track mouse for gradient effect
   useEffect(() => {
@@ -24,7 +26,7 @@ export default function LoginPage() {
   }, []);
 
   const handleGitHubLogin = () => {
-    window.location.href = 'http://localhost:8080/oauth2/authorization/github';
+    window.location.href = `${API_BASE_URL.replace(/\/$/, '')}/oauth2/authorization/github`;
   };
 
   const features = [
