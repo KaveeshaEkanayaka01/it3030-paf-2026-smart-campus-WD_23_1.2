@@ -20,24 +20,20 @@ public class AuthController {
 
     private final AuthService authService;
 
-    // ✅ Register
     @PostMapping("/register")
     public ResponseEntity<AuthResponseDto> register(@RequestBody RegisterRequestDto request) {
         return ResponseEntity.ok(authService.register(request));
     }
 
-    // ✅ Login
     @PostMapping("/login")
     public ResponseEntity<AuthResponseDto> login(@RequestBody LoginRequestDto request) {
         return ResponseEntity.ok(authService.login(request));
     }
 
-    // ✅ Set Password (NEW FEATURE)
     @PostMapping("/set-password")
     public ResponseEntity<?> setPassword(
             @RequestBody SetPasswordRequestDto request,
             Authentication authentication) {
-        // 🔐 Get logged-in user's email from JWT
         String email = authentication.getName();
 
         String message = authService.setPassword(email, request);
@@ -47,7 +43,6 @@ public class AuthController {
                 "message", message));
     }
 
-    // ✅ Health check
     @GetMapping("/health")
     public ResponseEntity<String> health() {
         return ResponseEntity.ok("Auth service is running");

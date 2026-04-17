@@ -22,7 +22,7 @@ public class Resource {
     private String id;
 
     private String name;
-    private String type; // LAB, HALL, ROOM, PROJECTOR, etc.
+    private String type;
     private String description;
     private String location;
 

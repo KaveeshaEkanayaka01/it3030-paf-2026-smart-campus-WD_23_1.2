@@ -25,7 +25,6 @@ public class User {
     private String email;
     private String password;
 
-    // Allowed values: STUDENT, ADMIN
     private String role;
 
     private String profileImageUrl;

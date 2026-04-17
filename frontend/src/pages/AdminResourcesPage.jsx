@@ -4,6 +4,7 @@ import {
   deleteResource,
   getAllResources,
   updateResource,
+  uploadImage,
 } from "../api/resourceApi";
 import ResourceCard from "../components/resources/ResourceCard";
 import ResourceForm from "../components/resources/ResourceForm";
@@ -53,17 +54,24 @@ const AdminResourcesPage = () => {
     setViewingResource(normalizeResource(resource));
   };
 
-  const handleSubmit = async (payload) => {
+  const handleSubmit = async (payload, file = null) => {
     if (isSubmitting) return;
 
     try {
       setIsSubmitting(true);
       setServerErrors({});
 
+      let finalPayload = { ...payload };
+
+      if (file) {
+        const uploadedUrl = await uploadImage(file);
+        finalPayload.imageUrl = uploadedUrl;
+      }
+
       if (selectedResource?.id) {
-        await updateResource(selectedResource.id, payload);
+        await updateResource(selectedResource.id, finalPayload);
       } else {
-        await createResource(payload);
+        await createResource(finalPayload);
       }
 
       setSelectedResource(null);
@@ -143,7 +151,10 @@ const AdminResourcesPage = () => {
       )}
 
       {viewingResource && (
-        <div className="resource-modal-overlay" onClick={() => setViewingResource(null)}>
+        <div
+          className="resource-modal-overlay"
+          onClick={() => setViewingResource(null)}
+        >
           <div className="resource-modal" onClick={(e) => e.stopPropagation()}>
             <div className="resource-modal__header">
               <div>
@@ -177,7 +188,9 @@ const AdminResourcesPage = () => {
 
                 <div className="resource-modal__detail-card">
                   <span>Status</span>
-                  <p>{viewingResource.available ? "Available" : "Unavailable"}</p>
+                  <p>
+                    {viewingResource.available ? "Available" : "Unavailable"}
+                  </p>
                 </div>
 
                 <div className="resource-modal__detail-card">
@@ -193,7 +206,9 @@ const AdminResourcesPage = () => {
 
               <div className="resource-modal__description">
                 <span>Description</span>
-                <p>{viewingResource.description || "No description available."}</p>
+                <p>
+                  {viewingResource.description || "No description available."}
+                </p>
               </div>
             </div>
           </div>

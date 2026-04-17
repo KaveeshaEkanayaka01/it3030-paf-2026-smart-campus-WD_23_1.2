@@ -4,58 +4,71 @@
   align-items: center;
   justify-content: center;
   padding: 30px 16px;
+  background: linear-gradient(180deg, #f8fbff 0%, #f3f6fb 100%);
 }
 
+/* Card */
 .login-card {
   width: 100%;
   max-width: 460px;
-  background: var(--surface);
+  background: #ffffff;
   border-radius: 24px;
   overflow: hidden;
-  box-shadow: var(--shadow);
-  border: 1px solid var(--border);
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+  border: 1px solid #e5e7eb;
+  transition: transform 0.25s ease;
 }
 
+.login-card:hover {
+  transform: translateY(-2px);
+}
+
+/* Header */
 .login-header {
-  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  background: linear-gradient(135deg, #2563eb, #4f46e5);
   color: white;
   text-align: center;
-  padding: 32px 24px 24px;
+  padding: 34px 24px 26px;
 }
 
 .login-header h1 {
   margin: 0;
   font-size: 2rem;
-  font-weight: 700;
-  color: white;
+  font-weight: 800;
+  letter-spacing: -0.02em;
 }
 
 .login-header p {
   margin-top: 10px;
-  font-size: 0.98rem;
-  color: rgba(255, 255, 255, 0.88);
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.85);
 }
 
+/* Body */
 .login-body {
   padding: 28px 26px 30px;
 }
 
+/* Error */
 .login-error {
   background: #fee2e2;
   color: #b91c1c;
   border: 1px solid #fecaca;
   padding: 12px 14px;
   border-radius: 12px;
-  font-size: 0.95rem;
+  font-size: 0.92rem;
   margin-bottom: 18px;
+  font-weight: 600;
 }
 
+/* Form */
 .login-form {
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
 
+/* Input Group */
 .form-group {
   display: flex;
   flex-direction: column;
@@ -63,78 +76,84 @@
 }
 
 .form-group label {
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: var(--text-h);
-  margin-bottom: 8px;
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #374151;
+  margin-bottom: 6px;
 }
 
 .form-group input {
   width: 100%;
   padding: 13px 14px;
-  border: 1px solid var(--border);
+  border: 1px solid #d1d5db;
   border-radius: 12px;
-  font-size: 0.97rem;
-  color: var(--text-h);
-  background: #fff;
+  font-size: 0.95rem;
+  color: #111827;
+  background: #ffffff;
   outline: none;
   transition: all 0.25s ease;
 }
 
 .form-group input:focus {
-  border-color: var(--accent-2);
-  box-shadow: 0 0 0 4px rgba(15, 98, 254, 0.12);
+  border-color: #2563eb;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
 }
 
 .form-group input::placeholder {
-  color: #94a3b8;
+  color: #9ca3af;
 }
 
+/* Buttons */
 .login-btn {
   width: 100%;
   border: none;
   border-radius: 12px;
   padding: 13px 16px;
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 700;
   transition: all 0.25s ease;
+  cursor: pointer;
 }
 
+/* Primary button */
 .primary-btn {
-  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  background: linear-gradient(135deg, #2563eb, #4f46e5);
   color: white;
   margin-top: 4px;
+  box-shadow: 0 8px 18px rgba(37, 99, 235, 0.25);
 }
 
 .primary-btn:hover {
   transform: translateY(-1px);
-  box-shadow: 0 10px 24px rgba(0, 61, 165, 0.22);
+  box-shadow: 0 12px 24px rgba(37, 99, 235, 0.32);
 }
 
+/* Google button */
 .google-btn {
-  background: white;
-  color: var(--text-h);
-  border: 1px solid var(--border);
+  background: #ffffff;
+  color: #111827;
+  border: 1px solid #e5e7eb;
 }
 
 .google-btn:hover {
-  background: #f8fafc;
+  background: #f9fafb;
 }
 
+/* Divider */
 .divider {
   display: flex;
   align-items: center;
   text-align: center;
   margin: 18px 0;
-  color: var(--text);
-  font-size: 0.9rem;
+  color: #6b7280;
+  font-size: 0.85rem;
 }
 
 .divider::before,
 .divider::after {
   content: "";
   flex: 1;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid #e5e7eb;
 }
 
 .divider span {
@@ -143,29 +162,32 @@
   color: #64748b;
 }
 
+/* Toggle */
 .toggle-text {
   text-align: center;
   margin: 22px 0 0;
-  color: var(--text);
-  font-size: 0.95rem;
+  color: #6b7280;
+  font-size: 0.9rem;
 }
 
 .toggle-btn {
   background: none;
   border: none;
-  color: var(--danger);
+  color: #ef4444;
   font-weight: 700;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   padding: 0;
+  cursor: pointer;
 }
 
 .toggle-btn:hover {
   text-decoration: underline;
 }
 
+/* Mobile */
 @media (max-width: 480px) {
   .login-header h1 {
-    font-size: 1.7rem;
+    font-size: 1.6rem;
   }
 
   .login-body {

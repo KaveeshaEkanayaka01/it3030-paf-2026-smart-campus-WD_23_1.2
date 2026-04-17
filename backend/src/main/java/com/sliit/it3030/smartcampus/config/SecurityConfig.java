@@ -13,6 +13,7 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
@@ -32,6 +33,12 @@ public class SecurityConfig {
         private final UserRepository userRepository;
         private final CustomOAuth2UserService customOAuth2UserService;
         private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
+
+        @Bean
+        public WebSecurityCustomizer webSecurityCustomizer() {
+                return web -> web.ignoring()
+                                .requestMatchers("/uploads/**");
+        }
 
         @Bean
         public UserDetailsService userDetailsService() {
@@ -79,7 +86,8 @@ public class SecurityConfig {
                                                                 "/api/auth/**",
                                                                 "/oauth2/**",
                                                                 "/login/**",
-                                                                "/error")
+                                                                "/error",
+                                                                "/api/upload/**")
                                                 .permitAll()
                                                 .requestMatchers("/api/resources/**").authenticated()
                                                 .requestMatchers("/api/users/me").authenticated()

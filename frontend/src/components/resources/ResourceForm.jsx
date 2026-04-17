@@ -20,6 +20,8 @@ const ResourceForm = ({
 }) => {
   const [formData, setFormData] = useState(defaultFormState);
   const [errors, setErrors] = useState({});
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [preview, setPreview] = useState("");
 
   useEffect(() => {
     if (selectedResource) {
@@ -35,10 +37,13 @@ const ResourceForm = ({
             : true,
         imageUrl: selectedResource.imageUrl || "",
       });
+      setPreview(selectedResource.imageUrl || "");
     } else {
       setFormData(defaultFormState);
+      setPreview("");
     }
 
+    setSelectedFile(null);
     setErrors({});
   }, [selectedResource]);
 
@@ -59,9 +64,62 @@ const ResourceForm = ({
       [name]: type === "checkbox" ? checked : value,
     }));
 
+    if (name === "imageUrl") {
+      setPreview(value.trim());
+      if (value.trim()) {
+        setSelectedFile(null);
+      }
+    }
+
     setErrors((prev) => ({
       ...prev,
       [name]: "",
+      imageFile: name === "imageUrl" ? "" : prev.imageFile,
+    }));
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0];
+
+    if (!file) {
+      setSelectedFile(null);
+      setPreview(formData.imageUrl.trim() || "");
+      return;
+    }
+
+    const allowedTypes = ["image/jpeg", "image/png", "image/jpg", "image/webp"];
+    const maxSize = 5 * 1024 * 1024;
+
+    const newErrors = {};
+
+    if (!allowedTypes.includes(file.type)) {
+      newErrors.imageFile =
+        "Only JPG, JPEG, PNG, or WEBP images are allowed";
+    } else if (file.size > maxSize) {
+      newErrors.imageFile = "Image size must be 5MB or less";
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors((prev) => ({
+        ...prev,
+        ...newErrors,
+      }));
+      setSelectedFile(null);
+      return;
+    }
+
+    setSelectedFile(file);
+    setPreview(URL.createObjectURL(file));
+
+    setFormData((prev) => ({
+      ...prev,
+      imageUrl: "",
+    }));
+
+    setErrors((prev) => ({
+      ...prev,
+      imageUrl: "",
+      imageFile: "",
     }));
   };
 
@@ -154,7 +212,7 @@ const ResourceForm = ({
       capacity: Number(formData.capacity),
     };
 
-    onSubmit(payload);
+    onSubmit(payload, selectedFile);
   };
 
   return (
@@ -195,7 +253,9 @@ const ResourceForm = ({
             placeholder="Enter description"
             rows="4"
           />
-          {errors.description && <p className="form-error">{errors.description}</p>}
+          {errors.description && (
+            <p className="form-error">{errors.description}</p>
+          )}
         </div>
 
         <div className="resource-form__grid">
@@ -237,6 +297,33 @@ const ResourceForm = ({
           />
           {errors.imageUrl && <p className="form-error">{errors.imageUrl}</p>}
         </div>
+
+        <div className="resource-form__field">
+          <label>Or Choose from Device</label>
+          <input
+            type="file"
+            accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+            onChange={handleFileChange}
+          />
+          {errors.imageFile && <p className="form-error">{errors.imageFile}</p>}
+        </div>
+
+        {preview && (
+          <div className="resource-form__field">
+            <label>Image Preview</label>
+            <img
+              src={preview}
+              alt="Preview"
+              style={{
+                width: "100%",
+                maxHeight: "220px",
+                objectFit: "cover",
+                borderRadius: "12px",
+                border: "1px solid #e5e7eb",
+              }}
+            />
+          </div>
+        )}
 
         <div className="resource-form__checkbox">
           <input

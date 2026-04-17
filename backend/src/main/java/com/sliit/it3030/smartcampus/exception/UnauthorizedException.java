@@ -1,5 +1,12 @@
 package com.sliit.it3030.smartcampus.exception;
 
-public class UnauthorizedException {
+public class UnauthorizedException extends RuntimeException {
 
+    public UnauthorizedException(String message) {
+        super(message);
+    }
+
+    public UnauthorizedException() {
+        super("You are not authorized to perform this action");
+    }
 }
