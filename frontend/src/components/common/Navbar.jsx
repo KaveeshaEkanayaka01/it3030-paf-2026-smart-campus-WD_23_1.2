@@ -15,21 +15,19 @@ const Navbar = ({ toggleSidebar }) => {
 
   return (
     <header className="navbar">
-
       <button className="navbar__menu" onClick={toggleSidebar}>
         ☰
       </button>
 
       <div className="navbar__right">
-        
         <div className={`navbar__user ${isAdmin ? "admin" : ""}`}>
           <span className="navbar__name">
-            {user?.fullName}
+            {user?.fullName || "User"}
             {isAdmin && <span className="admin-icon"> 👑</span>}
           </span>
 
           <span className={`navbar__role ${isAdmin ? "admin-role" : ""}`}>
-            {isAdmin ? "ADMIN PANEL" : user?.role}
+            {isAdmin ? "ADMIN PANEL" : user?.role || "USER"}
           </span>
         </div>
 

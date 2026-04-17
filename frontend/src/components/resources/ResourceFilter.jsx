@@ -13,7 +13,7 @@ const ResourceFilter = ({
       <div className="resource-filter__group">
         <input
           type="text"
-          placeholder="Search resource name..."
+          placeholder="Search by resource name or location..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />

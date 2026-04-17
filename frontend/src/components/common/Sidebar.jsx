@@ -9,8 +9,11 @@ const Sidebar = ({ isOpen }) => {
   return (
     <aside className={`sidebar ${isOpen ? "sidebar--open" : "sidebar--closed"}`}>
       <div className="sidebar__brand">
-        <h2>Smart Campus</h2>
-        <p>Manage everything smoothly</p>
+        <div className="sidebar__brand-mark">SC</div>
+        <div>
+          <h2>Smart Campus</h2>
+          <p>Manage everything smoothly</p>
+        </div>
       </div>
 
       <nav className="sidebar__nav">

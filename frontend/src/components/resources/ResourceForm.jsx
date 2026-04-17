@@ -1,56 +1,279 @@
-const ResourceCard = ({ resource, onEdit, onDelete, isAdmin = false }) => {
+import { useEffect, useState } from "react";
+import "./ResourceForm.css";
+
+const defaultFormState = {
+  name: "",
+  type: "",
+  description: "",
+  location: "",
+  capacity: "",
+  available: true,
+  imageUrl: "",
+};
+
+const ResourceForm = ({
+  onSubmit,
+  selectedResource,
+  onCancel,
+  isSubmitting = false,
+  serverErrors = {},
+}) => {
+  const [formData, setFormData] = useState(defaultFormState);
+  const [errors, setErrors] = useState({});
+
+  useEffect(() => {
+    if (selectedResource) {
+      setFormData({
+        name: selectedResource.name || "",
+        type: selectedResource.type || "",
+        description: selectedResource.description || "",
+        location: selectedResource.location || "",
+        capacity: selectedResource.capacity ?? "",
+        available:
+          selectedResource.available !== undefined
+            ? selectedResource.available
+            : true,
+        imageUrl: selectedResource.imageUrl || "",
+      });
+    } else {
+      setFormData(defaultFormState);
+    }
+
+    setErrors({});
+  }, [selectedResource]);
+
+  useEffect(() => {
+    if (serverErrors && Object.keys(serverErrors).length > 0) {
+      setErrors((prev) => ({
+        ...prev,
+        ...serverErrors,
+      }));
+    }
+  }, [serverErrors]);
+
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
+
+    setErrors((prev) => ({
+      ...prev,
+      [name]: "",
+    }));
+  };
+
+  const validateImageUrl = (url) => {
+    if (!url.trim()) return true;
+
+    try {
+      const parsed = new URL(url);
+      return ["http:", "https:"].includes(parsed.protocol);
+    } catch {
+      return false;
+    }
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+
+    const name = formData.name.trim();
+    const type = formData.type.trim();
+    const description = formData.description.trim();
+    const location = formData.location.trim();
+    const imageUrl = formData.imageUrl.trim();
+
+    if (!name) {
+      newErrors.name = "Resource name is required";
+    } else if (name.length < 3) {
+      newErrors.name = "Resource name must be at least 3 characters";
+    } else if (name.length > 100) {
+      newErrors.name = "Resource name must be less than 100 characters";
+    }
+
+    if (!type) {
+      newErrors.type = "Type is required";
+    } else if (type.length < 2) {
+      newErrors.type = "Type must be at least 2 characters";
+    } else if (type.length > 50) {
+      newErrors.type = "Type must be less than 50 characters";
+    }
+
+    if (!description) {
+      newErrors.description = "Description is required";
+    } else if (description.length < 10) {
+      newErrors.description = "Description must be at least 10 characters";
+    } else if (description.length > 500) {
+      newErrors.description = "Description must be less than 500 characters";
+    }
+
+    if (!location) {
+      newErrors.location = "Location is required";
+    } else if (location.length < 2) {
+      newErrors.location = "Location must be at least 2 characters";
+    } else if (location.length > 100) {
+      newErrors.location = "Location must be less than 100 characters";
+    }
+
+    if (formData.capacity === "" || formData.capacity === null) {
+      newErrors.capacity = "Capacity is required";
+    } else if (Number.isNaN(Number(formData.capacity))) {
+      newErrors.capacity = "Capacity must be a valid number";
+    } else if (!Number.isInteger(Number(formData.capacity))) {
+      newErrors.capacity = "Capacity must be a whole number";
+    } else if (Number(formData.capacity) < 0) {
+      newErrors.capacity = "Capacity cannot be negative";
+    } else if (Number(formData.capacity) > 10000) {
+      newErrors.capacity = "Capacity is too large";
+    }
+
+    if (imageUrl && !validateImageUrl(imageUrl)) {
+      newErrors.imageUrl =
+        "Please enter a valid image URL starting with http or https";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    if (isSubmitting) return;
+    if (!validateForm()) return;
+
+    const payload = {
+      ...formData,
+      name: formData.name.trim(),
+      type: formData.type.trim(),
+      description: formData.description.trim(),
+      location: formData.location.trim(),
+      imageUrl: formData.imageUrl.trim(),
+      capacity: Number(formData.capacity),
+    };
+
+    onSubmit(payload);
+  };
+
   return (
-    <div className="bg-white rounded-xl shadow-sm border p-5 space-y-3">
-      {resource.imageUrl && (
-        <img
-          src={resource.imageUrl}
-          alt={resource.name}
-          className="w-full h-44 object-cover rounded-lg"
-        />
-      )}
+    <div className="resource-form-wrapper">
+      <form onSubmit={handleSubmit} className="resource-form" noValidate>
+        <div className="resource-form__grid">
+          <div className="resource-form__field">
+            <label>Resource Name</label>
+            <input
+              type="text"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              placeholder="Enter resource name"
+            />
+            {errors.name && <p className="form-error">{errors.name}</p>}
+          </div>
 
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <h3 className="text-lg font-semibold text-gray-900">{resource.name}</h3>
-          <p className="text-sm text-gray-500">{resource.type}</p>
+          <div className="resource-form__field">
+            <label>Type</label>
+            <input
+              type="text"
+              name="type"
+              value={formData.type}
+              onChange={handleChange}
+              placeholder="Enter resource type"
+            />
+            {errors.type && <p className="form-error">{errors.type}</p>}
+          </div>
         </div>
 
-        <span
-          className={`text-xs px-3 py-1 rounded-full font-medium ${
-            resource.available
-              ? "bg-green-100 text-green-700"
-              : "bg-red-100 text-red-700"
-          }`}
-        >
-          {resource.available ? "Available" : "Unavailable"}
-        </span>
-      </div>
+        <div className="resource-form__field">
+          <label>Description</label>
+          <textarea
+            name="description"
+            value={formData.description}
+            onChange={handleChange}
+            placeholder="Enter description"
+            rows="4"
+          />
+          {errors.description && <p className="form-error">{errors.description}</p>}
+        </div>
 
-      <p className="text-sm text-gray-600">{resource.description}</p>
+        <div className="resource-form__grid">
+          <div className="resource-form__field">
+            <label>Location</label>
+            <input
+              type="text"
+              name="location"
+              value={formData.location}
+              onChange={handleChange}
+              placeholder="Enter location"
+            />
+            {errors.location && <p className="form-error">{errors.location}</p>}
+          </div>
 
-      <div className="text-sm text-gray-700 space-y-1">
-        <p><span className="font-semibold">Location:</span> {resource.location}</p>
-        <p><span className="font-semibold">Capacity:</span> {resource.capacity}</p>
-      </div>
+          <div className="resource-form__field">
+            <label>Capacity</label>
+            <input
+              type="number"
+              name="capacity"
+              value={formData.capacity}
+              onChange={handleChange}
+              placeholder="Enter capacity"
+              min="0"
+              step="1"
+            />
+            {errors.capacity && <p className="form-error">{errors.capacity}</p>}
+          </div>
+        </div>
 
-      {isAdmin && (
-        <div className="flex gap-2 pt-2">
+        <div className="resource-form__field">
+          <label>Image URL</label>
+          <input
+            type="text"
+            name="imageUrl"
+            value={formData.imageUrl}
+            onChange={handleChange}
+            placeholder="Enter image URL"
+          />
+          {errors.imageUrl && <p className="form-error">{errors.imageUrl}</p>}
+        </div>
+
+        <div className="resource-form__checkbox">
+          <input
+            type="checkbox"
+            id="available"
+            name="available"
+            checked={formData.available}
+            onChange={handleChange}
+          />
+          <label htmlFor="available">Available</label>
+        </div>
+
+        <div className="resource-form__actions">
           <button
-            onClick={() => onEdit(resource)}
-            className="px-4 py-2 rounded-lg bg-yellow-500 text-white hover:bg-yellow-600"
+            type="submit"
+            className="resource-form__btn-primary"
+            disabled={isSubmitting}
           >
-            Edit
+            {isSubmitting
+              ? "Saving..."
+              : selectedResource
+              ? "Update Resource"
+              : "Create Resource"}
           </button>
+
           <button
-            onClick={() => onDelete(resource.id)}
-            className="px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600"
+            type="button"
+            onClick={onCancel}
+            className="resource-form__btn-secondary"
+            disabled={isSubmitting}
           >
-            Delete
+            Cancel
           </button>
         </div>
-      )}
+      </form>
     </div>
   );
 };
 
-export default ResourceCard;
+export default ResourceForm;

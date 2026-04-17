@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import MainLayout from "../layouts/MainLayout";
+import AdminLayout from "../layouts/AdminLayout";
 import LoginPage from "../pages/LoginPage";
 import DashboardPage from "../pages/DashboardPage";
 import ResourcesPage from "../pages/ResourcesPage";
@@ -23,7 +24,7 @@ const AppRoutes = () => {
         </Route>
 
         <Route element={<ProtectedRoute allowedRoles={["ADMIN"]} />}>
-          <Route element={<MainLayout />}>
+          <Route element={<AdminLayout />}>
             <Route path="/admin/resources" element={<AdminResourcesPage />} />
           </Route>
         </Route>

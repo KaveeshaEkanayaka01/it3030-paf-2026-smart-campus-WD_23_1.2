@@ -3,8 +3,10 @@ package com.sliit.it3030.smartcampus.controller;
 import com.sliit.it3030.smartcampus.dto.resource.ResourceRequestDto;
 import com.sliit.it3030.smartcampus.dto.resource.ResourceResponseDto;
 import com.sliit.it3030.smartcampus.service.ResourceService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,8 +19,9 @@ public class ResourceController {
 
     private final ResourceService resourceService;
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
-    public ResponseEntity<ResourceResponseDto> createResource(@RequestBody ResourceRequestDto requestDto) {
+    public ResponseEntity<ResourceResponseDto> createResource(@Valid @RequestBody ResourceRequestDto requestDto) {
         return ResponseEntity.ok(resourceService.createResource(requestDto));
     }
 
@@ -47,13 +50,15 @@ public class ResourceController {
         return ResponseEntity.ok(resourceService.searchResources(keyword));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<ResourceResponseDto> updateResource(
             @PathVariable String id,
-            @RequestBody ResourceRequestDto requestDto) {
+            @Valid @RequestBody ResourceRequestDto requestDto) {
         return ResponseEntity.ok(resourceService.updateResource(id, requestDto));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteResource(@PathVariable String id) {
         resourceService.deleteResource(id);

@@ -1,14 +1,14 @@
 .resource-filter {
   background: #ffffff;
   border: 1px solid #e5e7eb;
-  border-radius: 18px;
+  border-radius: 20px;
   padding: 18px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 16px;
   flex-wrap: wrap;
-  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.04);
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.04);
 }
 
 .resource-filter__group {
@@ -22,16 +22,18 @@
   min-width: 240px;
   flex: 1;
   border: 1px solid #d1d5db;
-  border-radius: 12px;
-  padding: 12px 14px;
+  border-radius: 14px;
+  padding: 13px 14px;
   font-size: 14px;
   background: #f9fafb;
   outline: none;
+  transition: all 0.2s ease;
 }
 
 .resource-filter__group input[type="text"]:focus {
   border-color: #2563eb;
   background: #ffffff;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.08);
 }
 
 .resource-filter__checkbox {
@@ -39,7 +41,7 @@
   align-items: center;
   gap: 10px;
   color: #374151;
-  font-weight: 500;
+  font-weight: 600;
   white-space: nowrap;
 }
 

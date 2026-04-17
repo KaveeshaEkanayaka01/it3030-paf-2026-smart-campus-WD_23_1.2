@@ -21,7 +21,9 @@ export const getResourcesByType = async (type) => {
 };
 
 export const searchResources = async (keyword) => {
-  const res = await API.get(`/resources/search?keyword=${encodeURIComponent(keyword)}`);
+  const res = await API.get(
+    `/resources/search?keyword=${encodeURIComponent(keyword)}`
+  );
   return res.data;
 };
 

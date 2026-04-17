@@ -17,14 +17,25 @@ public class ResourceService {
     private final ResourceRepository resourceRepository;
 
     public ResourceResponseDto createResource(ResourceRequestDto requestDto) {
+        String name = requestDto.getName().trim();
+        String location = requestDto.getLocation().trim();
+
+        boolean exists = resourceRepository.existsByNameIgnoreCaseAndLocationIgnoreCase(name, location);
+        if (exists) {
+            throw new IllegalArgumentException("A resource with the same name and location already exists");
+        }
+
         Resource resource = Resource.builder()
-                .name(requestDto.getName())
-                .type(requestDto.getType())
-                .description(requestDto.getDescription())
-                .location(requestDto.getLocation())
+                .name(name)
+                .type(requestDto.getType().trim())
+                .description(requestDto.getDescription().trim())
+                .location(location)
                 .capacity(requestDto.getCapacity())
                 .available(requestDto.getAvailable() != null ? requestDto.getAvailable() : true)
-                .imageUrl(requestDto.getImageUrl())
+                .imageUrl(
+                        requestDto.getImageUrl() != null && !requestDto.getImageUrl().trim().isEmpty()
+                                ? requestDto.getImageUrl().trim()
+                                : null)
                 .build();
 
         Resource saved = resourceRepository.save(resource);
@@ -70,27 +81,27 @@ public class ResourceService {
         Resource resource = resourceRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Resource not found with id: " + id));
 
-        if (requestDto.getName() != null) {
-            resource.setName(requestDto.getName());
-        }
-        if (requestDto.getType() != null) {
-            resource.setType(requestDto.getType());
-        }
-        if (requestDto.getDescription() != null) {
-            resource.setDescription(requestDto.getDescription());
-        }
-        if (requestDto.getLocation() != null) {
-            resource.setLocation(requestDto.getLocation());
-        }
-        if (requestDto.getCapacity() != null) {
-            resource.setCapacity(requestDto.getCapacity());
-        }
-        if (requestDto.getAvailable() != null) {
-            resource.setAvailable(requestDto.getAvailable());
-        }
-        if (requestDto.getImageUrl() != null) {
-            resource.setImageUrl(requestDto.getImageUrl());
-        }
+        String name = requestDto.getName().trim();
+        String location = requestDto.getLocation().trim();
+
+        resourceRepository.findByNameIgnoreCaseAndLocationIgnoreCase(name, location)
+                .ifPresent(existing -> {
+                    if (!existing.getId().equals(id)) {
+                        throw new IllegalArgumentException(
+                                "Another resource with the same name and location already exists");
+                    }
+                });
+
+        resource.setName(name);
+        resource.setType(requestDto.getType().trim());
+        resource.setDescription(requestDto.getDescription().trim());
+        resource.setLocation(location);
+        resource.setCapacity(requestDto.getCapacity());
+        resource.setAvailable(requestDto.getAvailable() != null ? requestDto.getAvailable() : resource.isAvailable());
+        resource.setImageUrl(
+                requestDto.getImageUrl() != null && !requestDto.getImageUrl().trim().isEmpty()
+                        ? requestDto.getImageUrl().trim()
+                        : null);
 
         Resource updated = resourceRepository.save(resource);
         return mapToDto(updated);
@@ -104,15 +115,14 @@ public class ResourceService {
     }
 
     private ResourceResponseDto mapToDto(Resource resource) {
-        return ResourceResponseDto.builder()
-                .id(resource.getId())
-                .name(resource.getName())
-                .type(resource.getType())
-                .description(resource.getDescription())
-                .location(resource.getLocation())
-                .capacity(resource.getCapacity())
-                .available(resource.isAvailable())
-                .imageUrl(resource.getImageUrl())
-                .build();
+        return new ResourceResponseDto(
+                resource.getId(),
+                resource.getName(),
+                resource.getType(),
+                resource.getDescription(),
+                resource.getLocation(),
+                resource.getCapacity(),
+                resource.isAvailable(),
+                resource.getImageUrl());
     }
 }

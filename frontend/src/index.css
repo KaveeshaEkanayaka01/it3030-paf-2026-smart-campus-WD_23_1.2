@@ -12,10 +12,16 @@ body,
 
 body {
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  background: #f3f6fb;
+  background: linear-gradient(180deg, #f8fbff 0%, #f3f6fb 100%);
   color: #111827;
 }
 
 a {
   color: inherit;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
 }
