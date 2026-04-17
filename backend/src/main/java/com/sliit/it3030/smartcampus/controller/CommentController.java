@@ -1,59 +1,77 @@
 package com.sliit.it3030.smartcampus.controller;
 
-import com.sliit.it3030.smartcampus.model.CommentModel;
+import com.sliit.it3030.smartcampus.dto.comment.CommentRequest;
+import com.sliit.it3030.smartcampus.dto.comment.CommentResponse;
+import com.sliit.it3030.smartcampus.model.User;
 import com.sliit.it3030.smartcampus.service.CommentService;
-
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api")
-@CrossOrigin
+@RequestMapping("/api/tickets")
+@RequiredArgsConstructor
 public class CommentController {
 
-    @Autowired
-    private CommentService commentService;
+    private final CommentService commentService;
 
-    // Add Comment
-    @PostMapping("/tickets/{ticketId}/comments")
-    public CommentModel addComment(@PathVariable String ticketId,
-                                   @RequestBody CommentModel comment) {
-        return commentService.addComment(ticketId, comment);
+    /**
+     * POST /api/tickets/{ticketId}/comments
+     * Add comment to a ticket
+     */
+    @PostMapping("/{ticketId}/comments")
+    public ResponseEntity<CommentResponse> addComment(
+            @PathVariable String ticketId,
+            @Valid @RequestBody CommentRequest request,
+            @AuthenticationPrincipal User currentUser) {
+
+        CommentResponse response = commentService.addComment(ticketId, request, currentUser);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    // Get Comments by Ticket
-    @GetMapping("/tickets/{ticketId}/comments")
-    public List<CommentModel> getComments(@PathVariable String ticketId) {
-        return commentService.getComments(ticketId);
+    /**
+     * GET /api/tickets/{ticketId}/comments
+     * Get all comments for a ticket
+     */
+    @GetMapping("/{ticketId}/comments")
+    public ResponseEntity<List<CommentResponse>> getComments(
+            @PathVariable String ticketId,
+            @AuthenticationPrincipal User currentUser) {
+
+        List<CommentResponse> comments =
+                commentService.getCommentsByTicket(ticketId, currentUser.getId());
+        return ResponseEntity.ok(comments);
     }
 
-    // Update Comment
-    @PutMapping("/comments/{id}")
-    public CommentModel updateComment(@PathVariable String id,
-                                      @RequestBody CommentModel newComment,
-                                      @RequestParam String actorUserId,
-                                      @RequestParam(defaultValue = "USER") String actorRole) {
-        try {
-            return commentService.updateComment(id, newComment, actorUserId, actorRole);
-        } catch (IllegalArgumentException ex) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, ex.getMessage());
-        }
+    /**
+     * PUT /api/comments/{commentId}
+     * Edit a comment (owner only)
+     */
+    @PutMapping("/comments/{commentId}")
+    public ResponseEntity<CommentResponse> updateComment(
+            @PathVariable String commentId,
+            @Valid @RequestBody CommentRequest request,
+            @AuthenticationPrincipal User currentUser) {
+
+        CommentResponse updated = commentService.updateComment(commentId, request, currentUser);
+        return ResponseEntity.ok(updated);
     }
 
-    // Delete Comment
-    @DeleteMapping("/comments/{id}")
-    public String deleteComment(@PathVariable String id,
-                                @RequestParam String actorUserId,
-                                @RequestParam(defaultValue = "USER") String actorRole) {
-        try {
-            commentService.deleteComment(id, actorUserId, actorRole);
-            return "Comment deleted";
-        } catch (IllegalArgumentException ex) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, ex.getMessage());
-        }
+    /**
+     * DELETE /api/comments/{commentId}
+     * Delete comment (owner or ADMIN)
+     */
+    @DeleteMapping("/comments/{commentId}")
+    public ResponseEntity<Void> deleteComment(
+            @PathVariable String commentId,
+            @AuthenticationPrincipal User currentUser) {
+
+        commentService.deleteComment(commentId, currentUser);
+        return ResponseEntity.noContent().build();
     }
 }

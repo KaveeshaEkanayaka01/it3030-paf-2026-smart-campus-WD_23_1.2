@@ -6,8 +6,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 @SpringBootTest(classes = SmartcampusApplication.class)
 class SmartcampusApplicationTests {
 
-	@Test
-	void contextLoads() {
-	}
+@Test
+void contextLoads() {
+}
 
 }

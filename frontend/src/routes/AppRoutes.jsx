@@ -1,6 +1,13 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
 
+// Auth Pages
+import LoginPage from '../pages/LoginPage';
+import AuthCallbackPage from '../pages/AuthCallbackPage';
+import DashboardPage from '../pages/DashboardPage';
+import NotificationsPage from '../pages/NotificationsPage';
+import ProtectedRoute from '../components/common/ProtectedRoute';
+
 // Shared UI
 import Navbar from '../components/Navbar';
 
@@ -20,46 +27,58 @@ import { TicketDetailsPage } from '../pages/ticketDetails';
 export default function AppRoutes() {
   const { currentUser } = useUser();
 
-  if (!currentUser) return null;
-
-  const isAdmin = currentUser.role === 'ADMIN';
-
   return (
-    <div className="flex flex-col min-h-screen">
-      <Navbar />
+    <Routes>
+      {/* Public Routes */}
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/auth/callback" element={<AuthCallbackPage />} />
 
-      <main className="flex-1">
-        <Routes>
-          {/* Default Redirect */}
-          <Route
-            path="/"
-            element={
-              <Navigate
-                to={isAdmin ? '/admin-dashboard' : '/create-booking'}
-                replace
-              />
-            }
-          />
+      {/* Protected Routes with Navbar */}
+      <Route
+        path="/*"
+        element={
+          <ProtectedRoute>
+            <div className="flex flex-col min-h-screen">
+              <Navbar />
+              <main className="flex-1">
+                <Routes>
+                  {/* Default Redirect */}
+                  <Route
+                    path="/"
+                    element={
+                      <Navigate
+                        to={currentUser?.role === 'ADMIN' ? '/admin-dashboard' : '/dashboard'}
+                        replace
+                      />
+                    }
+                  />
 
-          {/* ================= BOOKING ROUTES ================= */}
-          {/* alias for legacy/short links */}
-          <Route path="/create" element={<CreateBookingPage />} />
-          <Route path="/create-booking" element={<CreateBookingPage />} />
-          <Route path="/my-bookings" element={<MyBookingsPage />} />
-          <Route path="/admin-dashboard" element={<AdminDashboardPage />} />
-          <Route path="/calendar" element={<ResourceCalendarPage />} />
+                  {/* Dashboard & Notifications */}
+                  <Route path="/dashboard" element={<DashboardPage />} />
+                  <Route path="/notifications" element={<NotificationsPage />} />
 
-          {/* ================= TICKET ROUTES ================= */}
-          <Route path="/my-tickets" element={<MyTicketsPage />} />
-          <Route path="/create-ticket" element={<CreateTicketPage />} />
-          <Route path="/tickets/:id" element={<TicketDetailsPage />} />
-          <Route path="/technician" element={<TechnicianPanelPage />} />
-          <Route path="/admin" element={<AdminPanelPage />} />
+                  {/* Booking Routes */}
+                  <Route path="/create" element={<CreateBookingPage />} />
+                  <Route path="/create-booking" element={<CreateBookingPage />} />
+                  <Route path="/my-bookings" element={<MyBookingsPage />} />
+                  <Route path="/admin-dashboard" element={<AdminDashboardPage />} />
+                  <Route path="/calendar" element={<ResourceCalendarPage />} />
 
-          {/* Fallback */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </main>
-    </div>
+                  {/* Ticket Routes */}
+                  <Route path="/my-tickets" element={<MyTicketsPage />} />
+                  <Route path="/create-ticket" element={<CreateTicketPage />} />
+                  <Route path="/tickets/:id" element={<TicketDetailsPage />} />
+                  <Route path="/technician" element={<TechnicianPanelPage />} />
+                  <Route path="/admin" element={<AdminPanelPage />} />
+
+                  {/* Fallback */}
+                  <Route path="*" element={<Navigate to="/" replace />} />
+                </Routes>
+              </main>
+            </div>
+          </ProtectedRoute>
+        }
+      />
+    </Routes>
   );
 }

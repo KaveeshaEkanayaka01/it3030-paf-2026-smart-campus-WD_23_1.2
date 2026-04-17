@@ -1,84 +1,113 @@
 package com.sliit.it3030.smartcampus.service;
 
+import com.sliit.it3030.smartcampus.dto.comment.CommentRequest;
+import com.sliit.it3030.smartcampus.dto.comment.CommentResponse;
 import com.sliit.it3030.smartcampus.exception.ResourceNotFoundException;
-import com.sliit.it3030.smartcampus.model.CommentModel;
-import com.sliit.it3030.smartcampus.model.TicketModel;
+import com.sliit.it3030.smartcampus.exception.UnauthorizedException;
+import com.sliit.it3030.smartcampus.model.Comment;
+import com.sliit.it3030.smartcampus.model.User;
 import com.sliit.it3030.smartcampus.repository.CommentRepository;
-import com.sliit.it3030.smartcampus.repository.TicketRepository;
-
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Locale;
-import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
+@Slf4j
 public class CommentService {
 
-    @Autowired
-    private CommentRepository commentRepository;
+    private final CommentRepository commentRepository;
+    private final NotificationService notificationService;
 
-    @Autowired
-    private TicketRepository ticketRepository;
+    // Add comment to ticket
+    public CommentResponse addComment(String ticketId, CommentRequest request, User currentUser) {
+        Comment comment = Comment.builder()
+                .ticketId(ticketId)
+                .authorId(currentUser.getId())
+                .authorName(currentUser.getName())
+                .authorAvatar(currentUser.getAvatarUrl())
+                .content(request.getContent())
+                .createdAt(LocalDateTime.now())
+                .build();
 
-    public CommentModel addComment(String ticketId, CommentModel comment){
+        Comment saved = commentRepository.save(comment);
+        log.info("Comment added to ticket {} by user {}", ticketId, currentUser.getId());
 
-        TicketModel ticket = ticketRepository.findById(ticketId)
-                .orElseThrow(() -> new ResourceNotFoundException("Ticket not found"));
+        // Trigger notification for new comment
+        notificationService.sendNewCommentNotification(ticketId, currentUser.getName());
 
-        if (comment.getId() == null || comment.getId().isBlank()) {
-            comment.setId(UUID.randomUUID().toString());
+        return mapToResponse(saved, currentUser.getId());
+    }
+
+    // Get all comments for a ticket
+    public List<CommentResponse> getCommentsByTicket(String ticketId, String currentUserId) {
+        return commentRepository
+                .findByTicketIdAndDeletedFalseOrderByCreatedAtAsc(ticketId)
+                .stream()
+                .map(comment -> mapToResponse(comment, currentUserId))
+                .collect(Collectors.toList());
+    }
+
+    // Edit comment (only owner can edit)
+    public CommentResponse updateComment(
+            String commentId, CommentRequest request, User currentUser) {
+
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Comment", commentId));
+
+        // Ownership check
+        if (!comment.getAuthorId().equals(currentUser.getId())) {
+            throw new UnauthorizedException("You can only edit your own comments");
         }
 
-        comment.setTicketId(ticket.getId());
-        if (comment.getCreatedAt() == null) {
-            comment.setCreatedAt(LocalDateTime.now());
+        comment.setContent(request.getContent());
+        comment.setEdited(true);
+        comment.setUpdatedAt(LocalDateTime.now());
+
+        Comment updated = commentRepository.save(comment);
+        log.info("Comment {} updated by user {}", commentId, currentUser.getId());
+
+        return mapToResponse(updated, currentUser.getId());
+    }
+
+    // Delete comment
+    // ADMIN can delete any, USER can only delete own
+    public void deleteComment(String commentId, User currentUser) {
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Comment", commentId));
+
+        boolean isAdmin = currentUser.getRoles().contains(User.ROLE_ADMIN);
+        boolean isOwner = comment.getAuthorId().equals(currentUser.getId());
+
+        if (!isAdmin && !isOwner) {
+            throw new UnauthorizedException("You cannot delete this comment");
         }
 
-        return commentRepository.save(comment);
+        // Soft delete
+        comment.setDeleted(true);
+        comment.setUpdatedAt(LocalDateTime.now());
+        commentRepository.save(comment);
+
+        log.info("Comment {} soft-deleted by user {}", commentId, currentUser.getId());
     }
 
-    public List<CommentModel> getComments(String ticketId){
-        return commentRepository.findByTicketId(ticketId);
+    // Map Comment entity to CommentResponse DTO
+    private CommentResponse mapToResponse(Comment comment, String currentUserId) {
+        return CommentResponse.builder()
+                .id(comment.getId())
+                .ticketId(comment.getTicketId())
+                .authorId(comment.getAuthorId())
+                .authorName(comment.getAuthorName())
+                .authorAvatar(comment.getAuthorAvatar())
+                .content(comment.getContent())
+                .edited(comment.isEdited())
+                .createdAt(comment.getCreatedAt())
+                .updatedAt(comment.getUpdatedAt())
+                .isOwner(comment.getAuthorId().equals(currentUserId))
+                .build();
     }
-
-    public CommentModel updateComment(String id, CommentModel newComment, String actorUserId, String actorRole){
-
-        CommentModel comment = commentRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Comment not found"));
-
-        if (!canModify(comment, actorUserId, actorRole)) {
-            throw new IllegalArgumentException("You are not allowed to edit this comment");
-        }
-
-        comment.setMessage(newComment.getMessage());
-
-        return commentRepository.save(comment);
-    }
-
-    public void deleteComment(String id, String actorUserId, String actorRole){
-        CommentModel comment = commentRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Comment not found"));
-
-        if (!canModify(comment, actorUserId, actorRole)) {
-            throw new IllegalArgumentException("You are not allowed to delete this comment");
-        }
-
-        commentRepository.deleteById(id);
-    }
-
-    private boolean canModify(CommentModel comment, String actorUserId, String actorRole) {
-        String owner = safe(comment.getCreatedBy());
-        String actor = safe(actorUserId);
-        String role = safe(actorRole).toUpperCase(Locale.ROOT);
-
-        return owner.equals(actor) || "STAFF".equals(role) || "ADMIN".equals(role) || "TECHNICIAN".equals(role);
-    }
-
-    private String safe(String value) {
-        return value == null ? "" : value.trim();
-    }
-
 }

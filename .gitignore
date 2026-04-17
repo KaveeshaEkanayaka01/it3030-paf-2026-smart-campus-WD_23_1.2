@@ -21,11 +21,6 @@ frontend/dist/
 frontend/.vite/
 frontend/.cache/
 
-# Editor
-.vscode/*
-!.vscode/settings.json
-!.vscode/launch.json
-
 # Runtime uploads / temp data
 backend/uploads/
 

@@ -1,12 +1,20 @@
 package com.sliit.it3030.smartcampus.repository;
 
-import com.sliit.it3030.smartcampus.model.CommentModel;
+import com.sliit.it3030.smartcampus.model.Comment;
 import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.stereotype.Repository;
+
 import java.util.List;
 
-public interface CommentRepository extends MongoRepository<CommentModel, String> {
+@Repository
+public interface CommentRepository extends MongoRepository<Comment, String> {
 
-    // Get comments for a specific ticket
-    List<CommentModel> findByTicketId(String ticketId);
+    // Get all non-deleted comments for a ticket
+    List<Comment> findByTicketIdAndDeletedFalseOrderByCreatedAtAsc(String ticketId);
 
+    // Count comments per ticket
+    long countByTicketIdAndDeletedFalse(String ticketId);
+
+    // Get comments by author
+    List<Comment> findByAuthorIdAndDeletedFalse(String authorId);
 }
