@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
 import { useAuth } from '../context/AuthContext';
@@ -10,6 +11,8 @@ export default function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();
   const isAdmin = currentUser.role === 'ADMIN';
+  const isTechnician = currentUser.role === 'TECHNICIAN';
+  const canOpenTechnicianPanel = isAdmin || isTechnician;
 
   const handleLogout = () => {
     logout();
@@ -35,7 +38,20 @@ export default function Navbar() {
     { to: '/calendar', icon: <CalendarDays size={18} />, label: 'Calendar' },
   ];
 
-  const links = isAdmin ? adminLinks : userLinks;
+  const links = useMemo(() => {
+    if (isAdmin) {
+      return adminLinks;
+    }
+
+    if (canOpenTechnicianPanel) {
+      return [
+        ...userLinks,
+        { to: '/technician', icon: <Wrench size={18} />, label: 'Technician' },
+      ];
+    }
+
+    return userLinks;
+  }, [isAdmin, canOpenTechnicianPanel]);
 
   return (
     <nav className="sticky top-0 z-50" style={{ background: 'rgba(2,6,23,0.72)', backdropFilter: 'blur(12px)', borderBottom: '1px solid rgba(148,163,184,0.2)' }}>

@@ -1,9 +1,9 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Shield, RefreshCcw, Search, UserCheck, Wrench, Trash2 } from 'lucide-react';
 import { TicketStatusBadge } from '../components/TicketStatusBadge';
 import { PriorityBadge } from '../components/PriorityBadge';
 import { getCurrentUserId, getCurrentUserRole, setCurrentUserRole, ticketService } from '../api/ticketService';
+import { authApi } from '../api/authApi';
 
 const PRIVILEGED_ROLES = ['ADMIN', 'STAFF', 'TECHNICIAN'];
 
@@ -27,7 +27,6 @@ const getAllowedStatusOptions = (ticketStatus, role) => {
 };
 
 export const AdminPanelPage = () => {
-  const navigate = useNavigate();
   const [tickets, setTickets] = useState([]);
   const [selectedTicketId, setSelectedTicketId] = useState('');
   const [loading, setLoading] = useState(true);
@@ -40,6 +39,7 @@ export const AdminPanelPage = () => {
   const [rejectionReason, setRejectionReason] = useState('');
   const [roleInput, setRoleInput] = useState(getCurrentUserRole());
   const [currentRole, setCurrentRole] = useState(getCurrentUserRole());
+  const [userDisplayMap, setUserDisplayMap] = useState({});
 
   const currentUserId = getCurrentUserId() || 'wd23-student';
   const canManage = PRIVILEGED_ROLES.includes(currentRole);
@@ -65,9 +65,39 @@ export const AdminPanelPage = () => {
     }
   };
 
+  const loadUserDisplayMap = async () => {
+    try {
+      const response = await authApi.getAllUsers();
+      const users = Array.isArray(response?.data) ? response.data : [];
+      const nextMap = {};
+
+      users.forEach((user) => {
+        const id = String(user?.id || '').trim();
+        if (!id) return;
+
+        const display = String(
+          user?.name || user?.githubUsername || user?.email || id
+        ).trim();
+
+        nextMap[id] = display || id;
+      });
+
+      setUserDisplayMap(nextMap);
+    } catch {
+      setUserDisplayMap({});
+    }
+  };
+
   useEffect(() => {
     loadTickets();
+    loadUserDisplayMap();
   }, []);
+
+  const getCreatedByDisplay = (createdBy) => {
+    const key = String(createdBy || '').trim();
+    if (!key) return 'Unknown';
+    return userDisplayMap[key] || key;
+  };
 
   useEffect(() => {
     if (!selectedTicket) {
@@ -190,7 +220,8 @@ export const AdminPanelPage = () => {
       String(ticket.category || '').toLowerCase().includes(needle) ||
       String(ticket.location || '').toLowerCase().includes(needle) ||
       String(ticket.description || '').toLowerCase().includes(needle) ||
-      String(ticket.createdBy || '').toLowerCase().includes(needle)
+      String(ticket.createdBy || '').toLowerCase().includes(needle) ||
+      String(getCreatedByDisplay(ticket.createdBy)).toLowerCase().includes(needle)
     );
   });
 
@@ -218,20 +249,6 @@ export const AdminPanelPage = () => {
           >
             <RefreshCcw size={16} className="text-pink-400" />
             Refresh
-          </button>
-          <button
-            type="button"
-            onClick={() => navigate('/technician')}
-            className="bg-gradient-to-r from-violet-600 to-indigo-600 border border-indigo-500 shadow-lg shadow-indigo-500/20 px-5 py-3.5 rounded-xl text-xs font-bold uppercase tracking-widest text-white hover:scale-[1.02] active:scale-95 transition-all"
-          >
-            Technician Workspace
-          </button>
-          <button
-            type="button"
-            onClick={() => navigate('/my-tickets')}
-            className="glass-panel px-5 py-3.5 rounded-xl text-xs font-bold uppercase tracking-widest text-slate-300 hover:glass-panel-strong transition-all hover:-translate-y-0.5"
-          >
-            Back to Tickets
           </button>
         </div>
       </div>
@@ -313,7 +330,7 @@ export const AdminPanelPage = () => {
                   </div>
                   <p className="line-clamp-2 text-xs text-slate-400 leading-relaxed font-light">{ticket.description || 'No description provided.'}</p>
                   <div className="mt-4 flex items-center justify-between text-[9px] font-bold uppercase tracking-wider text-slate-500 pt-3 border-t border-white/5">
-                    <span className="flex items-center gap-1"><Shield size={10} /> {ticket.createdBy || 'Unknown'}</span>
+                    <span className="flex items-center gap-1"><Shield size={10} /> {getCreatedByDisplay(ticket.createdBy)}</span>
                     <span className="truncate max-w-[120px]">{ticket.assignedTechnician || 'Unassigned'}</span>
                   </div>
                 </button>
@@ -352,7 +369,7 @@ export const AdminPanelPage = () => {
                 <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                   <div className="glass-panel bg-black/20 p-4 rounded-xl border border-white/5">
                     <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Created By</p>
-                    <p className="mt-2 text-sm font-semibold text-slate-200 truncate">{selectedTicket.createdBy || 'N/A'}</p>
+                    <p className="mt-2 text-sm font-semibold text-slate-200 truncate">{getCreatedByDisplay(selectedTicket.createdBy)}</p>
                   </div>
                   <div className="glass-panel bg-black/20 p-4 rounded-xl border border-white/5">
                     <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Priority</p>

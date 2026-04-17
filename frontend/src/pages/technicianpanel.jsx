@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { CheckCircle2, ClipboardList, RefreshCcw, ShieldCheck, UserCheck, Wrench } from 'lucide-react';
 import { TicketStatusBadge } from '../components/TicketStatusBadge';
 import { getCurrentUserId, getCurrentUserRole, setCurrentUserRole, ticketService } from '../api/ticketService';
+import { useAuth } from '../context/AuthContext';
 
 const TECH_ROLES = ['ADMIN', 'STAFF', 'TECHNICIAN'];
 
@@ -26,6 +27,7 @@ const getAllowedStatusOptions = (ticketStatus) => {
 
 export const TechnicianPanelPage = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [savingTicketId, setSavingTicketId] = useState('');
@@ -35,6 +37,25 @@ export const TechnicianPanelPage = () => {
   const [currentRole, setCurrentRole] = useState(getCurrentUserRole());
 
   const currentUserId = getCurrentUserId() || 'wd23-student';
+  const assignmentActor = String(user?.id || currentUserId || '').trim();
+  const technicianIdentitySet = useMemo(() => {
+    return new Set(
+      [
+        currentUserId,
+        user?.id,
+        user?.githubUsername,
+        user?.email,
+      ]
+        .map((value) => String(value || '').trim().toLowerCase())
+        .filter(Boolean)
+    );
+  }, [currentUserId, user]);
+
+  const isAssignedToCurrentTechnician = (ticket) => {
+    const assigned = String(ticket?.assignedTechnician || '').trim().toLowerCase();
+    return Boolean(assigned) && technicianIdentitySet.has(assigned);
+  };
+
   const canManage = TECH_ROLES.includes(currentRole);
 
   const loadTickets = async () => {
@@ -76,8 +97,8 @@ export const TechnicianPanelPage = () => {
     try {
       setSavingTicketId(ticket.id);
       setError('');
-      const updated = await ticketService.assignTechnician(ticket.id, currentUserId, currentRole);
-      updateTicketInState(updated || { ...ticket, assignedTechnician: currentUserId });
+      const updated = await ticketService.assignTechnician(ticket.id, assignmentActor, currentRole);
+      updateTicketInState(updated || { ...ticket, assignedTechnician: assignmentActor });
     } catch (err) {
       console.error('Failed to claim ticket:', err);
       const backendMessage = err?.response?.data?.message || err?.response?.data?.detail || err?.response?.data?.error;
@@ -97,10 +118,23 @@ export const TechnicianPanelPage = () => {
       return;
     }
 
+    let resolutionNotes = '';
+    if (next === 'RESOLVED' || next === 'CLOSED') {
+      const notesInput = window.prompt('Enter resolution notes for this ticket:');
+      const normalizedNotes = String(notesInput || '').trim();
+
+      if (!normalizedNotes) {
+        setError('Resolution notes are required when moving a ticket to RESOLVED/CLOSED.');
+        return;
+      }
+
+      resolutionNotes = normalizedNotes;
+    }
+
     try {
       setSavingTicketId(ticket.id);
       setError('');
-      const updated = await ticketService.updateStatus(ticket.id, next, currentRole);
+      const updated = await ticketService.updateStatus(ticket.id, next, currentRole, resolutionNotes);
       updateTicketInState(updated || { ...ticket, status: next });
     } catch (err) {
       console.error('Failed to update ticket status:', err);
@@ -114,9 +148,8 @@ export const TechnicianPanelPage = () => {
   const filteredTickets = useMemo(() => {
     const needle = search.toLowerCase();
     const base = tickets.filter((ticket) => {
-      const assigned = String(ticket.assignedTechnician || '').toLowerCase();
-      const mine = assigned === currentUserId.toLowerCase();
-      const unassigned = !assigned;
+      const mine = isAssignedToCurrentTechnician(ticket);
+      const unassigned = !String(ticket.assignedTechnician || '').trim();
       return mine || unassigned;
     });
 
@@ -126,11 +159,9 @@ export const TechnicianPanelPage = () => {
       || String(ticket.description || '').toLowerCase().includes(needle)
       || String(ticket.createdBy || '').toLowerCase().includes(needle)
     ));
-  }, [tickets, search, currentUserId]);
+  }, [tickets, search, technicianIdentitySet]);
 
-  const assignedToMe = filteredTickets.filter(
-    (ticket) => String(ticket.assignedTechnician || '').toLowerCase() === currentUserId.toLowerCase(),
-  );
+  const assignedToMe = filteredTickets.filter((ticket) => isAssignedToCurrentTechnician(ticket));
   const unassigned = filteredTickets.filter((ticket) => !String(ticket.assignedTechnician || '').trim());
 
   return (
@@ -157,21 +188,6 @@ export const TechnicianPanelPage = () => {
           >
             <RefreshCcw size={16} style={{ color: 'var(--accent-mid)' }} />
             Refresh
-          </button>
-          <button
-            type="button"
-            onClick={() => navigate('/my-tickets')}
-            className="glass-panel px-5 py-3.5 rounded-xl text-xs font-bold uppercase tracking-widest text-slate-300 hover:glass-panel-strong transition-all hover:-translate-y-0.5"
-          >
-            My Tickets
-          </button>
-          <button
-            type="button"
-            onClick={() => navigate('/admin')}
-            className="px-5 py-3.5 rounded-xl text-xs font-bold uppercase tracking-widest text-white hover:scale-[1.02] active:scale-95 transition-all"
-            style={{ background: 'linear-gradient(135deg, var(--accent-start), var(--accent-end))', boxShadow: '0 10px 24px rgba(14, 165, 233, 0.24)' }}
-          >
-            Admin Panel
           </button>
         </div>
       </div>
@@ -260,7 +276,7 @@ export const TechnicianPanelPage = () => {
       ) : (
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           {filteredTickets.map((ticket) => {
-            const mine = String(ticket.assignedTechnician || '').toLowerCase() === currentUserId.toLowerCase();
+            const mine = isAssignedToCurrentTechnician(ticket);
             const canAdvance = mine && getAllowedStatusOptions(ticket.status).length > 0;
             const nextStatus = getAllowedStatusOptions(ticket.status)[0];
             const isSaving = savingTicketId === ticket.id;
