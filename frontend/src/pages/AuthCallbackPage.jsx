@@ -4,22 +4,32 @@ import { useAuth } from '../context/AuthContext';
 
 export default function AuthCallbackPage() {
   const [searchParams] = useSearchParams();
-  const { loginWithToken } = useAuth();
+  const { loginWithToken, loading, isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const token = searchParams.get('token');
+  const token = searchParams.get('token');
 
-    console.log('Callback page loaded');
-    console.log('Token received:', token);
-    
-    if (token) {
-      loginWithToken(token);
-      navigate('/', { replace: true });
-    } else {
+  useEffect(() => {
+    if (!token) {
       navigate('/login', { replace: true });
+      return;
     }
-  }, []);
+    // start login flow
+    loginWithToken(token);
+    // wait for auth context to finish loading and then redirect appropriately
+  }, [token, loginWithToken, navigate]);
+
+  useEffect(() => {
+    if (token == null) return;
+    if (!loading) {
+      if (isAuthenticated) {
+        const isAdmin = Array.isArray(user?.roles) && user.roles.includes('ROLE_ADMIN');
+        navigate(isAdmin ? '/admin-dashboard' : '/dashboard', { replace: true });
+      } else {
+        navigate('/login', { replace: true });
+      }
+    }
+  }, [loading, isAuthenticated, user, token, navigate]);
 
   return (
     <div className="min-h-screen flex items-center justify-center">

@@ -156,16 +156,27 @@ export default function LoginPage() {
         </div>
 
         {/* Login Button */}
-        <button
-          onClick={handleGitHubLogin}
-          className="flex items-center gap-2 bg-white text-gray-900
-                     px-4 py-2 rounded-xl font-semibold text-sm
-                     hover:bg-gray-100 transition-all duration-200
-                     hover:shadow-lg hover:shadow-white/20"
-        >
-          <FaGithub size={16} />
-          Sign In
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={handleGitHubLogin}
+            className="flex items-center gap-2 bg-white text-gray-900
+                       px-4 py-2 rounded-xl font-semibold text-sm
+                       hover:bg-gray-100 transition-all duration-200
+                       hover:shadow-lg hover:shadow-white/20"
+          >
+            <FaGithub size={16} />
+            Sign In
+          </button>
+
+          <button
+            onClick={() => navigate('/login/local')}
+            className="flex items-center gap-2 bg-transparent border border-white/20 text-white/90
+                       px-3 py-2 rounded-xl font-medium text-sm
+                       hover:bg-white/5 transition-all duration-200"
+          >
+            Sign In (Email)
+          </button>
+        </div>
       </nav>
 
       {/* ===== HERO SECTION ===== */}
