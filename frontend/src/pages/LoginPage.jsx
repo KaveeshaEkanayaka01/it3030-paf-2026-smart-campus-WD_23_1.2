@@ -155,26 +155,17 @@ export default function LoginPage() {
           </a>
         </div>
 
-        {/* Login Button */}
+        {/* Login Button - single entry point */}
         <div className="flex items-center gap-3">
           <button
-            onClick={handleGitHubLogin}
-            className="flex items-center gap-2 bg-white text-gray-900
-                       px-4 py-2 rounded-xl font-semibold text-sm
-                       hover:bg-gray-100 transition-all duration-200
-                       hover:shadow-lg hover:shadow-white/20"
-          >
-            <FaGithub size={16} />
-            Sign In
-          </button>
-
-          <button
             onClick={() => navigate('/login/local')}
-            className="flex items-center gap-2 bg-transparent border border-white/20 text-white/90
-                       px-3 py-2 rounded-xl font-medium text-sm
-                       hover:bg-white/5 transition-all duration-200"
+            className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white
+                       px-4 py-2 rounded-xl font-semibold text-sm
+                       hover:from-blue-500 hover:to-purple-500 transition-all duration-200
+                       hover:shadow-lg"
           >
-            Sign In (Email)
+            <span className="hidden md:inline">Login</span>
+            <span className="md:hidden">Sign In</span>
           </button>
         </div>
       </nav>
