@@ -25,6 +25,7 @@ import java.util.Map;
 public class BookingService {
 
     private final BookingRepository bookingRepository;
+    private final NotificationService notificationService;
 
     // =============================================================
     // POST /api/bookings — Create a new booking (USER)
@@ -109,7 +110,13 @@ public class BookingService {
 
         booking.setStatus(BookingStatus.APPROVED);
         log.info("Booking id={} APPROVED", id);
-        return bookingRepository.save(booking);
+        Booking saved = bookingRepository.save(booking);
+
+        if (saved.getUserId() != null && !saved.getUserId().isBlank()) {
+            notificationService.sendBookingApprovedNotification(saved.getUserId(), saved.getId());
+        }
+
+        return saved;
     }
 
     // =============================================================
@@ -128,7 +135,13 @@ public class BookingService {
         booking.setStatus(BookingStatus.REJECTED);
         booking.setRejectionReason(rejectRequest.getReason());
         log.info("Booking id={} REJECTED with reason: {}", id, rejectRequest.getReason());
-        return bookingRepository.save(booking);
+        Booking saved = bookingRepository.save(booking);
+
+        if (saved.getUserId() != null && !saved.getUserId().isBlank()) {
+            notificationService.sendBookingRejectedNotification(saved.getUserId(), saved.getId());
+        }
+
+        return saved;
     }
 
     // =============================================================

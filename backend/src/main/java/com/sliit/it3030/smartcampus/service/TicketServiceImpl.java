@@ -22,6 +22,9 @@ public class TicketServiceImpl implements TicketService {
     @Autowired
     private TicketRepository ticketRepository;
 
+    @Autowired
+    private NotificationService notificationService;
+
     private static final Map<TicketStatus, Set<TicketStatus>> ALLOWED_TRANSITIONS = new EnumMap<>(TicketStatus.class);
 
     static {
@@ -96,7 +99,9 @@ public class TicketServiceImpl implements TicketService {
             currentStatus = TicketStatus.OPEN;
         }
 
-        if (status != currentStatus) {
+        boolean statusChanged = status != currentStatus;
+
+        if (statusChanged) {
             Set<TicketStatus> allowedNext = ALLOWED_TRANSITIONS.getOrDefault(currentStatus, Set.of());
             if (!allowedNext.contains(status)) {
                 throw new IllegalStateException("Invalid status transition: " + currentStatus + " -> " + status);
@@ -136,7 +141,13 @@ public class TicketServiceImpl implements TicketService {
             }
         }
 
-        return ticketRepository.save(ticket);
+        TicketModel saved = ticketRepository.save(ticket);
+
+        if (statusChanged && saved.getCreatedBy() != null && !saved.getCreatedBy().isBlank()) {
+            notificationService.sendTicketStatusNotification(saved.getCreatedBy(), saved.getId(), status.name());
+        }
+
+        return saved;
     }
 
     @Override

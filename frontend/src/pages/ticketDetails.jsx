@@ -49,6 +49,35 @@ export const TicketDetailsPage = () => {
   }, [user]);
   const canManageTicket = PRIVILEGED_ROLES.includes(currentUserRole);
   const hasSidePanel = canManageTicket || Boolean(ticket?.assignedTechnician);
+  const currentUserName = useMemo(() => {
+    const candidate = user?.name || user?.githubUsername || user?.email || '';
+    return String(candidate).trim();
+  }, [user]);
+  const currentUserIdentitySet = useMemo(() => {
+    return new Set(
+      [
+        currentUserId,
+        user?.id,
+        user?.email,
+        user?.githubUsername,
+      ]
+        .map((value) => String(value || '').trim())
+        .filter(Boolean)
+    );
+  }, [currentUserId, user]);
+
+  const createdByDisplayName = useMemo(() => {
+    const createdBy = String(ticket?.createdBy || '').trim();
+    if (!createdBy) {
+      return 'N/A';
+    }
+
+    if (currentUserIdentitySet.has(createdBy) && currentUserName) {
+      return currentUserName;
+    }
+
+    return createdBy;
+  }, [ticket?.createdBy, currentUserIdentitySet, currentUserName]);
 
   const mapCommentForUI = (comment) => ({
     id: String(comment.id),
@@ -268,7 +297,7 @@ export const TicketDetailsPage = () => {
                 <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Created By</p>
                 <div className="mt-2 flex items-center justify-center md:justify-start gap-2 text-xs font-semibold uppercase text-slate-100">
                   <User size={14} className="text-indigo-400" />
-                  <span className="truncate">{ticket.createdBy || 'N/A'}</span>
+                  <span className="truncate">{createdByDisplayName}</span>
                 </div>
               </div>
               <div className="glass-panel p-4 rounded-xl text-center md:text-left">
