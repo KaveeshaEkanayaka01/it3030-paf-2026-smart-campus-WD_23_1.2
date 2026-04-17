@@ -1,6 +1,6 @@
 import { AuthProvider } from './context/AuthContext';
 import { NotificationProvider } from './context/NotificationContext';
-import AppRoutes from './routes/AppRoutes';
+import AppRoutes from './routes/AppRoutes.jsx';
 import { Toaster } from 'react-hot-toast';
 
 function App() {
@@ -14,4 +14,4 @@ function App() {
   );
 }
 
-export default App;s
+export default App;
