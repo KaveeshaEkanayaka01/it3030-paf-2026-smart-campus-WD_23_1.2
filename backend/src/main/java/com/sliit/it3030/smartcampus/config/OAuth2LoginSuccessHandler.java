@@ -38,16 +38,34 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
             OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
             Map<String, Object> attributes = oAuth2User.getAttributes();
 
-            // ✅ Safe extraction
-            String githubId = String.valueOf(attributes.get("id"));
+            User user = null;
 
-            log.info("OAuth2 success - GitHub ID: {}", githubId);
+            // ✅ Try GitHub first (has "login" attribute)
+            if (attributes.containsKey("login")) {
+                String githubId = String.valueOf(attributes.get("id"));
+                log.info("OAuth2 success - GitHub ID: {}", githubId);
+                user = userRepository.findByGithubId(githubId).orElse(null);
+            }
 
-            // Find user from DB
-            User user = userRepository.findByGithubId(githubId)
-                    .orElseThrow(() -> new RuntimeException(
-                        "User not found after OAuth login - githubId: " + githubId
-                    ));
+            // ✅ Try Google (has "sub" attribute)
+            if (user == null && attributes.containsKey("sub")) {
+                String googleId = (String) attributes.get("sub");
+                log.info("OAuth2 success - Google ID: {}", googleId);
+                user = userRepository.findByGoogleId(googleId).orElse(null);
+            }
+
+            // ✅ Fallback - find by email
+            if (user == null) {
+                String email = (String) attributes.get("email");
+                log.info("OAuth2 success - fallback email: {}", email);
+                if (email != null) {
+                    user = userRepository.findByEmail(email).orElse(null);
+                }
+            }
+
+            if (user == null) {
+                throw new RuntimeException("User not found after OAuth login");
+            }
 
             log.info("Found user: {}", user.getEmail());
 
@@ -58,7 +76,7 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
                     user.getRoles()
             );
 
-            log.info("JWT generated successfully for user: {}", user.getEmail());
+            log.info("JWT generated for: {}", user.getEmail());
 
             // Redirect to frontend with token
             String redirectUrl = frontendUrl + "/auth/callback?token=" + token;
@@ -68,10 +86,9 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
 
         } catch (Exception e) {
             log.error("OAuth2 success handler error: ", e);
-            // Redirect to login page with error
             getRedirectStrategy().sendRedirect(
-                request, response, 
-                frontendUrl + "/login?error=auth_failed"
+                    request, response,
+                    frontendUrl + "/login?error=auth_failed"
             );
         }
     }

@@ -14,6 +14,9 @@ public interface UserRepository extends MongoRepository<User, String> {
 
     Optional<User> findByGithubId(String githubId);
 
+    // ✅ Add this for Google
+    Optional<User> findByGoogleId(String googleId);
+
     boolean existsByEmail(String email);
 
     List<User> findByRolesContaining(String role);

@@ -27,9 +27,15 @@ public class User {
 
     private String avatarUrl;
 
+    // GitHub fields
     private String githubId;
-
     private String githubUsername;
+
+    // ✅ Google fields
+    private String googleId;
+
+    // ✅ Which provider they used
+    private String provider; // "github" or "google"
 
     @Builder.Default
     private Set<String> roles = new HashSet<>();
