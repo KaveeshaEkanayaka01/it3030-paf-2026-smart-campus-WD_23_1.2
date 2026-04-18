@@ -48,7 +48,8 @@ export const CommentSection = ({ comments, onAddComment, onDeleteComment, onUpda
             className="glass-panel rounded-2xl p-6 transition-all hover:glass-panel-strong"
           >
               {(() => {
-                const canManage = comment.isOwner || comment.authorId === currentUserId || isPrivilegedRole(currentUserRole);
+                const canEdit = comment.isOwner || comment.authorId === currentUserId;
+                const canDelete = canEdit || String(currentUserRole || '').toUpperCase() === 'ADMIN';
                 const isEditing = editingCommentId === comment.id;
 
                 return (
@@ -63,20 +64,24 @@ export const CommentSection = ({ comments, onAddComment, onDeleteComment, onUpda
                     <p className="text-[10px] text-slate-400 font-medium uppercase tracking-wider">{new Date(comment.createdAt).toLocaleString()}</p>
                   </div>
                 </div>
-                {canManage && (
+                {(canEdit || canDelete) && (
                   <div className="flex gap-1 bg-white/5 rounded-lg p-1 backdrop-blur-sm border border-white/10">
-                    <button
-                      onClick={() => (isEditing ? cancelEditing() : startEditing(comment))}
-                      className="p-1.5 rounded-md text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
-                    >
-                      <Pencil size={14} />
-                    </button>
-                    <button 
-                      onClick={() => onDeleteComment(comment.id)}
-                      className="p-1.5 rounded-md text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors"
-                    >
-                      <Trash2 size={14} />
-                    </button>
+                    {canEdit && (
+                      <button
+                        onClick={() => (isEditing ? cancelEditing() : startEditing(comment))}
+                        className="p-1.5 rounded-md text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
+                      >
+                        <Pencil size={14} />
+                      </button>
+                    )}
+                    {canDelete && (
+                      <button 
+                        onClick={() => onDeleteComment(comment.id)}
+                        className="p-1.5 rounded-md text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    )}
                   </div>
                 )}
               </div>

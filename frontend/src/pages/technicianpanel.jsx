@@ -35,6 +35,7 @@ export const TechnicianPanelPage = () => {
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
   const [technicianOptions, setTechnicianOptions] = useState([]);
+  const [userDisplayMap, setUserDisplayMap] = useState({});
   const [identityInput, setIdentityInput] = useState(getCurrentUserId() || user?.id || 'wd23-student');
   const [activeIdentity, setActiveIdentity] = useState(getCurrentUserId() || user?.id || 'wd23-student');
 
@@ -92,8 +93,32 @@ export const TechnicianPanelPage = () => {
     }
   };
 
+  const loadUserDisplayMap = async () => {
+    try {
+      const response = await authApi.getAllUsers();
+      const users = Array.isArray(response?.data) ? response.data : [];
+      const nextMap = {};
+
+      users.forEach((userEntry) => {
+        const id = String(userEntry?.id || '').trim();
+        if (!id) return;
+
+        const display = String(
+          userEntry?.name || userEntry?.githubUsername || userEntry?.email || id,
+        ).trim();
+
+        nextMap[id] = display || id;
+      });
+
+      setUserDisplayMap(nextMap);
+    } catch {
+      setUserDisplayMap({});
+    }
+  };
+
   useEffect(() => {
     loadTickets();
+    loadUserDisplayMap();
   }, []);
 
   useEffect(() => {
@@ -143,6 +168,12 @@ export const TechnicianPanelPage = () => {
 
   const updateTicketInState = (updatedTicket) => {
     setTickets((prev) => prev.map((ticket) => (ticket.id === updatedTicket.id ? { ...ticket, ...updatedTicket } : ticket)));
+  };
+
+  const getCreatedByDisplay = (createdBy) => {
+    const key = String(createdBy || '').trim();
+    if (!key) return 'Unknown';
+    return userDisplayMap[key] || key;
   };
 
   const handleClaim = async (ticket) => {
@@ -214,8 +245,9 @@ export const TechnicianPanelPage = () => {
       || String(ticket.location || '').toLowerCase().includes(needle)
       || String(ticket.description || '').toLowerCase().includes(needle)
       || String(ticket.createdBy || '').toLowerCase().includes(needle)
+      || String(getCreatedByDisplay(ticket.createdBy)).toLowerCase().includes(needle)
     ));
-  }, [tickets, search, technicianIdentitySet]);
+  }, [tickets, search, technicianIdentitySet, userDisplayMap]);
 
   const assignedToMe = filteredTickets.filter((ticket) => isAssignedToCurrentTechnician(ticket));
   const unassigned = filteredTickets.filter((ticket) => !String(ticket.assignedTechnician || '').trim());
@@ -248,16 +280,16 @@ export const TechnicianPanelPage = () => {
         </div>
       </div>
 
-      <div className="mb-8 glass-panel border-sky-500/30 bg-sky-500/10 p-6 rounded-2xl backdrop-blur-md">
-        <p className="text-xs font-bold uppercase tracking-wider text-sky-300">Technician Identity Switch</p>
-        <p className="mt-1 text-sm text-sky-100/80">
+      <div className="mb-6 glass-panel border-sky-500/25 bg-sky-500/10 px-5 py-4 rounded-2xl backdrop-blur-md">
+        <p className="text-[11px] font-bold uppercase tracking-wider text-sky-300">Technician Identity Switch</p>
+        <p className="mt-1 text-xs text-sky-100/80">
           Choose which technician profile to act as when claiming and viewing assigned tickets.
         </p>
-        <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+        <div className="mt-3 flex flex-col gap-2.5 sm:flex-row sm:items-center">
           <select
             value={identityInput}
             onChange={(e) => setIdentityInput(e.target.value)}
-            className="w-full glass-input rounded-xl px-4 py-3 text-sm font-semibold outline-none text-slate-200 cursor-pointer"
+            className="w-full glass-input rounded-xl px-3.5 py-2.5 text-xs font-semibold outline-none text-slate-200 cursor-pointer"
           >
             <option value="" className="bg-slate-900 text-slate-300">Select technician identity</option>
             {technicianOptions.map((tech) => (
@@ -269,7 +301,7 @@ export const TechnicianPanelPage = () => {
           <button
             type="button"
             onClick={applyIdentity}
-            className="bg-sky-500 text-white px-6 py-3 rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-sky-600 transition-colors shadow-lg shadow-sky-500/20"
+            className="bg-sky-500 text-white px-4 py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-wider hover:bg-sky-600 transition-colors shadow-lg shadow-sky-500/20 sm:whitespace-nowrap"
           >
             Use This Identity
           </button>
@@ -355,7 +387,7 @@ export const TechnicianPanelPage = () => {
                 <div className="mt-6 grid grid-cols-2 gap-4 text-[10px] font-semibold uppercase tracking-wider text-slate-400 border-t border-white/10 pt-5">
                   <div className="glass-panel bg-black/20 p-3 rounded-xl border border-white/5">
                     <p>Created By</p>
-                    <p className="mt-1 text-slate-200 truncate">{ticket.createdBy || 'Unknown'}</p>
+                    <p className="mt-1 text-slate-200 truncate">{getCreatedByDisplay(ticket.createdBy)}</p>
                   </div>
                   <div className="glass-panel bg-black/20 p-3 rounded-xl border border-white/5">
                     <p>Technician</p>

@@ -23,11 +23,21 @@ export const commentsApi = {
     })
   },
 
-  updateComment(commentId, content) {
+  updateComment(commentId, content, actor = null) {
+    const payload = {
+      content,
+    }
+
+    if (actor && typeof actor === 'object') {
+      payload.actorId = actor.actorId || ''
+      payload.actorName = actor.actorName || ''
+      payload.actorRole = actor.actorRole || ''
+    }
+
     return apiRequest(`/api/tickets/comments/${commentId}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ content }),
+      body: JSON.stringify(payload),
     })
   },
 

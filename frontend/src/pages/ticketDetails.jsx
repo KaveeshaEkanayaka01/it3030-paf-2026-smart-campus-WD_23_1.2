@@ -39,6 +39,7 @@ export const TicketDetailsPage = () => {
   const [rejectionReason, setRejectionReason] = useState('');
   const [technician, setTechnician] = useState('');
   const [technicianOptions, setTechnicianOptions] = useState([]);
+  const [userDisplayMap, setUserDisplayMap] = useState({});
   const [assigning, setAssigning] = useState(false);
   const currentUserId = user?.id || getCurrentUserId() || 'wd23-student';
   const currentUserRole = useMemo(() => {
@@ -67,6 +68,9 @@ export const TicketDetailsPage = () => {
         .filter(Boolean)
     );
   }, [currentUserId, user]);
+  const currentCommentIdentityId = useMemo(() => {
+    return String(getCurrentUserId() || user?.id || '').trim();
+  }, [user]);
 
   const createdByDisplayName = useMemo(() => {
     const createdBy = String(ticket?.createdBy || '').trim();
@@ -74,12 +78,17 @@ export const TicketDetailsPage = () => {
       return 'N/A';
     }
 
+    const mapped = String(userDisplayMap[createdBy] || '').trim();
+    if (mapped) {
+      return mapped;
+    }
+
     if (currentUserIdentitySet.has(createdBy) && currentUserName) {
       return currentUserName;
     }
 
     return createdBy;
-  }, [ticket?.createdBy, currentUserIdentitySet, currentUserName]);
+  }, [ticket?.createdBy, currentUserIdentitySet, currentUserName, userDisplayMap]);
 
   const mapCommentForUI = (comment) => ({
     id: String(comment.id),
@@ -123,6 +132,31 @@ export const TicketDetailsPage = () => {
   }, [id, loadComments]);
 
   useEffect(() => {
+    const loadUsers = async () => {
+      try {
+        const response = await authApi.getAllUsers();
+        const users = Array.isArray(response?.data) ? response.data : [];
+        const nextMap = {};
+
+        users.forEach((userEntry) => {
+          const id = String(userEntry?.id || '').trim();
+          if (!id) return;
+
+          const display = String(
+            userEntry?.name || userEntry?.githubUsername || userEntry?.email || id,
+          ).trim();
+
+          nextMap[id] = display || id;
+        });
+
+        setUserDisplayMap(nextMap);
+      } catch {
+        setUserDisplayMap({});
+      }
+    };
+
+    loadUsers();
+
     const loadTechnicians = async () => {
       try {
         const response = await authApi.getTechnicians();
@@ -204,7 +238,20 @@ export const TicketDetailsPage = () => {
     }
 
     try {
-      await ticketService.updateComment(commentId, text);
+      const actingIdentityId = String(getCurrentUserId() || user?.id || '').trim();
+      const actingTech = technicianOptions.find(
+        (tech) => String(tech?.id || '').trim() === actingIdentityId,
+      );
+      const actingIdentityName = String(
+        actingTech?.name || actingTech?.githubUsername || currentUserName || actingIdentityId,
+      ).trim();
+      const actingIdentityRole = actingTech ? 'TECHNICIAN' : currentUserRole;
+
+      await ticketService.updateComment(commentId, text, {
+        actorId: actingIdentityId,
+        actorName: actingIdentityName,
+        actorRole: actingIdentityRole,
+      });
       await loadComments(id);
     } catch (err) {
       console.error('Failed to update comment:', err);
@@ -462,7 +509,7 @@ export const TicketDetailsPage = () => {
                 onAddComment={handleAddComment}
                 onDeleteComment={handleDeleteComment}
                 onUpdateComment={handleUpdateComment}
-                currentUserId={currentUserId}
+                currentUserId={currentCommentIdentityId || currentUserId}
                 currentUserRole={currentUserRole}
               />
             </div>

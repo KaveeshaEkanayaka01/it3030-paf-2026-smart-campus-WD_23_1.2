@@ -87,8 +87,17 @@ public class CommentService {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Comment", commentId));
 
+        boolean isOwner = comment.getAuthorId().equals(currentUser.getId());
+        boolean isAdmin = currentUser.getRoles().contains(User.ROLE_ADMIN);
+        String actorId = String.valueOf(request.getActorId()).trim();
+        String actorRole = String.valueOf(request.getActorRole()).trim().toUpperCase(Locale.ROOT);
+        boolean canUseActingIdentity = isAdmin
+            && !actorId.isEmpty()
+            && ("TECHNICIAN".equals(actorRole) || "STAFF".equals(actorRole));
+        boolean isActingOwner = canUseActingIdentity && comment.getAuthorId().equals(actorId);
+
         // Ownership check
-        if (!comment.getAuthorId().equals(currentUser.getId())) {
+        if (!isOwner && !isActingOwner) {
             throw new UnauthorizedException("You can only edit your own comments");
         }
 
@@ -97,9 +106,10 @@ public class CommentService {
         comment.setUpdatedAt(LocalDateTime.now());
 
         Comment updated = commentRepository.save(comment);
-        log.info("Comment {} updated by user {}", commentId, currentUser.getId());
+        String effectiveEditorId = isActingOwner ? actorId : currentUser.getId();
+        log.info("Comment {} updated by user {}", commentId, effectiveEditorId);
 
-        return mapToResponse(updated, currentUser.getId());
+        return mapToResponse(updated, effectiveEditorId);
     }
 
     // Delete comment
