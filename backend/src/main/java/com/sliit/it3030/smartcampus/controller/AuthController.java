@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Set;
 
 @RestController
@@ -56,7 +57,9 @@ public class AuthController {
     /**
      * POST /api/auth/login
      * Local email/password login for admin (development convenience)
-     * If `admin@gmail.com` signs in with `admin123`, an admin user will be created/returned.
+        * Bootstrap credentials:
+        * - admin@gmail.com / admin123
+        * - nadeeshan@gmail.com / nadeeshan123
      */
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
@@ -64,34 +67,35 @@ public class AuthController {
             throw new IllegalArgumentException("Email and password are required");
         }
 
-        String email = request.getEmail().toLowerCase().trim();
+        String email = request.getEmail().toLowerCase(Locale.ROOT).trim();
         String password = request.getPassword();
 
         User user = userRepository.findByEmail(email).orElse(null);
+        User bootstrapTemplate = getBootstrapUserTemplate(email, password);
 
         if (user == null) {
-            // Allow creating the single admin account via credentials
-            if ("admin@gmail.com".equalsIgnoreCase(email) && "admin123".equals(password)) {
-                Set<String> roles = new HashSet<>();
-                roles.add(User.ROLE_USER);
-                roles.add(User.ROLE_ADMIN);
-
-                user = User.builder()
-                        .email(email)
-                        .name("Admin")
-                        .roles(roles)
-                        .active(true)
-                        .createdAt(LocalDateTime.now())
-                        .password(passwordEncoder.encode(password))
-                        .build();
-
-                user = userRepository.save(user);
-            } else {
+            if (bootstrapTemplate == null) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
             }
+
+            user = userRepository.save(bootstrapTemplate);
         } else {
             // Validate password
-            if (user.getPassword() == null || !passwordEncoder.matches(password, user.getPassword())) {
+            if (user.getPassword() == null) {
+                if (bootstrapTemplate == null) {
+                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+                }
+
+                user.setPassword(passwordEncoder.encode(password));
+                if (user.getName() == null || user.getName().trim().isEmpty()) {
+                    user.setName(bootstrapTemplate.getName());
+                }
+                if (user.getRoles() == null || user.getRoles().isEmpty()) {
+                    user.setRoles(bootstrapTemplate.getRoles());
+                }
+                user.setUpdatedAt(LocalDateTime.now());
+                user = userRepository.save(user);
+            } else if (!passwordEncoder.matches(password, user.getPassword())) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
             }
         }
@@ -100,5 +104,38 @@ public class AuthController {
         AuthResponse resp = authService.buildAuthResponse(user, token);
 
         return ResponseEntity.ok(resp);
+    }
+
+    private User getBootstrapUserTemplate(String email, String password) {
+        if ("admin@gmail.com".equalsIgnoreCase(email) && "admin123".equals(password)) {
+            Set<String> roles = new HashSet<>();
+            roles.add(User.ROLE_USER);
+            roles.add(User.ROLE_ADMIN);
+
+            return User.builder()
+                    .email("admin@gmail.com")
+                    .name("Admin")
+                    .roles(roles)
+                    .active(true)
+                    .createdAt(LocalDateTime.now())
+                    .password(passwordEncoder.encode(password))
+                    .build();
+        }
+
+        if ("nadeeshan@gmail.com".equalsIgnoreCase(email) && "nadeeshan123".equals(password)) {
+            Set<String> roles = new HashSet<>();
+            roles.add(User.ROLE_USER);
+
+            return User.builder()
+                    .email("nadeeshan@gmail.com")
+                    .name("Nadeeshan")
+                    .roles(roles)
+                    .active(true)
+                    .createdAt(LocalDateTime.now())
+                    .password(passwordEncoder.encode(password))
+                    .build();
+        }
+
+        return null;
     }
 }

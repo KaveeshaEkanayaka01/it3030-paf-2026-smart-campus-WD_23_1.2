@@ -14,6 +14,7 @@ import {
   Clock
 } from 'lucide-react';
 import { getCurrentUserId, getCurrentUserRole, ticketService } from '../api/ticketService';
+import { authApi } from '../api/authApi';
 import { useAuth } from '../context/AuthContext';
 import { TicketStatusBadge } from '../components/TicketStatusBadge';
 import { CommentSection } from '../components/commentSection';
@@ -37,6 +38,7 @@ export const TicketDetailsPage = () => {
   const [resolutionNotes, setResolutionNotes] = useState('');
   const [rejectionReason, setRejectionReason] = useState('');
   const [technician, setTechnician] = useState('');
+  const [technicianOptions, setTechnicianOptions] = useState([]);
   const [assigning, setAssigning] = useState(false);
   const currentUserId = user?.id || getCurrentUserId() || 'wd23-student';
   const currentUserRole = useMemo(() => {
@@ -120,13 +122,61 @@ export const TicketDetailsPage = () => {
     fetchTicket();
   }, [id, loadComments]);
 
+  useEffect(() => {
+    const loadTechnicians = async () => {
+      try {
+        const response = await authApi.getTechnicians();
+        const technicians = Array.isArray(response?.data) ? response.data : [];
+        setTechnicianOptions(technicians);
+      } catch {
+        setTechnicianOptions([]);
+      }
+    };
+
+    loadTechnicians();
+  }, []);
+
+  useEffect(() => {
+    if (!ticket) {
+      setTechnician('');
+      return;
+    }
+
+    setTechnician(String(ticket.assignedTechnician || '').trim());
+  }, [ticket]);
+
+  const getTechnicianDisplay = (technicianOption) => {
+    const name = String(technicianOption?.name || '').trim();
+    const username = String(technicianOption?.githubUsername || '').trim();
+    const idValue = String(technicianOption?.id || '').trim();
+
+    if (name && idValue) {
+      return `${name} (${idValue})`;
+    }
+
+    return name || username || idValue || 'Unknown Technician';
+  };
+
   const handleAddComment = async (text) => {
     if (!id) {
       return;
     }
 
     try {
-      await ticketService.addComment(id, text);
+      const actingIdentityId = String(getCurrentUserId() || user?.id || '').trim();
+      const actingTech = technicianOptions.find(
+        (tech) => String(tech?.id || '').trim() === actingIdentityId,
+      );
+      const actingIdentityName = String(
+        actingTech?.name || actingTech?.githubUsername || currentUserName || actingIdentityId,
+      ).trim();
+      const actingIdentityRole = actingTech ? 'TECHNICIAN' : currentUserRole;
+
+      await ticketService.addComment(id, text, {
+        actorId: actingIdentityId,
+        actorName: actingIdentityName,
+        actorRole: actingIdentityRole,
+      });
       await loadComments(id);
     } catch (err) {
       console.error('Failed to add comment:', err);
@@ -479,21 +529,33 @@ export const TicketDetailsPage = () => {
                   Assign Technician
                 </h3>
                 <div className="space-y-4">
-                  <input
-                    type="text"
+                  <select
                     value={technician}
                     onChange={(e) => setTechnician(e.target.value)}
-                    placeholder="Technician username or id"
                     disabled={!canManageTicket || assigning}
-                    className="w-full glass-input rounded-xl px-4 py-3.5 text-sm font-medium outline-none text-slate-200 placeholder:text-slate-500 disabled:opacity-50 transition-all focus:glass-panel-strong"
-                  />
+                    className="w-full glass-input rounded-xl px-4 py-3.5 text-sm font-medium outline-none text-slate-200 disabled:opacity-50 transition-all focus:glass-panel-strong cursor-pointer"
+                  >
+                    <option value="" className="bg-slate-900 text-slate-300">Select technician</option>
+                    {technicianOptions.map((tech) => (
+                      <option key={tech.id} value={tech.id} className="bg-slate-900 text-slate-200">
+                        {getTechnicianDisplay(tech)}
+                      </option>
+                    ))}
+                  </select>
+
+                  {technicianOptions.length === 0 && (
+                    <p className="text-xs font-semibold text-amber-300">
+                      No technicians found in database. Add users with ROLE_TECHNICIAN.
+                    </p>
+                  )}
+
                   <button
                     type="button"
                     onClick={handleAssignTechnician}
-                    disabled={!canManageTicket || assigning || !technician.trim()}
+                    disabled={!canManageTicket || assigning || !technician.trim() || technicianOptions.length === 0}
                     className={cn(
                       'w-full rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 px-4 py-3.5 text-xs font-bold uppercase tracking-widest text-white transition-all shadow-[0_0_20px_rgba(16,185,129,0.2)]',
-                      (!canManageTicket || assigning || !technician.trim()) ? 'opacity-50 cursor-not-allowed shadow-none' : 'hover:scale-[1.02] active:scale-95'
+                      (!canManageTicket || assigning || !technician.trim() || technicianOptions.length === 0) ? 'opacity-50 cursor-not-allowed shadow-none' : 'hover:scale-[1.02] active:scale-95'
                     )}
                   >
                     {assigning ? 'Assigning...' : 'Assign Technician'}

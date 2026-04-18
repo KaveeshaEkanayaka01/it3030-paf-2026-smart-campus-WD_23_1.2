@@ -19,12 +19,22 @@ const CATEGORIES = [
 
 const PRIORITIES = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'];
 
+const DESCRIPTION_MIN_LENGTH = 15;
+const DESCRIPTION_MAX_LENGTH = 1000;
+const LOCATION_MIN_LENGTH = 3;
+const LOCATION_MAX_LENGTH = 120;
+const CONTACT_MAX_LENGTH = 120;
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+const PHONE_REGEX = /^\+?[0-9\s()\-]{7,20}$/;
+
 export const CreateTicketPage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [files, setFiles] = useState([]);
   const [error, setError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState({});
   const [uploadInfo, setUploadInfo] = useState('');
   const [currentUser, setCurrentUser] = useState(getCurrentUserId() || '');
   const [testUserInput, setTestUserInput] = useState(getCurrentUserId() || '');
@@ -64,10 +74,78 @@ export const CreateTicketPage = () => {
     setError('');
   };
 
+  const validateField = (fieldName, fieldValue) => {
+    const value = String(fieldValue ?? '').trim();
+
+    if (fieldName === 'category') {
+      if (!value) return 'Category is required.';
+      if (!CATEGORIES.includes(value)) return 'Please select a valid category.';
+      return '';
+    }
+
+    if (fieldName === 'priority') {
+      if (!value) return 'Priority is required.';
+      if (!PRIORITIES.includes(value)) return 'Please select a valid priority.';
+      return '';
+    }
+
+    if (fieldName === 'location') {
+      if (!value) return 'Location is required.';
+      if (value.length < LOCATION_MIN_LENGTH) return `Location must be at least ${LOCATION_MIN_LENGTH} characters.`;
+      if (value.length > LOCATION_MAX_LENGTH) return `Location must be ${LOCATION_MAX_LENGTH} characters or less.`;
+      return '';
+    }
+
+    if (fieldName === 'description') {
+      if (!value) return 'Description is required.';
+      if (value.length < DESCRIPTION_MIN_LENGTH) return `Description must be at least ${DESCRIPTION_MIN_LENGTH} characters.`;
+      if (value.length > DESCRIPTION_MAX_LENGTH) return `Description must be ${DESCRIPTION_MAX_LENGTH} characters or less.`;
+      return '';
+    }
+
+    if (fieldName === 'contact') {
+      if (!value) return 'Preferred contact is required.';
+      if (value.length > CONTACT_MAX_LENGTH) return `Preferred contact must be ${CONTACT_MAX_LENGTH} characters or less.`;
+      if (!EMAIL_REGEX.test(value) && !PHONE_REGEX.test(value)) {
+        return 'Enter a valid email address or phone number.';
+      }
+      return '';
+    }
+
+    return '';
+  };
+
+  const validateForm = () => {
+    const errors = {
+      category: validateField('category', formData.category),
+      priority: validateField('priority', formData.priority),
+      location: validateField('location', formData.location),
+      description: validateField('description', formData.description),
+      contact: validateField('contact', formData.contact),
+    };
+    
+
+    const hasErrors = Object.values(errors).some(Boolean);
+    setFieldErrors(errors);
+
+    return !hasErrors;
+  };
+
+  const handleFieldChange = (fieldName, value) => {
+    setFormData((prev) => ({ ...prev, [fieldName]: value }));
+    setFieldErrors((prev) => ({ ...prev, [fieldName]: validateField(fieldName, value) }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setUploadInfo('');
+
+    if (!validateForm()) {
+      setError('Please correct the highlighted fields before submitting.');
+      return;
+    }
+
     setLoading(true);
 
     const currentUserId = user?.id || getCurrentUserId();
@@ -78,13 +156,17 @@ export const CreateTicketPage = () => {
     }
 
     try {
+      const trimmedDescription = formData.description.trim();
+      const trimmedLocation = formData.location.trim();
+      const trimmedContact = formData.contact.trim();
+
       const payload = {
         title: `${formData.category} issue`,
         category: formData.category,
-        description: formData.description,
+        description: trimmedDescription,
         priority: formData.priority,
-        location: formData.location,
-        preferredContact: formData.contact,
+        location: trimmedLocation,
+        preferredContact: trimmedContact,
         createdBy: currentUserId,
       };
 
@@ -204,7 +286,8 @@ export const CreateTicketPage = () => {
 
           <form onSubmit={handleSubmit} className="space-y-6">
             {error && (
-              <div className="glass-panel border-rose-500/30 bg-rose-500/10 p-5 rounded-2xl text-sm font-semibold text-rose-300">
+              <div className="glass-panel border-rose-500/30 bg-rose-500/10 p-5 rounded-2xl text-sm font-semibold text-rose-300 flex items-center gap-2">
+                <AlertCircle size={16} className="shrink-0" />
                 {error}
               </div>
             )}
@@ -226,7 +309,7 @@ export const CreateTicketPage = () => {
                   <select
                     required
                     value={formData.category}
-                    onChange={e => setFormData({ ...formData, category: e.target.value })}
+                    onChange={(e) => handleFieldChange('category', e.target.value)}
                     className="w-full glass-input rounded-xl px-4 py-3.5 text-sm font-medium outline-none text-slate-200 cursor-pointer appearance-none bg-slate-900/50 focus:bg-slate-800/80 transition-all border border-white/10"
                   >
                     <option value="" className="bg-slate-900 text-slate-400">Select a category</option>
@@ -234,6 +317,9 @@ export const CreateTicketPage = () => {
                       <option key={cat} value={cat} className="bg-slate-900 text-slate-200">{cat}</option>
                     ))}
                   </select>
+                  {fieldErrors.category && (
+                    <p className="text-xs font-semibold text-rose-300">{fieldErrors.category}</p>
+                  )}
                 </div>
 
                 <div className="space-y-2.5">
@@ -243,17 +329,21 @@ export const CreateTicketPage = () => {
                   <select
                     required
                     value={formData.priority}
-                    onChange={e => setFormData({ ...formData, priority: e.target.value })}
+                    onChange={(e) => handleFieldChange('priority', e.target.value)}
                     className="w-full glass-input rounded-xl px-4 py-3.5 text-sm font-medium outline-none text-slate-200 cursor-pointer appearance-none bg-slate-900/50 focus:bg-slate-800/80 transition-all border border-white/10"
                   >
                     {PRIORITIES.map(prio => (
                       <option key={prio} value={prio} className="bg-slate-900 text-slate-200">{prio}</option>
                     ))}
                   </select>
+                  {fieldErrors.priority && (
+                    <p className="text-xs font-semibold text-rose-300">{fieldErrors.priority}</p>
+                  )}
                 </div>
 
                 <div className="space-y-2.5 md:col-span-2">
                   <label className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                    <MapPin size={12} className="text-sky-400" />
                     Location
                   </label>
                   <input
@@ -261,13 +351,18 @@ export const CreateTicketPage = () => {
                     type="text"
                     placeholder="e.g. Building A, Room 302"
                     value={formData.location}
-                    onChange={e => setFormData({ ...formData, location: e.target.value })}
+                    onChange={(e) => handleFieldChange('location', e.target.value)}
+                    maxLength={LOCATION_MAX_LENGTH}
                     className="w-full glass-input rounded-xl px-4 py-3.5 text-sm outline-none text-slate-200 placeholder:text-slate-500 font-medium transition-all"
                   />
+                  {fieldErrors.location && (
+                    <p className="text-xs font-semibold text-rose-300">{fieldErrors.location}</p>
+                  )}
                 </div>
 
                 <div className="space-y-2.5 md:col-span-2">
                   <label className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                    <Info size={12} className="text-fuchsia-400" />
                     Description
                   </label>
                   <textarea
@@ -275,9 +370,13 @@ export const CreateTicketPage = () => {
                     rows={5}
                     placeholder="Describe the issue in detail..."
                     value={formData.description}
-                    onChange={e => setFormData({ ...formData, description: e.target.value })}
+                    onChange={(e) => handleFieldChange('description', e.target.value)}
+                    maxLength={DESCRIPTION_MAX_LENGTH}
                     className="w-full resize-none glass-input rounded-xl px-4 py-3.5 text-sm outline-none text-slate-200 placeholder:text-slate-500 font-medium transition-all"
                   />
+                  {fieldErrors.description && (
+                    <p className="text-xs font-semibold text-rose-300">{fieldErrors.description}</p>
+                  )}
                   <p className="text-right text-[10px] font-bold uppercase tracking-widest text-slate-500 pt-1">
                     {formData.description.length} characters
                   </p>
@@ -285,6 +384,7 @@ export const CreateTicketPage = () => {
 
                 <div className="space-y-2.5 md:col-span-2">
                   <label className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                    <Phone size={12} className="text-teal-400" />
                     Preferred Contact
                   </label>
                   <input
@@ -292,9 +392,13 @@ export const CreateTicketPage = () => {
                     type="text"
                     placeholder="Email or phone number"
                     value={formData.contact}
-                    onChange={e => setFormData({ ...formData, contact: e.target.value })}
+                    onChange={(e) => handleFieldChange('contact', e.target.value)}
+                    maxLength={CONTACT_MAX_LENGTH}
                     className="w-full glass-input rounded-xl px-4 py-3.5 text-sm outline-none text-slate-200 placeholder:text-slate-500 font-medium transition-all"
                   />
+                  {fieldErrors.contact && (
+                    <p className="text-xs font-semibold text-rose-300">{fieldErrors.contact}</p>
+                  )}
                 </div>
               </div>
             </div>
@@ -311,7 +415,7 @@ export const CreateTicketPage = () => {
               <AttachmentUpload files={files} setFiles={setFiles} />
               
               {uploadInfo && (
-                <div className="glass-panel border-emerald-500/30 bg-emerald-500/10 px-4 py-3 rounded-xl border border-white/10">
+                <div className="glass-panel border-emerald-500/30 bg-emerald-500/10 px-4 py-3 rounded-xl border">
                   <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-400">
                     {uploadInfo}
                   </p>

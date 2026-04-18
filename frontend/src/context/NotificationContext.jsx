@@ -21,20 +21,27 @@ export function NotificationProvider({ children }) {
   }, [isAuthenticated]);
 
   useEffect(() => {
-    if (isAuthenticated) {
-      fetchNotifications();
-      const interval = setInterval(fetchNotifications, 30000);
-      return () => clearInterval(interval);
+    if (!isAuthenticated) {
+      setNotifications([]);
+      setUnreadCount(0);
+      return;
     }
+
+    fetchNotifications();
+    const interval = setInterval(fetchNotifications, 30000);
+    return () => clearInterval(interval);
   }, [isAuthenticated, fetchNotifications]);
 
   const markAsRead = async (id) => {
     try {
       await notificationApi.markAsRead(id);
+      const target = notifications.find((n) => n.id === id);
       setNotifications(prev =>
         prev.map(n => n.id === id ? { ...n, read: true } : n)
       );
-      setUnreadCount(prev => Math.max(0, prev - 1));
+      if (target && !target.read) {
+        setUnreadCount(prev => Math.max(0, prev - 1));
+      }
     } catch (error) {
       console.error('Failed to mark as read:', error);
     }
@@ -53,7 +60,11 @@ export function NotificationProvider({ children }) {
   const deleteNotification = async (id) => {
     try {
       await notificationApi.deleteNotification(id);
+      const target = notifications.find((n) => n.id === id);
       setNotifications(prev => prev.filter(n => n.id !== id));
+      if (target && !target.read) {
+        setUnreadCount(prev => Math.max(0, prev - 1));
+      }
     } catch (error) {
       console.error('Failed to delete notification:', error);
     }

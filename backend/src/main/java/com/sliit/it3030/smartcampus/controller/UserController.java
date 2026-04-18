@@ -31,6 +31,15 @@ public class UserController {
     }
 
     /**
+     * GET /api/users/technicians
+     * Get all active technicians for ticket assignment
+     */
+    @GetMapping("/technicians")
+    public ResponseEntity<List<UserInfoDto>> getTechnicians() {
+        return ResponseEntity.ok(userService.getTechnicians());
+    }
+
+    /**
      * GET /api/users/{id}
      * Get user by ID - ADMIN or self
      */

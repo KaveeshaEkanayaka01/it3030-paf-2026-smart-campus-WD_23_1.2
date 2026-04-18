@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 @Service
@@ -25,20 +26,47 @@ public class CommentService {
 
     // Add comment to ticket
     public CommentResponse addComment(String ticketId, CommentRequest request, User currentUser) {
+        String effectiveAuthorId = currentUser.getId();
+        String effectiveAuthorName = String.valueOf(currentUser.getName()).trim();
+        if (effectiveAuthorName.isEmpty()) {
+            effectiveAuthorName = String.valueOf(currentUser.getEmail()).trim();
+        }
+        if (effectiveAuthorName.isEmpty()) {
+            effectiveAuthorName = effectiveAuthorId;
+        }
+
+        // Allow admin to act as a technician/staff identity in local testing flows.
+        boolean isAdmin = currentUser.getRoles().contains(User.ROLE_ADMIN);
+        String actorId = String.valueOf(request.getActorId()).trim();
+        String actorName = String.valueOf(request.getActorName()).trim();
+        String actorRole = String.valueOf(request.getActorRole()).trim().toUpperCase(Locale.ROOT);
+        boolean canUseActingIdentity = isAdmin
+                && !actorId.isEmpty()
+                && ("TECHNICIAN".equals(actorRole) || "STAFF".equals(actorRole));
+
+        if (canUseActingIdentity) {
+            effectiveAuthorId = actorId;
+            if (!actorName.isEmpty()) {
+                effectiveAuthorName = actorName;
+            } else {
+                effectiveAuthorName = actorId;
+            }
+        }
+
         Comment comment = Comment.builder()
                 .ticketId(ticketId)
-                .authorId(currentUser.getId())
-                .authorName(currentUser.getName())
+                .authorId(effectiveAuthorId)
+                .authorName(effectiveAuthorName)
                 .authorAvatar(currentUser.getAvatarUrl())
                 .content(request.getContent())
                 .createdAt(LocalDateTime.now())
                 .build();
 
         Comment saved = commentRepository.save(comment);
-        log.info("Comment added to ticket {} by user {}", ticketId, currentUser.getId());
+        log.info("Comment added to ticket {} by user {}", ticketId, effectiveAuthorId);
 
         // Trigger notification for new comment
-        notificationService.sendNewCommentNotification(ticketId, currentUser.getName());
+        notificationService.sendNewCommentNotification(ticketId, effectiveAuthorName);
 
         return mapToResponse(saved, currentUser.getId());
     }

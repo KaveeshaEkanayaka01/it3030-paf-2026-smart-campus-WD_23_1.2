@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
@@ -40,6 +41,16 @@ public class UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", userId));
         return authService.mapToUserInfoDto(user);
+    }
+
+    // Get all active technicians
+    public List<UserInfoDto> getTechnicians() {
+        return userRepository.findByRolesContaining(User.ROLE_TECHNICIAN).stream()
+                .filter(User::isActive)
+                .sorted(Comparator.comparing((User user) -> String.valueOf(user.getName()).toLowerCase())
+                        .thenComparing(User::getId))
+                .map(authService::mapToUserInfoDto)
+                .collect(Collectors.toList());
     }
 
     // Update user role (ADMIN only)

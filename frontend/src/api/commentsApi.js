@@ -5,13 +5,21 @@ export const commentsApi = {
     return apiRequest(`/api/tickets/${ticketId}/comments`)
   },
 
-  addComment(ticketId, content) {
+  addComment(ticketId, content, actor = null) {
+    const payload = {
+      content,
+    }
+
+    if (actor && typeof actor === 'object') {
+      payload.actorId = actor.actorId || ''
+      payload.actorName = actor.actorName || ''
+      payload.actorRole = actor.actorRole || ''
+    }
+
     return apiRequest(`/api/tickets/${ticketId}/comments`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        content,
-      }),
+      body: JSON.stringify(payload),
     })
   },
 

@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Shield, RefreshCcw, Search, UserCheck, Wrench, Trash2 } from 'lucide-react';
 import { TicketStatusBadge } from '../components/TicketStatusBadge';
 import { PriorityBadge } from '../components/PriorityBadge';
-import { getCurrentUserId, getCurrentUserRole, setCurrentUserRole, ticketService } from '../api/ticketService';
+import { getCurrentUserRole, ticketService } from '../api/ticketService';
 import { authApi } from '../api/authApi';
 
 const PRIVILEGED_ROLES = ['ADMIN', 'STAFF', 'TECHNICIAN'];
@@ -34,14 +34,13 @@ export const AdminPanelPage = () => {
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
   const [technician, setTechnician] = useState('');
+  const [technicianOptions, setTechnicianOptions] = useState([]);
   const [selectedStatus, setSelectedStatus] = useState('IN_PROGRESS');
   const [resolutionNotes, setResolutionNotes] = useState('');
   const [rejectionReason, setRejectionReason] = useState('');
-  const [roleInput, setRoleInput] = useState(getCurrentUserRole());
-  const [currentRole, setCurrentRole] = useState(getCurrentUserRole());
   const [userDisplayMap, setUserDisplayMap] = useState({});
 
-  const currentUserId = getCurrentUserId() || 'wd23-student';
+  const currentRole = getCurrentUserRole();
   const canManage = PRIVILEGED_ROLES.includes(currentRole);
 
   const selectedTicket = useMemo(
@@ -88,9 +87,20 @@ export const AdminPanelPage = () => {
     }
   };
 
+  const loadTechnicians = async () => {
+    try {
+      const response = await authApi.getTechnicians();
+      const technicians = Array.isArray(response?.data) ? response.data : [];
+      setTechnicianOptions(technicians);
+    } catch {
+      setTechnicianOptions([]);
+    }
+  };
+
   useEffect(() => {
     loadTickets();
     loadUserDisplayMap();
+    loadTechnicians();
   }, []);
 
   const getCreatedByDisplay = (createdBy) => {
@@ -99,24 +109,29 @@ export const AdminPanelPage = () => {
     return userDisplayMap[key] || key;
   };
 
+  const getTechnicianDisplay = (technicianOption) => {
+    const name = String(technicianOption?.name || '').trim();
+    const username = String(technicianOption?.githubUsername || '').trim();
+    const id = String(technicianOption?.id || '').trim();
+
+    if (name && id) {
+      return `${name} (${id})`;
+    }
+
+    return name || username || id || 'Unknown Technician';
+  };
+
   useEffect(() => {
     if (!selectedTicket) {
+      setTechnician('');
       return;
     }
+
+    setTechnician(String(selectedTicket.assignedTechnician || '').trim());
 
     const allowed = getAllowedStatusOptions(selectedTicket.status, currentRole);
     setSelectedStatus((current) => (allowed.includes(current) ? current : allowed[0] || ''));
   }, [selectedTicket, currentRole]);
-
-  const applyTestRole = () => {
-    if (!setCurrentUserRole(roleInput)) {
-      setError('Enter a valid role before continuing.');
-      return;
-    }
-
-    setCurrentRole(getCurrentUserRole());
-    setError('');
-  };
 
   const refreshSelected = async () => {
     if (!selectedTicketId) {
@@ -253,34 +268,6 @@ export const AdminPanelPage = () => {
         </div>
       </div>
 
-      {!canManage && (
-        <div className="mb-8 glass-panel border-amber-500/30 bg-amber-500/10 p-6 rounded-2xl backdrop-blur-md">
-          <p className="text-xs font-bold uppercase tracking-wider text-amber-400">Testing Mode Role Setup</p>
-          <p className="mt-1 text-sm text-amber-200/80">
-            Set ADMIN, STAFF, or TECHNICIAN for assignment and status updates. Delete remains ADMIN only.
-          </p>
-          <div className="mt-4 flex flex-col gap-3 sm:flex-row">
-            <select
-              value={roleInput}
-              onChange={(e) => setRoleInput(e.target.value)}
-              className="w-full glass-input rounded-xl px-4 py-3 text-sm font-bold uppercase tracking-wider outline-none text-slate-200 cursor-pointer"
-            >
-              <option value="USER" className="bg-slate-900 text-slate-200">USER</option>
-              <option value="TECHNICIAN" className="bg-slate-900 text-slate-200">TECHNICIAN</option>
-              <option value="STAFF" className="bg-slate-900 text-slate-200">STAFF</option>
-              <option value="ADMIN" className="bg-slate-900 text-slate-200">ADMIN</option>
-            </select>
-            <button
-              type="button"
-              onClick={applyTestRole}
-              className="bg-amber-500 text-white px-6 py-3 rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-amber-600 transition-colors shadow-lg shadow-amber-500/20"
-            >
-              Use This Role
-            </button>
-          </div>
-        </div>
-      )}
-
       {error && (
         <div className="mb-6 glass-panel border-rose-500/30 bg-rose-500/10 p-5 rounded-2xl text-sm font-semibold text-rose-300">
           {error}
@@ -399,18 +386,30 @@ export const AdminPanelPage = () => {
                     Assign Technician
                   </h3>
                   <div className="space-y-4">
-                    <input
-                      type="text"
+                    <select
                       value={technician}
                       onChange={(e) => setTechnician(e.target.value)}
-                      placeholder="Technician username or id"
                       disabled={!canManage || saving}
-                      className="w-full glass-input rounded-xl px-4 py-3.5 text-sm outline-none text-slate-200 placeholder:text-slate-500 disabled:opacity-50 transition-all font-medium"
-                    />
+                      className="w-full glass-input rounded-xl px-4 py-3.5 text-sm outline-none text-slate-200 disabled:opacity-50 transition-all font-medium cursor-pointer"
+                    >
+                      <option value="" className="bg-slate-900 text-slate-300">Select technician</option>
+                      {technicianOptions.map((tech) => (
+                        <option key={tech.id} value={tech.id} className="bg-slate-900 text-slate-200">
+                          {getTechnicianDisplay(tech)}
+                        </option>
+                      ))}
+                    </select>
+
+                    {technicianOptions.length === 0 && (
+                      <p className="text-xs font-semibold text-amber-300">
+                        No technicians found in database. Add users with ROLE_TECHNICIAN.
+                      </p>
+                    )}
+
                     <button
                       type="button"
                       onClick={handleAssign}
-                      disabled={!canManage || saving || !technician.trim()}
+                      disabled={!canManage || saving || !technician.trim() || technicianOptions.length === 0}
                       className="w-full rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 px-4 py-3.5 text-xs font-bold uppercase tracking-widest text-white hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 disabled:scale-100 shadow-[0_0_20px_rgba(16,185,129,0.2)] disabled:shadow-none"
                     >
                       {saving ? 'Saving...' : 'Assign Technician'}

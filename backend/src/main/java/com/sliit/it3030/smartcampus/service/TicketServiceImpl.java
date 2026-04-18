@@ -71,17 +71,25 @@ public class TicketServiceImpl implements TicketService {
             throw new IllegalArgumentException("Only staff/admin can assign a technician");
         }
 
+        if (technician == null || technician.isBlank()) {
+            throw new IllegalArgumentException("Technician is required");
+        }
+
+        String technicianId = technician.trim();
+
         TicketModel ticket = ticketRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Ticket not found"));
 
-        ticket.setAssignedTechnician(technician);
+        ticket.setAssignedTechnician(technicianId);
         ticket.setUpdatedAt(LocalDateTime.now());
         
         if (ticket.getFirstRespondedAt() == null) {
             ticket.setFirstRespondedAt(LocalDateTime.now());
         }
 
-        return ticketRepository.save(ticket);
+        TicketModel saved = ticketRepository.save(ticket);
+        notificationService.sendTicketAssignedNotification(technicianId, saved.getId());
+        return saved;
     }
 
     @Override
