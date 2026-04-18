@@ -10,11 +10,21 @@ public class CorsConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         // Allow local dev hosts (Vite may select different localhost ports)
+        String[] allowedOrigins = new String[] {"http://localhost:*", "http://127.0.0.1:*"};
+
         registry.addMapping("/api/**")
-            .allowedOriginPatterns("http://localhost:*", "http://127.0.0.1:*")
+            .allowedOriginPatterns(allowedOrigins)
             .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
             .allowedHeaders("*")
-            .allowCredentials(false)
+            .allowCredentials(true)
+            .maxAge(3600);
+
+        // Also allow OAuth2 endpoints during local development
+        registry.addMapping("/oauth2/**")
+            .allowedOriginPatterns(allowedOrigins)
+            .allowedMethods("GET", "POST", "OPTIONS")
+            .allowedHeaders("*")
+            .allowCredentials(true)
             .maxAge(3600);
     }
 }
