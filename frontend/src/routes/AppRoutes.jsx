@@ -5,6 +5,7 @@ import { useUser } from '../context/UserContext';
 import LoginPage from '../pages/LoginPage';
 import AuthCallbackPage from '../pages/AuthCallbackPage';
 import LocalLoginPage from '../pages/LocalLoginPage';
+import SignUpPage from '../pages/SignUpPage';
 import DashboardPage from '../pages/DashboardPage';
 import NotificationsPage from '../pages/NotificationsPage';
 import ProtectedRoute from '../components/common/ProtectedRoute';
@@ -33,6 +34,7 @@ export default function AppRoutes() {
       {/* Public Routes */}
       <Route path="/login" element={<LoginPage />} />
       <Route path="/login/local" element={<LocalLoginPage />} />
+      <Route path="/signup" element={<SignUpPage />} />
       <Route path="/auth/callback" element={<AuthCallbackPage />} />
 
       {/* Protected Routes with Navbar */}

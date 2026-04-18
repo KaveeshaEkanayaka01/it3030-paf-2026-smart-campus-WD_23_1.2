@@ -62,6 +62,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/github").permitAll()
                 .requestMatchers("/api/auth/login").permitAll()
+                .requestMatchers("/api/auth/register").permitAll()
                 .requestMatchers("/api/auth/me").authenticated()
                 .requestMatchers("/login/**").permitAll()
                 .requestMatchers("/oauth2/**").permitAll()

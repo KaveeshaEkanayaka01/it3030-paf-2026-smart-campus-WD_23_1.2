@@ -1,11 +1,13 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { authApi } from '../api/authApi';
 import { API_BASE_URL } from '../api/httpClient';
 import { FaGoogle, FaGithub } from 'react-icons/fa';
 
 export default function LocalLoginPage() {
-  const [email, setEmail] = useState('');
+  const location = useLocation();
+  const prefilledEmail = location.state?.email || '';
+  const [email, setEmail] = useState(prefilledEmail);
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -141,6 +143,17 @@ export default function LocalLoginPage() {
                 className="text-sm text-white/80 underline"
               >
                 Back
+              </button>
+            </div>
+
+            <div className="text-sm text-white/80">
+              New here?{' '}
+              <button
+                type="button"
+                onClick={() => navigate('/signup')}
+                className="underline text-cyan-300"
+              >
+                Create an account
               </button>
             </div>
           </form>

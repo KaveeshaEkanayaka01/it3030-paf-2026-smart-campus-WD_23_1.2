@@ -2,6 +2,7 @@ package com.sliit.it3030.smartcampus.controller;
 
 import com.sliit.it3030.smartcampus.dto.auth.AuthResponse;
 import com.sliit.it3030.smartcampus.dto.auth.LoginRequest;
+import com.sliit.it3030.smartcampus.dto.auth.RegisterRequest;
 import com.sliit.it3030.smartcampus.dto.auth.UserInfoDto;
 import com.sliit.it3030.smartcampus.model.User;
 import com.sliit.it3030.smartcampus.repository.UserRepository;
@@ -104,6 +105,40 @@ public class AuthController {
         AuthResponse resp = authService.buildAuthResponse(user, token);
 
         return ResponseEntity.ok(resp);
+    }
+
+    /**
+     * POST /api/auth/register
+     * Creates a local email/password account and returns auth token.
+     */
+    @PostMapping("/register")
+    public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
+        String email = request.getEmail().toLowerCase(Locale.ROOT).trim();
+
+        if (!request.getPassword().equals(request.getConfirmPassword())) {
+            throw new IllegalArgumentException("Passwords do not match");
+        }
+
+        if (userRepository.existsByEmail(email)) {
+            throw new IllegalArgumentException("An account with this email already exists");
+        }
+
+        Set<String> roles = new HashSet<>(Set.of(User.ROLE_USER));
+        User user = User.builder()
+                .name(request.getName().trim())
+                .email(email)
+                .password(passwordEncoder.encode(request.getPassword()))
+                .roles(roles)
+                .provider("local")
+                .active(true)
+                .createdAt(LocalDateTime.now())
+                .build();
+
+        user = userRepository.save(user);
+
+        String token = jwtService.generateToken(user.getId(), user.getEmail(), user.getRoles());
+        AuthResponse response = authService.buildAuthResponse(user, token);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     private User getBootstrapUserTemplate(String email, String password) {
