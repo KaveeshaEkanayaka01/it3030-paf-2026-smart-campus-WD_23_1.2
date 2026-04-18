@@ -4,6 +4,3 @@ target/
 
 # Runtime uploads / temp data
 uploads/
-
-# Local secrets file (do not commit)
-src/main/resources/application-secrets.properties
