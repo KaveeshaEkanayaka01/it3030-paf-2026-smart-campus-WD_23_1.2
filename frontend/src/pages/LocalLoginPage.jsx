@@ -35,6 +35,10 @@ export default function LocalLoginPage() {
     window.location.href = `${API_BASE_URL.replace(/\/$/, '')}/oauth2/authorization/github`;
   };
 
+  const handleGoogleLogin = () => {
+    window.location.href = `${API_BASE_URL.replace(/\/$/, '')}/oauth2/authorization/google`;
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center text-white px-4" style={{ backgroundColor: '#021026' }}>
       <div className="w-full max-w-4xl rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 grid grid-cols-1 md:grid-cols-2 overflow-hidden shadow-2xl relative">
@@ -125,9 +129,8 @@ export default function LocalLoginPage() {
           <div className="grid grid-cols-1 gap-3">
             <button
               type="button"
-              disabled
-              title="Google login not configured"
-              className="flex items-center justify-center gap-2 bg-gradient-to-r from-red-500 to-yellow-400 text-white px-4 py-3 rounded-lg text-sm font-medium opacity-95 cursor-not-allowed shadow-md"
+              onClick={handleGoogleLogin}
+              className="flex items-center justify-center gap-2 bg-white text-gray-900 px-4 py-3 rounded-lg text-sm font-medium shadow-md"
             >
               <FaGoogle />
               Continue with Google

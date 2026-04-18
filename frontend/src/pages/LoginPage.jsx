@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { API_BASE_URL } from '../api/httpClient';
-import { FaGithub, FaShieldAlt, FaBell, FaTicketAlt, FaCalendarCheck, FaUsers, FaArrowRight, FaStar } from 'react-icons/fa';
+import { FaGithub, FaGoogle, FaShieldAlt, FaBell, FaTicketAlt, FaCalendarCheck, FaUsers, FaArrowRight, FaStar } from 'react-icons/fa';
 
 export default function LoginPage() {
   const { isAuthenticated, user } = useAuth();
@@ -27,6 +27,10 @@ export default function LoginPage() {
 
   const handleGitHubLogin = () => {
     window.location.href = `${API_BASE_URL.replace(/\/$/, '')}/oauth2/authorization/github`;
+  };
+
+  const handleGoogleLogin = () => {
+    window.location.href = `${API_BASE_URL.replace(/\/$/, '')}/oauth2/authorization/google`;
   };
 
   const features = [
@@ -202,24 +206,38 @@ export default function LoginPage() {
 
         {/* CTA Buttons */}
         <div className="flex flex-col sm:flex-row items-center gap-4 mb-16">
-          {/* Primary - GitHub Login */}
-          <button
-            onClick={handleGitHubLogin}
-            className="group flex items-center gap-3
-                       bg-gradient-to-r from-blue-600 to-purple-600
-                       hover:from-blue-500 hover:to-purple-500
-                       text-white px-8 py-4 rounded-2xl font-bold text-base
-                       transition-all duration-300
-                       hover:shadow-2xl hover:shadow-blue-500/30
-                       hover:-translate-y-1"
-          >
-            <FaGithub size={20} />
-            Continue with GitHub
-            <FaArrowRight
-              size={16}
-              className="group-hover:translate-x-1 transition-transform"
-            />
-          </button>
+          <div className="flex gap-3">
+            <button
+              onClick={handleGitHubLogin}
+              className="group flex items-center gap-3
+                         bg-gradient-to-r from-blue-600 to-purple-600
+                         hover:from-blue-500 hover:to-purple-500
+                         text-white px-6 py-3 rounded-2xl font-bold text-base
+                         transition-all duration-300
+                         hover:shadow-2xl hover:shadow-blue-500/30
+                         hover:-translate-y-1"
+            >
+              <FaGithub size={18} />
+              Continue with GitHub
+              <FaArrowRight
+                size={14}
+                className="group-hover:translate-x-1 transition-transform"
+              />
+            </button>
+
+            <button
+              onClick={handleGoogleLogin}
+              className="group flex items-center gap-3 bg-white text-gray-900 px-6 py-3 rounded-2xl font-bold text-base
+                         transition-all duration-300 hover:shadow-2xl"
+            >
+              <FaGoogle size={18} />
+              Continue with Google
+              <FaArrowRight
+                size={14}
+                className="group-hover:translate-x-1 transition-transform"
+              />
+            </button>
+          </div>
 
           {/* Secondary */}
           <button
