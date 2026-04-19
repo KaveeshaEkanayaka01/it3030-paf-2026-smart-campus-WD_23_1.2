@@ -1,10 +1,12 @@
 package com.sliit.it3030.smartcampus.controller;
 
-import com.sliit.it3030.smartcampus.dto.resource.ResourceRequestDto;
-import com.sliit.it3030.smartcampus.dto.resource.ResourceResponseDto;
+import com.sliit.it3030.smartcampus.dto.resource.ResourceCreateRequest;
+import com.sliit.it3030.smartcampus.dto.resource.ResourceUpdateRequest;
+import com.sliit.it3030.smartcampus.model.Resource;
 import com.sliit.it3030.smartcampus.service.ResourceService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -14,54 +16,75 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/resources")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class ResourceController {
 
     private final ResourceService resourceService;
 
-    @PreAuthorize("hasRole('ADMIN')")
+    /**
+     * POST /api/resources
+     * Create a new resource - ADMIN only
+     */
     @PostMapping
-    public ResponseEntity<ResourceResponseDto> createResource(@Valid @RequestBody ResourceRequestDto requestDto) {
-        return ResponseEntity.ok(resourceService.createResource(requestDto));
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public ResponseEntity<Resource> createResource(
+            @Valid @RequestBody ResourceCreateRequest request) {
+
+        Resource createdResource = resourceService.createResource(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdResource);
     }
 
+    /**
+     * GET /api/resources
+     * Get all resources with optional filters
+     * Example:
+     * /api/resources?type=LAB
+     * /api/resources?location=Engineering Block
+     * /api/resources?minCapacity=30
+     * /api/resources?status=ACTIVE
+     */
     @GetMapping
-    public ResponseEntity<List<ResourceResponseDto>> getAllResources() {
-        return ResponseEntity.ok(resourceService.getAllResources());
+    public ResponseEntity<List<Resource>> getResources(
+            @RequestParam(required = false) String type,
+            @RequestParam(required = false) String location,
+            @RequestParam(required = false) Integer minCapacity,
+            @RequestParam(required = false) String status) {
+
+        List<Resource> resources = resourceService.getResources(type, location, minCapacity, status);
+        return ResponseEntity.ok(resources);
     }
 
+    /**
+     * GET /api/resources/{id}
+     * Get resource details by ID
+     */
     @GetMapping("/{id}")
-    public ResponseEntity<ResourceResponseDto> getResourceById(@PathVariable String id) {
-        return ResponseEntity.ok(resourceService.getResourceById(id));
+    public ResponseEntity<Resource> getResourceById(@PathVariable String id) {
+        Resource resource = resourceService.getResourceById(id);
+        return ResponseEntity.ok(resource);
     }
 
-    @GetMapping("/available")
-    public ResponseEntity<List<ResourceResponseDto>> getAvailableResources() {
-        return ResponseEntity.ok(resourceService.getAvailableResources());
-    }
-
-    @GetMapping("/type/{type}")
-    public ResponseEntity<List<ResourceResponseDto>> getResourcesByType(@PathVariable String type) {
-        return ResponseEntity.ok(resourceService.getResourcesByType(type));
-    }
-
-    @GetMapping("/search")
-    public ResponseEntity<List<ResourceResponseDto>> searchResources(@RequestParam String keyword) {
-        return ResponseEntity.ok(resourceService.searchResources(keyword));
-    }
-
-    @PreAuthorize("hasRole('ADMIN')")
+    /**
+     * PUT /api/resources/{id}
+     * Update resource - ADMIN only
+     */
     @PutMapping("/{id}")
-    public ResponseEntity<ResourceResponseDto> updateResource(
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public ResponseEntity<Resource> updateResource(
             @PathVariable String id,
-            @Valid @RequestBody ResourceRequestDto requestDto) {
-        return ResponseEntity.ok(resourceService.updateResource(id, requestDto));
+            @Valid @RequestBody ResourceUpdateRequest request) {
+
+        Resource updatedResource = resourceService.updateResource(id, request);
+        return ResponseEntity.ok(updatedResource);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    /**
+     * DELETE /api/resources/{id}
+     * Delete resource - ADMIN only
+     */
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteResource(@PathVariable String id) {
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public ResponseEntity<Void> deleteResource(@PathVariable String id) {
         resourceService.deleteResource(id);
-        return ResponseEntity.ok("Resource deleted successfully");
+        return ResponseEntity.noContent().build();
     }
 }

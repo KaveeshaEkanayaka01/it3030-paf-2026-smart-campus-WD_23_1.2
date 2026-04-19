@@ -1,5 +1,6 @@
 package com.sliit.it3030.smartcampus.model;
 
+import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,24 +12,37 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
 
-@Document(collection = "resources")
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@Document(collection = "resources")
 public class Resource {
 
     @Id
     private String id;
 
     private String name;
-    private String type;
-    private String description;
+
+    private ResourceType type;
+
+    @Min(0)
+    private Integer capacity;
+
     private String location;
 
-    private Integer capacity;
-    private boolean available;
+    private String description;
+
+    private ResourceStatus status;
+
     private String imageUrl;
+
+    // Simple availability window support for assignment requirement
+    private String availableFrom;
+    private String availableTo;
+
+    @Builder.Default
+    private Boolean active = true;
 
     @CreatedDate
     private LocalDateTime createdAt;

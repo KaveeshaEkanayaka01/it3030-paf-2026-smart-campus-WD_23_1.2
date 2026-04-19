@@ -1,56 +1,23 @@
-import API from "./axios";
+import api from './authApi'
 
-export const getAllResources = async () => {
-  const res = await API.get("/resources");
-  return res.data;
-};
+export const resourceApi = {
+  getAll(params = {}) {
+    return api.get('/resources', { params })
+  },
 
-export const getAvailableResources = async () => {
-  const res = await API.get("/resources/available");
-  return res.data;
-};
+  getById(id) {
+    return api.get(`/resources/${id}`)
+  },
 
-export const getResourceById = async (id) => {
-  const res = await API.get(`/resources/${id}`);
-  return res.data;
-};
+  create(payload) {
+    return api.post('/resources', payload)
+  },
 
-export const getResourcesByType = async (type) => {
-  const res = await API.get(`/resources/type/${type}`);
-  return res.data;
-};
+  update(id, payload) {
+    return api.put(`/resources/${id}`, payload)
+  },
 
-export const searchResources = async (keyword) => {
-  const res = await API.get(
-    `/resources/search?keyword=${encodeURIComponent(keyword)}`
-  );
-  return res.data;
-};
-
-export const createResource = async (payload) => {
-  const res = await API.post("/resources", payload);
-  return res.data;
-};
-
-export const updateResource = async (id, payload) => {
-  const res = await API.put(`/resources/${id}`, payload);
-  return res.data;
-};
-
-export const deleteResource = async (id) => {
-  const res = await API.delete(`/resources/${id}`);
-  return res.data;
-};
-
-export const uploadImage = async (file) => {
-  const formData = new FormData();
-  formData.append("file", file);
-
-  const res = await API.post("/upload", formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
-
-  return res.data;
-};
+  deleteById(id) {
+    return api.delete(`/resources/${id}`)
+  },
+}

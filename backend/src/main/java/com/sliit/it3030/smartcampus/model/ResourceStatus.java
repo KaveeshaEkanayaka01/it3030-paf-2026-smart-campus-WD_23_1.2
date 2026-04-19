@@ -1,4 +1,4 @@
-package com.sliit.it3030.smartcampus.enums;
+package com.sliit.it3030.smartcampus.model;
 
 public enum ResourceStatus {
     ACTIVE,

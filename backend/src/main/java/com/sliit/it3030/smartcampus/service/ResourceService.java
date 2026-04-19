@@ -1,14 +1,19 @@
 package com.sliit.it3030.smartcampus.service;
 
-import com.sliit.it3030.smartcampus.dto.resource.ResourceRequestDto;
-import com.sliit.it3030.smartcampus.dto.resource.ResourceResponseDto;
-import com.sliit.it3030.smartcampus.exception.ResourceNotFoundException;
+import com.sliit.it3030.smartcampus.dto.resource.ResourceCreateRequest;
+import com.sliit.it3030.smartcampus.dto.resource.ResourceUpdateRequest;
 import com.sliit.it3030.smartcampus.model.Resource;
+import com.sliit.it3030.smartcampus.model.ResourceStatus;
+import com.sliit.it3030.smartcampus.model.ResourceType;
 import com.sliit.it3030.smartcampus.repository.ResourceRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.HttpStatus;
 
 import java.util.List;
+import java.util.Locale;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -16,113 +21,135 @@ public class ResourceService {
 
     private final ResourceRepository resourceRepository;
 
-    public ResourceResponseDto createResource(ResourceRequestDto requestDto) {
-        String name = requestDto.getName().trim();
-        String location = requestDto.getLocation().trim();
-
-        boolean exists = resourceRepository.existsByNameIgnoreCaseAndLocationIgnoreCase(name, location);
-        if (exists) {
-            throw new IllegalArgumentException("A resource with the same name and location already exists");
-        }
+    public Resource createResource(ResourceCreateRequest request) {
+        validateAvailabilityWindow(request.getAvailableFrom(), request.getAvailableTo());
 
         Resource resource = Resource.builder()
-                .name(name)
-                .type(requestDto.getType().trim())
-                .description(requestDto.getDescription().trim())
-                .location(location)
-                .capacity(requestDto.getCapacity())
-                .available(requestDto.getAvailable() != null ? requestDto.getAvailable() : true)
-                .imageUrl(
-                        requestDto.getImageUrl() != null && !requestDto.getImageUrl().trim().isEmpty()
-                                ? requestDto.getImageUrl().trim()
-                                : null)
+                .name(request.getName().trim())
+                .type(request.getType())
+                .capacity(request.getCapacity())
+                .location(request.getLocation().trim())
+                .description(request.getDescription() != null ? request.getDescription().trim() : null)
+                .status(request.getStatus())
+                .imageUrl(request.getImageUrl())
+                .availableFrom(request.getAvailableFrom())
+                .availableTo(request.getAvailableTo())
+                .active(true)
                 .build();
 
-        Resource saved = resourceRepository.save(resource);
-        return mapToDto(saved);
+        return resourceRepository.save(resource);
     }
 
-    public List<ResourceResponseDto> getAllResources() {
-        return resourceRepository.findAll()
-                .stream()
-                .map(this::mapToDto)
-                .toList();
+    public List<Resource> getResources(String type, String location, Integer minCapacity, String status) {
+        List<Resource> resources = resourceRepository.findAll();
+
+        return resources.stream()
+                .filter(resource -> matchesType(resource, type))
+                .filter(resource -> matchesLocation(resource, location))
+                .filter(resource -> matchesMinCapacity(resource, minCapacity))
+                .filter(resource -> matchesStatus(resource, status))
+                .collect(Collectors.toList());
     }
 
-    public ResourceResponseDto getResourceById(String id) {
-        Resource resource = resourceRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Resource not found with id: " + id));
-
-        return mapToDto(resource);
+    public Resource getResourceById(String id) {
+        return resourceRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Resource not found with id: " + id));
     }
 
-    public List<ResourceResponseDto> getAvailableResources() {
-        return resourceRepository.findByAvailable(true)
-                .stream()
-                .map(this::mapToDto)
-                .toList();
-    }
+    public Resource updateResource(String id, ResourceUpdateRequest request) {
+        validateAvailabilityWindow(request.getAvailableFrom(), request.getAvailableTo());
 
-    public List<ResourceResponseDto> getResourcesByType(String type) {
-        return resourceRepository.findByTypeIgnoreCase(type)
-                .stream()
-                .map(this::mapToDto)
-                .toList();
-    }
+        Resource existing = resourceRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Resource not found with id: " + id));
 
-    public List<ResourceResponseDto> searchResources(String keyword) {
-        return resourceRepository.findByNameContainingIgnoreCase(keyword)
-                .stream()
-                .map(this::mapToDto)
-                .toList();
-    }
+        existing.setName(request.getName().trim());
+        existing.setType(request.getType());
+        existing.setCapacity(request.getCapacity());
+        existing.setLocation(request.getLocation().trim());
+        existing.setDescription(request.getDescription() != null ? request.getDescription().trim() : null);
+        existing.setStatus(request.getStatus());
+        existing.setImageUrl(request.getImageUrl());
+        existing.setAvailableFrom(request.getAvailableFrom());
+        existing.setAvailableTo(request.getAvailableTo());
 
-    public ResourceResponseDto updateResource(String id, ResourceRequestDto requestDto) {
-        Resource resource = resourceRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Resource not found with id: " + id));
+        if (request.getActive() != null) {
+            existing.setActive(request.getActive());
+        }
 
-        String name = requestDto.getName().trim();
-        String location = requestDto.getLocation().trim();
-
-        resourceRepository.findByNameIgnoreCaseAndLocationIgnoreCase(name, location)
-                .ifPresent(existing -> {
-                    if (!existing.getId().equals(id)) {
-                        throw new IllegalArgumentException(
-                                "Another resource with the same name and location already exists");
-                    }
-                });
-
-        resource.setName(name);
-        resource.setType(requestDto.getType().trim());
-        resource.setDescription(requestDto.getDescription().trim());
-        resource.setLocation(location);
-        resource.setCapacity(requestDto.getCapacity());
-        resource.setAvailable(requestDto.getAvailable() != null ? requestDto.getAvailable() : resource.isAvailable());
-        resource.setImageUrl(
-                requestDto.getImageUrl() != null && !requestDto.getImageUrl().trim().isEmpty()
-                        ? requestDto.getImageUrl().trim()
-                        : null);
-
-        Resource updated = resourceRepository.save(resource);
-        return mapToDto(updated);
+        return resourceRepository.save(existing);
     }
 
     public void deleteResource(String id) {
-        Resource resource = resourceRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Resource not found with id: " + id));
+        Resource existing = resourceRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Resource not found with id: " + id));
 
-        resourceRepository.delete(resource);
+        resourceRepository.delete(existing);
     }
 
-    private ResourceResponseDto mapToDto(Resource resource) {
-        return new ResourceResponseDto(
-                resource.getId(),
-                resource.getName(),
-                resource.getType(),
-                resource.getDescription(),
-                resource.getLocation(),
-                resource.getCapacity(),
-                resource.isAvailable(),
-                resource.getImageUrl());
+    private boolean matchesType(Resource resource, String type) {
+        if (type == null || type.isBlank()) {
+            return true;
+        }
+
+        try {
+            ResourceType requestedType = ResourceType.valueOf(type.trim().toUpperCase(Locale.ROOT));
+            return resource.getType() == requestedType;
+        } catch (IllegalArgumentException ex) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid resource type: " + type);
+        }
+    }
+
+    private boolean matchesLocation(Resource resource, String location) {
+        if (location == null || location.isBlank()) {
+            return true;
+        }
+
+        return resource.getLocation() != null &&
+                resource.getLocation().toLowerCase(Locale.ROOT)
+                        .contains(location.trim().toLowerCase(Locale.ROOT));
+    }
+
+    private boolean matchesMinCapacity(Resource resource, Integer minCapacity) {
+        if (minCapacity == null) {
+            return true;
+        }
+
+        return resource.getCapacity() != null && resource.getCapacity() >= minCapacity;
+    }
+
+    private boolean matchesStatus(Resource resource, String status) {
+        if (status == null || status.isBlank()) {
+            return true;
+        }
+
+        try {
+            ResourceStatus requestedStatus = ResourceStatus.valueOf(status.trim().toUpperCase(Locale.ROOT));
+            return resource.getStatus() == requestedStatus;
+        } catch (IllegalArgumentException ex) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid resource status: " + status);
+        }
+    }
+
+    private void validateAvailabilityWindow(String availableFrom, String availableTo) {
+        if ((availableFrom == null || availableFrom.isBlank()) &&
+                (availableTo == null || availableTo.isBlank())) {
+            return;
+        }
+
+        if (availableFrom == null || availableFrom.isBlank() ||
+                availableTo == null || availableTo.isBlank()) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Both availableFrom and availableTo must be provided together");
+        }
+
+        if (availableFrom.compareTo(availableTo) >= 0) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "availableFrom must be earlier than availableTo");
+        }
     }
 }
