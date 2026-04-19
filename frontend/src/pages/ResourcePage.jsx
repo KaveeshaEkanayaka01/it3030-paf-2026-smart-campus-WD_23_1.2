@@ -1,5 +1,12 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Search, RefreshCw, PlusCircle, Boxes } from 'lucide-react'
+import { useCallback, useEffect, useState } from 'react'
+import {
+  Search,
+  RefreshCw,
+  PlusCircle,
+  Boxes,
+  Grid2X2,
+  List,
+} from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useAuth } from '../context/AuthContext'
 import { resourceApi } from '../api/resourceApi'
@@ -21,8 +28,11 @@ export default function ResourcePage() {
   const [typeFilter, setTypeFilter] = useState('ALL')
   const [statusFilter, setStatusFilter] = useState('ALL')
   const [locationFilter, setLocationFilter] = useState('')
+  const [minCapacityFilter, setMinCapacityFilter] = useState('')
   const [modalOpen, setModalOpen] = useState(false)
   const [editingResource, setEditingResource] = useState(null)
+  const [viewingResource, setViewingResource] = useState(null)
+  const [layout, setLayout] = useState('grid')
 
   const fetchResources = useCallback(async () => {
     setLoading(true)
@@ -32,6 +42,8 @@ export default function ResourcePage() {
       if (typeFilter !== 'ALL') params.type = typeFilter
       if (statusFilter !== 'ALL') params.status = statusFilter
       if (locationFilter.trim()) params.location = locationFilter.trim()
+      if (search.trim()) params.q = search.trim()
+      if (minCapacityFilter !== '') params.minCapacity = Number(minCapacityFilter)
 
       const res = await resourceApi.getAll(params)
       setResources(Array.isArray(res.data) ? res.data : [])
@@ -40,25 +52,15 @@ export default function ResourcePage() {
     } finally {
       setLoading(false)
     }
-  }, [typeFilter, statusFilter, locationFilter])
+  }, [typeFilter, statusFilter, locationFilter, search, minCapacityFilter])
 
   useEffect(() => {
-    fetchResources()
+    const timeout = setTimeout(() => {
+      fetchResources()
+    }, 300)
+
+    return () => clearTimeout(timeout)
   }, [fetchResources])
-
-  const filteredResources = useMemo(() => {
-    return resources.filter((resource) => {
-      const q = search.trim().toLowerCase()
-      if (!q) return true
-
-      return (
-        String(resource?.name || '').toLowerCase().includes(q) ||
-        String(resource?.location || '').toLowerCase().includes(q) ||
-        String(resource?.type || '').toLowerCase().includes(q) ||
-        String(resource?.description || '').toLowerCase().includes(q)
-      )
-    })
-  }, [resources, search])
 
   const handleCreate = async (payload) => {
     try {
@@ -76,11 +78,12 @@ export default function ResourcePage() {
   }
 
   const handleUpdate = async (payload) => {
-    if (!editingResource?.id) return
+    const resourceId = editingResource?.id || editingResource?._id
+    if (!resourceId) return
 
     try {
       setSaving(true)
-      await resourceApi.update(editingResource.id, payload)
+      await resourceApi.update(resourceId, payload)
       toast.success('Resource updated successfully.')
       setModalOpen(false)
       setEditingResource(null)
@@ -93,11 +96,12 @@ export default function ResourcePage() {
   }
 
   const handleDelete = async (resource) => {
-    if (!resource?.id) return
+    const resourceId = resource?.id || resource?._id
+    if (!resourceId) return
     if (!window.confirm(`Delete "${resource.name}"?`)) return
 
     try {
-      await resourceApi.deleteById(resource.id)
+      await resourceApi.deleteById(resourceId)
       toast.success('Resource deleted successfully.')
       fetchResources()
     } catch (err) {
@@ -106,13 +110,27 @@ export default function ResourcePage() {
   }
 
   const openCreateModal = () => {
+    setViewingResource(null)
     setEditingResource(null)
     setModalOpen(true)
   }
 
   const openEditModal = (resource) => {
+    setViewingResource(null)
     setEditingResource(resource)
     setModalOpen(true)
+  }
+
+  const openViewModal = (resource) => {
+    setEditingResource(null)
+    setViewingResource(resource)
+    setModalOpen(true)
+  }
+
+  const closeModal = () => {
+    setModalOpen(false)
+    setEditingResource(null)
+    setViewingResource(null)
   }
 
   return (
@@ -123,7 +141,8 @@ export default function ResourcePage() {
             <div
               className="w-10 h-10 rounded-xl flex items-center justify-center"
               style={{
-                background: 'linear-gradient(135deg, var(--accent-start), var(--accent-end))',
+                background:
+                  'linear-gradient(135deg, var(--accent-start), var(--accent-end))',
               }}
             >
               <Boxes size={20} className="text-white" />
@@ -136,7 +155,7 @@ export default function ResourcePage() {
                 Resources
               </h1>
               <p
-                className="text-sm"
+                className="text-sm uppercase tracking-[0.18em]"
                 style={{ color: 'var(--text-secondary)' }}
               >
                 Browse and manage campus facilities and assets
@@ -157,9 +176,10 @@ export default function ResourcePage() {
             {isAdmin && (
               <button
                 onClick={openCreateModal}
-                className="px-4 py-2 rounded-xl text-sm font-semibold text-white flex items-center gap-2"
+                className="px-5 py-3 rounded-2xl text-sm font-semibold text-white flex items-center gap-2 shadow-lg"
                 style={{
-                  background: 'linear-gradient(135deg, var(--accent-start), var(--accent-end))',
+                  background:
+                    'linear-gradient(135deg, var(--accent-start), var(--accent-end))',
                 }}
               >
                 <PlusCircle size={16} />
@@ -169,21 +189,27 @@ export default function ResourcePage() {
           </div>
         </div>
 
-        <div className="glass-card p-4 mb-6 flex flex-col lg:flex-row gap-3">
+        <div
+          className="glass-card p-4 mb-6 flex flex-col lg:flex-row gap-3 items-stretch"
+          style={{
+            background: 'rgba(148,163,184,0.18)',
+            border: '1px solid rgba(148,163,184,0.18)',
+          }}
+        >
           <div className="flex-1 relative">
             <Search
               size={16}
-              className="absolute left-3 top-3"
+              className="absolute left-4 top-1/2 -translate-y-1/2"
               style={{ color: 'var(--muted)' }}
             />
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search by name, type, location, or description."
-              className="w-full pl-9 pr-4 py-2.5 rounded-xl text-sm outline-none"
+              placeholder="Search by name, type, location, or description..."
+              className="w-full pl-11 pr-4 py-4 rounded-2xl text-sm outline-none"
               style={{
-                background: 'transparent',
-                border: '1px solid rgba(15,23,42,0.06)',
+                background: 'rgba(15, 23, 42, 0.85)',
+                border: '1px solid rgba(148,163,184,0.18)',
                 color: 'var(--text-primary)',
               }}
             />
@@ -192,10 +218,10 @@ export default function ResourcePage() {
           <select
             value={typeFilter}
             onChange={(e) => setTypeFilter(e.target.value)}
-            className="px-4 py-2.5 rounded-xl text-sm outline-none"
+            className="px-4 py-4 rounded-2xl text-sm outline-none min-w-[160px]"
             style={{
-              background: 'rgba(15, 23, 42, 0.6)',
-              border: '1px solid rgba(148,163,184,0.25)',
+              background: 'rgba(15, 23, 42, 0.85)',
+              border: '1px solid rgba(148,163,184,0.18)',
               color: 'var(--text-primary)',
             }}
           >
@@ -209,10 +235,10 @@ export default function ResourcePage() {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-4 py-2.5 rounded-xl text-sm outline-none"
+            className="px-4 py-4 rounded-2xl text-sm outline-none min-w-[180px]"
             style={{
-              background: 'rgba(15, 23, 42, 0.6)',
-              border: '1px solid rgba(148,163,184,0.25)',
+              background: 'rgba(15, 23, 42, 0.85)',
+              border: '1px solid rgba(148,163,184,0.18)',
               color: 'var(--text-primary)',
             }}
           >
@@ -227,13 +253,69 @@ export default function ResourcePage() {
             value={locationFilter}
             onChange={(e) => setLocationFilter(e.target.value)}
             placeholder="Filter by location"
-            className="px-4 py-2.5 rounded-xl text-sm outline-none"
+            className="px-4 py-4 rounded-2xl text-sm outline-none min-w-[180px]"
             style={{
-              background: 'transparent',
-              border: '1px solid rgba(15,23,42,0.06)',
+              background: 'rgba(15, 23, 42, 0.85)',
+              border: '1px solid rgba(148,163,184,0.18)',
               color: 'var(--text-primary)',
             }}
           />
+
+          <input
+            type="number"
+            min="0"
+            value={minCapacityFilter}
+            onChange={(e) => setMinCapacityFilter(e.target.value)}
+            placeholder="Min capacity"
+            className="px-4 py-4 rounded-2xl text-sm outline-none min-w-[160px]"
+            style={{
+              background: 'rgba(15, 23, 42, 0.85)',
+              border: '1px solid rgba(148,163,184,0.18)',
+              color: 'var(--text-primary)',
+            }}
+          />
+
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => setLayout('grid')}
+              className="w-14 rounded-2xl flex items-center justify-center transition-all"
+              style={{
+                background:
+                  layout === 'grid'
+                    ? 'linear-gradient(135deg, var(--accent-start), var(--accent-end))'
+                    : 'rgba(15, 23, 42, 0.85)',
+                color: '#fff',
+                border: '1px solid rgba(148,163,184,0.18)',
+                boxShadow:
+                  layout === 'grid'
+                    ? '0 0 20px rgba(34,211,238,0.25)'
+                    : 'none',
+              }}
+            >
+              <Grid2X2 size={18} />
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setLayout('list')}
+              className="w-14 rounded-2xl flex items-center justify-center transition-all"
+              style={{
+                background:
+                  layout === 'list'
+                    ? 'linear-gradient(135deg, var(--accent-start), var(--accent-end))'
+                    : 'rgba(15, 23, 42, 0.85)',
+                color: '#fff',
+                border: '1px solid rgba(148,163,184,0.18)',
+                boxShadow:
+                  layout === 'list'
+                    ? '0 0 20px rgba(34,211,238,0.25)'
+                    : 'none',
+              }}
+            >
+              <List size={18} />
+            </button>
+          </div>
         </div>
 
         {!loading && (
@@ -264,7 +346,7 @@ export default function ResourcePage() {
             </div>
             <div className="glass-card p-4 text-center">
               <p className="text-2xl font-bold" style={{ color: 'var(--accent-mid)' }}>
-                {filteredResources.length}
+                {resources.length}
               </p>
               <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
                 Showing
@@ -277,17 +359,33 @@ export default function ResourcePage() {
           <div className="glass-card p-10 text-center" style={{ color: 'var(--text-secondary)' }}>
             Loading resources...
           </div>
-        ) : filteredResources.length === 0 ? (
+        ) : resources.length === 0 ? (
           <div className="glass-card p-10 text-center" style={{ color: 'var(--text-secondary)' }}>
             No resources found.
           </div>
-        ) : (
+        ) : layout === 'grid' ? (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-            {filteredResources.map((resource) => (
+            {resources.map((resource) => (
               <ResourceCard
-                key={resource.id}
+                key={resource.id || resource._id}
                 resource={resource}
                 isAdmin={isAdmin}
+                layout="grid"
+                onView={openViewModal}
+                onEdit={openEditModal}
+                onDelete={handleDelete}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="flex flex-col gap-4">
+            {resources.map((resource) => (
+              <ResourceCard
+                key={resource.id || resource._id}
+                resource={resource}
+                isAdmin={isAdmin}
+                layout="list"
+                onView={openViewModal}
                 onEdit={openEditModal}
                 onDelete={handleDelete}
               />
@@ -298,13 +396,11 @@ export default function ResourcePage() {
 
       <ResourceFormModal
         open={modalOpen}
-        onClose={() => {
-          setModalOpen(false)
-          setEditingResource(null)
-        }}
+        onClose={closeModal}
         onSubmit={editingResource ? handleUpdate : handleCreate}
-        initialData={editingResource}
+        initialData={editingResource || viewingResource}
         loading={saving}
+        readOnly={Boolean(viewingResource)}
       />
     </div>
   )

@@ -41,15 +41,17 @@ public class ResourceController {
      * /api/resources?location=Engineering Block
      * /api/resources?minCapacity=30
      * /api/resources?status=ACTIVE
+     * /api/resources?q=lab
      */
     @GetMapping
     public ResponseEntity<List<Resource>> getResources(
             @RequestParam(required = false) String type,
             @RequestParam(required = false) String location,
             @RequestParam(required = false) Integer minCapacity,
-            @RequestParam(required = false) String status) {
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String q) {
 
-        List<Resource> resources = resourceService.getResources(type, location, minCapacity, status);
+        List<Resource> resources = resourceService.getResources(type, location, minCapacity, status, q);
         return ResponseEntity.ok(resources);
     }
 

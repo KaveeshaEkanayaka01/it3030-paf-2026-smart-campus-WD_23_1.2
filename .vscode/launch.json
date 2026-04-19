@@ -1,0 +1,20 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "java",
+      "name": "BookingAppApplication",
+      "request": "launch",
+      "mainClass": "com.sliit.it3030.smartcampus.BookingAppApplication",
+      "projectName": "backend"
+    },
+    {
+      "type": "java",
+      "name": "Run SmartcampusApplication",
+      "request": "launch",
+      "mainClass": "com.sliit.it3030.smartcampus.SmartcampusApplication",
+      "projectName": "backend",
+      "cwd": "${workspaceFolder}/backend"
+    }
+  ]
+}

@@ -1,4 +1,4 @@
-import api from './authApi'
+import api from './axios'
 
 export const resourceApi = {
   getAll(params = {}) {
