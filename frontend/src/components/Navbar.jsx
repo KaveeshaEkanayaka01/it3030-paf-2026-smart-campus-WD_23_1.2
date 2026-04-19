@@ -63,7 +63,7 @@ export default function Navbar() {
               <CalendarDays size={16} className="text-white" />
             </div>
             <span className="font-bold text-lg" style={{ color: 'var(--text-primary)' }}>
-              Book<span style={{ color: 'var(--accent-mid)' }}>Ease</span>
+              Smart<span style={{ color: 'var(--accent-mid)' }}>Campus</span>
             </span>
           </Link>
 

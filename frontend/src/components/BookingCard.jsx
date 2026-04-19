@@ -1,8 +1,9 @@
 import { format } from 'date-fns';
 import { Clock, MapPin, User, CalendarDays, FileText, XCircle } from 'lucide-react';
 import StatusBadge from './StatusBadge';
+import { toBookingReference } from '../utils/bookingReference';
 
-export default function BookingCard({ booking, onCancel, showUser = false }) {
+export default function BookingCard({ booking, onCancel, showUser = false, bookingReference }) {
   const canCancel = booking.status === 'PENDING' || booking.status === 'APPROVED';
 
   return (
@@ -63,7 +64,7 @@ export default function BookingCard({ booking, onCancel, showUser = false }) {
       {/* Footer */}
       <div className="flex items-center justify-between mt-4 pt-4" style={{ borderTop: '1px solid rgba(15,23,42,0.04)' }}>
         <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>
-          #{booking.id} · {booking.createdAt ? format(new Date(booking.createdAt), 'MMM d') : 'Just now'}
+          {(bookingReference || toBookingReference(booking.id))} · {booking.createdAt ? format(new Date(booking.createdAt), 'MMM d') : 'Just now'}
         </span>
         {onCancel && canCancel && (
           <button

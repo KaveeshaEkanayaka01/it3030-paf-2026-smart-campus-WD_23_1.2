@@ -17,12 +17,12 @@ export default function RejectionModal({ booking, onConfirm, onClose }) {
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ background: 'rgba(15,23,42,0.18)', backdropFilter: 'blur(6px)' }}
+      style={{ background: 'rgba(2, 6, 23, 0.72)', backdropFilter: 'blur(8px)' }}
       onClick={e => e.target === e.currentTarget && onClose()}
     >
       <div
-        className="glass-card w-full max-w-md p-6 animate-[fadeIn_0.2s_ease-out]"
-        style={{ background: 'white' }}
+        className="glass-panel-strong w-full max-w-md p-6 animate-[fadeIn_0.2s_ease-out]"
+        style={{ color: 'var(--text-primary)' }}
       >
         {/* Header */}
         <div className="flex items-center justify-between mb-5">
@@ -32,7 +32,7 @@ export default function RejectionModal({ booking, onConfirm, onClose }) {
             </div>
             <div>
               <h2 className="text-base font-bold" style={{ color: 'var(--text-primary)' }}>Reject Booking</h2>
-              <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>Booking #{booking?.id}</p>
+              <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>Review and provide rejection reason</p>
             </div>
           </div>
           <button
@@ -46,9 +46,18 @@ export default function RejectionModal({ booking, onConfirm, onClose }) {
 
         {/* Booking info */}
         {booking && (
-          <div className="mb-4 p-3 rounded-xl" style={{ background: 'var(--accent-start)', border: '1px solid rgba(15,23,42,0.04)', color: 'white' }}>
+          <div
+            className="mb-4 p-3 rounded-xl"
+            style={{
+              background: 'rgba(15, 23, 42, 0.55)',
+              border: '1px solid rgba(148, 163, 184, 0.24)',
+              color: 'var(--text-primary)'
+            }}
+          >
             <p className="text-sm font-medium">{booking.resourceName}</p>
-            <p className="text-xs mt-0.5">{booking.userName} — {booking.purpose?.substring(0, 60)}{booking.purpose?.length > 60 ? '...' : ''}</p>
+            <p className="text-xs mt-0.5" style={{ color: 'var(--text-secondary)' }}>
+              {booking.userName} — {booking.purpose?.substring(0, 60)}{booking.purpose?.length > 60 ? '...' : ''}
+            </p>
           </div>
         )}
 
@@ -64,12 +73,12 @@ export default function RejectionModal({ booking, onConfirm, onClose }) {
             placeholder="Explain why this booking is being rejected..."
             className="w-full px-4 py-3 text-sm placeholder:text-secondary rounded-xl resize-none outline-none transition-all duration-200"
             style={{
-              background: 'transparent',
-              border: error ? '1px solid var(--status-rejected-border)' : '1px solid rgba(15,23,42,0.06)',
+              background: 'rgba(15, 23, 42, 0.5)',
+              border: error ? '1px solid var(--status-rejected-border)' : '1px solid rgba(148, 163, 184, 0.25)',
               color: 'var(--text-primary)'
             }}
             onFocus={e => { e.target.style.borderColor = 'var(--accent-mid)'; }}
-            onBlur={e => { e.target.style.borderColor = error ? 'var(--status-rejected-border)' : 'rgba(15,23,42,0.06)'; }}
+            onBlur={e => { e.target.style.borderColor = error ? 'var(--status-rejected-border)' : 'rgba(148, 163, 184, 0.25)'; }}
           />
           {error && <p className="mt-1.5 text-xs" style={{ color: '#f87171' }}>{error}</p>}
         </div>
@@ -79,7 +88,7 @@ export default function RejectionModal({ booking, onConfirm, onClose }) {
           <button
             onClick={onClose}
             className="flex-1 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200"
-            style={{ background: 'transparent', color: 'var(--text-secondary)', border: '1px solid rgba(15,23,42,0.04)' }}
+            style={{ background: 'rgba(15, 23, 42, 0.45)', color: 'var(--text-secondary)', border: '1px solid rgba(148, 163, 184, 0.22)' }}
           >
             Cancel
           </button>

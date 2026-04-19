@@ -5,6 +5,7 @@ import BookingCard from '../components/BookingCard';
 import toast from 'react-hot-toast';
 import { BookOpen, RefreshCw, PlusCircle, Search } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { buildBookingReferenceMap } from '../utils/bookingReference';
 
 const FILTER_OPTIONS = ['ALL', 'PENDING', 'APPROVED', 'REJECTED', 'CANCELLED'];
 
@@ -49,6 +50,8 @@ export default function MyBookingsPage() {
       b.resourceName.toLowerCase().includes(search.toLowerCase()) ||
       b.purpose.toLowerCase().includes(search.toLowerCase())
     );
+
+  const bookingReferences = buildBookingReferenceMap(bookings);
 
   const filterBg = { PENDING: 'var(--status-pending)', APPROVED: 'var(--status-approved)', REJECTED: 'var(--status-rejected)', CANCELLED: 'var(--status-cancelled)' };
 
@@ -145,7 +148,12 @@ export default function MyBookingsPage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {filtered.map(b => (
-              <BookingCard key={b.id} booking={b} onCancel={handleCancel} />
+              <BookingCard
+                key={b.id}
+                booking={b}
+                onCancel={handleCancel}
+                bookingReference={bookingReferences[b.id]}
+              />
             ))}
           </div>
         )}

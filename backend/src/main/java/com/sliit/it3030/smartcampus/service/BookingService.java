@@ -194,6 +194,16 @@ public class BookingService {
     }
 
     // =============================================================
+    // DELETE /api/bookings/{id} — Delete booking (ADMIN)
+    // =============================================================
+    @Transactional
+    public void deleteBooking(String id) {
+        Booking booking = findById(id);
+        bookingRepository.delete(booking);
+        log.info("Booking id={} permanently DELETED", id);
+    }
+
+    // =============================================================
     // Helpers
     // =============================================================
     private Booking findById(String id) {

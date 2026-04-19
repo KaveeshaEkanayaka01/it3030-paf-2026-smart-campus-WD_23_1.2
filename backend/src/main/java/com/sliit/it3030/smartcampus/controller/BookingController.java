@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import com.sliit.it3030.smartcampus.dto.BookingRequest;
@@ -104,5 +105,15 @@ public class BookingController {
     @GetMapping("/stats")
     public ResponseEntity<Map<String, Long>> getStats() {
         return ResponseEntity.ok(bookingService.getStats());
+    }
+
+    // ──────────────────────────────────────────────
+    // 8. DELETE /api/bookings/{id} — Permanently delete (Admin only)
+    // ──────────────────────────────────────────────
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public ResponseEntity<Void> deleteBooking(@PathVariable String id) {
+        bookingService.deleteBooking(id);
+        return ResponseEntity.noContent().build();
     }
 }

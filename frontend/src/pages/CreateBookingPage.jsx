@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
 import { bookingApi } from '../api/bookingApi';
 import toast from 'react-hot-toast';
 import { PlusCircle, Calendar, Clock, MapPin, FileText, ChevronRight } from 'lucide-react';
+import { toUserBookingReference } from '../utils/bookingReference';
 
 const RESOURCES = [
   { id: 'room_001', name: 'Conference Room A' },
@@ -28,6 +29,22 @@ export default function CreateBookingPage() {
     purpose: '',
   });
   const [loading, setLoading] = useState(false);
+  const [nextBookingSequence, setNextBookingSequence] = useState(1);
+
+  useEffect(() => {
+    const loadMyBookings = async () => {
+      if (!currentUser.userId) return;
+      try {
+        const res = await bookingApi.getMyBookings(currentUser.userId);
+        const total = Array.isArray(res.data) ? res.data.length : 0;
+        setNextBookingSequence(total + 1);
+      } catch {
+        setNextBookingSequence(1);
+      }
+    };
+
+    loadMyBookings();
+  }, [currentUser.userId]);
 
   const handleResourceChange = (e) => {
     const selected = RESOURCES.find(r => r.id === e.target.value);
@@ -93,14 +110,29 @@ export default function CreateBookingPage() {
               value={form.resourceId}
               onChange={handleResourceChange}
               className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-all duration-200"
-              style={{ background: 'transparent', border: '1px solid rgba(15,23,42,0.06)', color: 'var(--text-primary)' }}
+              style={{
+                background: 'rgba(15, 23, 42, 0.6)',
+                border: '1px solid rgba(148, 163, 184, 0.25)',
+                color: 'var(--text-primary)',
+              }}
               onFocus={e => e.target.style.borderColor = 'var(--accent-mid)'}
-              onBlur={e => e.target.style.borderColor = 'rgba(15,23,42,0.06)'}
+              onBlur={e => e.target.style.borderColor = 'rgba(148, 163, 184, 0.25)'}
               required
             >
-              <option value="">Select a resource...</option>
+              <option
+                value=""
+                style={{ backgroundColor: '#0f172a', color: 'var(--text-secondary)' }}
+              >
+                Select a resource...
+              </option>
               {RESOURCES.map(r => (
-                <option key={r.id} value={r.id}>{r.name}</option>
+                <option
+                  key={r.id}
+                  value={r.id}
+                  style={{ backgroundColor: '#0f172a', color: 'var(--text-primary)' }}
+                >
+                  {r.name}
+                </option>
               ))}
             </select>
           </div>
@@ -163,8 +195,12 @@ export default function CreateBookingPage() {
           <div className="p-3 rounded-xl" style={{ background: 'var(--accent-start)', border: '1px solid rgba(15,23,42,0.04)', color: 'white' }}>
             <p className="text-xs">
               Booking as: <span className="font-medium">{currentUser.userName}</span>
-              <span className="mx-2">·</span>
-              ID: <span className="font-mono text-xs">{currentUser.userId}</span>
+            </p>
+            <p className="text-xs mt-1">
+              Booking Ref (preview):{' '}
+              <span className="font-mono text-xs font-semibold">
+                {toUserBookingReference(currentUser.userName || currentUser.userId, nextBookingSequence)}
+              </span>
             </p>
           </div>
 

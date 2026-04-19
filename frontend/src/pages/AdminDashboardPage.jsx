@@ -5,9 +5,10 @@ import StatusBadge from '../components/StatusBadge';
 import RejectionModal from '../components/RejectionModal';
 import toast from 'react-hot-toast';
 import { format } from 'date-fns';
+import { buildBookingReferenceMap } from '../utils/bookingReference';
 import {
   LayoutDashboard, CheckCircle, XCircle, Ban, RefreshCw,
-  Search, ChevronDown, ChevronUp, Users, Clock, CheckSquare, AlertCircle
+  Search, ChevronDown, ChevronUp, Users, Clock, CheckSquare, AlertCircle, Trash2
 } from 'lucide-react';
 
 const FILTER_OPTIONS = ['ALL', 'PENDING', 'APPROVED', 'REJECTED', 'CANCELLED'];
@@ -87,6 +88,18 @@ export default function AdminDashboardPage() {
     }
   };
 
+  const handleDelete = async (id) => {
+    if (!window.confirm('Delete this booking from database permanently?')) return;
+    try {
+      await bookingApi.deleteById(id);
+      toast.success('Booking deleted from database.');
+      fetchData();
+    } catch (err) {
+      console.error('Delete error:', err);
+      toast.error(err?.response?.data?.message || err?.message || 'Failed to delete booking.');
+    }
+  };
+
   const handleSort = (field) => {
     if (sortField === field) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
     else { setSortField(field); setSortDir('asc'); }
@@ -112,6 +125,8 @@ export default function AdminDashboardPage() {
       if (va > vb) return sortDir === 'asc' ? 1 : -1;
       return 0;
     });
+
+  const bookingReferences = buildBookingReferenceMap(bookings);
 
   const statCards = [
     { label: 'Total', value: stats.TOTAL || 0, icon: <Users size={20} />, color: 'var(--accent-mid)', bg: 'rgba(99,102,241,0.12)' },
@@ -209,7 +224,7 @@ export default function AdminDashboardPage() {
               <table className="w-full">
                 <thead>
                     <tr style={{ background: 'transparent' }}>
-                    <th style={thStyle} onClick={() => handleSort('id')}><span className="flex items-center gap-1">#<SortIcon field="id" /></span></th>
+                    <th style={thStyle} onClick={() => handleSort('id')}><span className="flex items-center gap-1">Booking Ref<SortIcon field="id" /></span></th>
                     <th style={thStyle} onClick={() => handleSort('resourceName')}><span className="flex items-center gap-1">Resource<SortIcon field="resourceName" /></span></th>
                     <th style={thStyle} onClick={() => handleSort('userName')}><span className="flex items-center gap-1">User<SortIcon field="userName" /></span></th>
                     <th style={thStyle} onClick={() => handleSort('startTime')}><span className="flex items-center gap-1">Time Slot<SortIcon field="startTime" /></span></th>
@@ -236,7 +251,7 @@ export default function AdminDashboardPage() {
                       onMouseEnter={e => e.currentTarget.style.background = 'rgba(99,102,241,0.03)'}
                       onMouseLeave={e => e.currentTarget.style.background = i % 2 === 0 ? 'transparent' : 'rgba(15,23,42,0.02)'}
                     >
-                      <td style={{ padding: '14px 16px', color: 'var(--text-secondary)' }} className="text-xs font-mono">#{b.id}</td>
+                      <td style={{ padding: '14px 16px', color: 'var(--text-secondary)' }} className="text-xs font-mono">{bookingReferences[b.id]}</td>
                       <td style={{ padding: '14px 16px' }}>
                         <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{b.resourceName}</p>
                         <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>{b.resourceId}</p>
@@ -290,6 +305,16 @@ export default function AdminDashboardPage() {
                               style={{ background: 'var(--status-cancelled-bg)', color: 'var(--status-cancelled)', border: '1px solid var(--status-cancelled-border)' }}
                             >
                               <Ban size={15} />
+                            </button>
+                          )}
+                          {(b.status === 'REJECTED' || b.status === 'CANCELLED') && (
+                            <button
+                              onClick={() => handleDelete(b.id)}
+                              title="Delete from DB"
+                              className="p-1.5 rounded-lg transition-all hover:scale-110"
+                              style={{ background: 'rgba(239,68,68,0.12)', color: '#ef4444', border: '1px solid rgba(239,68,68,0.35)' }}
+                            >
+                              <Trash2 size={15} />
                             </button>
                           )}
                         </div>

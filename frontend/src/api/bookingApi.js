@@ -23,6 +23,9 @@ export const bookingApi = {
   // 7. GET /api/bookings/resource/{resourceId}
   getByResource: (resourceId) => api.get(`/bookings/resource/${resourceId}`),
 
+  // 8. DELETE /api/bookings/{id}
+  deleteById: (id) => api.delete(`/bookings/${id}`),
+
   // Bonus: GET /api/bookings/stats
   getStats: () => api.get('/bookings/stats'),
 };

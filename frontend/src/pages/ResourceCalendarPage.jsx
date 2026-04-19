@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { bookingApi } from '../api/bookingApi';
 import StatusBadge from '../components/StatusBadge';
+import { buildBookingReferenceMap } from '../utils/bookingReference';
 import toast from 'react-hot-toast';
 import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, isSameMonth, isSameDay, parseISO } from 'date-fns';
 import { CalendarDays, ChevronLeft, ChevronRight, MapPin } from 'lucide-react';
@@ -62,6 +63,7 @@ export default function ResourceCalendarPage() {
   }
 
   const selectedDayBookings = selectedDay ? getBookingsForDay(selectedDay) : [];
+  const bookingReferences = buildBookingReferenceMap(bookings);
 
   return (
     <div className="min-h-screen py-10 px-4 page-enter">
@@ -222,7 +224,7 @@ export default function ResourceCalendarPage() {
                       <div key={b.id} className="p-3 rounded-xl" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}>
                         <div className="flex items-center justify-between mb-2">
                           <StatusBadge status={b.status} size="sm" />
-                          <span className="text-xs text-slate-500 font-mono">#{b.id}</span>
+                          <span className="text-xs text-slate-500 font-mono">{bookingReferences[b.id]}</span>
                         </div>
                         <p className="text-sm font-medium text-white">{b.userName}</p>
                         <p className="text-xs text-slate-400 mt-0.5">{b.purpose?.substring(0, 60)}</p>
