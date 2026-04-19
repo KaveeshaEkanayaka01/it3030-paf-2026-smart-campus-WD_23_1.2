@@ -39,90 +39,61 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            // ✅ Apply CORS first
-            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .csrf(csrf -> csrf.disable())
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .exceptionHandling(ex -> ex
+                        .defaultAuthenticationEntryPointFor(
+                                new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED),
+                                new AntPathRequestMatcher("/api/**")))
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/auth/github").permitAll()
+                        .requestMatchers("/api/auth/login").permitAll()
+                        .requestMatchers("/api/auth/register").permitAll()
+                        .requestMatchers("/api/auth/me").authenticated()
+                        .requestMatchers("/login/**").permitAll()
+                        .requestMatchers("/oauth2/**").permitAll()
 
-            // Disable CSRF
-            .csrf(csrf -> csrf.disable())
+                        // ✅ ADD THIS LINE (ONLY CHANGE)
+                        .requestMatchers("/uploads/**").permitAll()
 
-            // Stateless session
-            .sessionManagement(session ->
-                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            )
+                        .requestMatchers(HttpMethod.GET, "/api/resources/**").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/resources/**").hasAuthority("ROLE_ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/resources/**").hasAuthority("ROLE_ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/resources/**").hasAuthority("ROLE_ADMIN")
+                        .requestMatchers("/api/bookings/**").authenticated()
+                        .requestMatchers("/api/tickets/**").authenticated()
+                        .requestMatchers("/api/notifications/**").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/users").hasAuthority("ROLE_ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/users/*/role").hasAuthority("ROLE_ADMIN")
+                        .anyRequest().authenticated())
+                .addFilterBefore(
+                        jwtAuthenticationFilter,
+                        UsernamePasswordAuthenticationFilter.class);
 
-            // Return 401 for API requests instead of redirecting to OAuth login page
-            .exceptionHandling(ex -> ex
-                .defaultAuthenticationEntryPointFor(
-                    new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED),
-                    new AntPathRequestMatcher("/api/**")
-                )
-            )
-
-            // Authorization rules
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/github").permitAll()
-                .requestMatchers("/api/auth/login").permitAll()
-                .requestMatchers("/api/auth/register").permitAll()
-                .requestMatchers("/api/auth/me").authenticated()
-                .requestMatchers("/login/**").permitAll()
-                .requestMatchers("/oauth2/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/resources/**").authenticated()
-                .requestMatchers(HttpMethod.POST, "/api/resources/**").hasAuthority("ROLE_ADMIN")
-                .requestMatchers(HttpMethod.PUT, "/api/resources/**").hasAuthority("ROLE_ADMIN")
-                .requestMatchers(HttpMethod.DELETE, "/api/resources/**").hasAuthority("ROLE_ADMIN")
-                .requestMatchers("/api/bookings/**").authenticated()
-                .requestMatchers("/api/tickets/**").authenticated()
-                .requestMatchers("/api/notifications/**").authenticated()
-                .requestMatchers(HttpMethod.GET, "/api/users").hasAuthority("ROLE_ADMIN")
-                .requestMatchers(HttpMethod.PUT, "/api/users/*/role").hasAuthority("ROLE_ADMIN")
-                .anyRequest().authenticated()
-            )
-
-            // JWT filter
-            .addFilterBefore(
-                jwtAuthenticationFilter,
-                UsernamePasswordAuthenticationFilter.class
-            );
-
-        // Enable OAuth2 login only when at least one client registration is configured.
         if (clientRegistrationRepositoryProvider.getIfAvailable() != null) {
             http.oauth2Login(oauth2 -> oauth2
-                .userInfoEndpoint(userInfo ->
-                    userInfo.userService(customOAuth2UserService)
-                )
-                .successHandler(oAuth2LoginSuccessHandler)
-            );
+                    .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
+                    .successHandler(oAuth2LoginSuccessHandler));
         }
 
         return http.build();
     }
 
-    // CORS configuration
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
 
-        // Allow frontend
         config.setAllowedOrigins(List.of("http://localhost:5173"));
-
-        // Allow all methods
         config.setAllowedMethods(List.of(
-            "GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"
-        ));
-
-        // Allow headers
+                "GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of(
-            "Authorization",
-            "Content-Type",
-            "Accept",
-            "Origin",
-            "X-Requested-With"
-        ));
-
-        // Allow credentials
+                "Authorization",
+                "Content-Type",
+                "Accept",
+                "Origin",
+                "X-Requested-With"));
         config.setAllowCredentials(true);
-
-        // Cache preflight
         config.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

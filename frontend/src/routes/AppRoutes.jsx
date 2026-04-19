@@ -19,6 +19,9 @@ import MyBookingsPage from '../pages/MyBookingsPage';
 import AdminDashboardPage from '../pages/AdminDashboardPage';
 import ResourceCalendarPage from '../pages/ResourceCalendarPage';
 
+// Resource Pages
+import ResourcePage from '../pages/ResourcePage';
+
 // Ticket Pages
 import { AdminPanelPage } from '../pages/adminpanel';
 import { CreateTicketPage } from '../pages/createticket';
@@ -75,6 +78,9 @@ export default function AppRoutes() {
                   />
                   <Route path="/calendar" element={<ResourceCalendarPage />} />
 
+                  {/* Resource Route */}
+                  <Route path="/resources" element={<ResourcePage />} />
+
                   {/* Ticket Routes */}
                   <Route path="/my-tickets" element={<MyTicketsPage />} />
                   <Route path="/create-ticket" element={<CreateTicketPage />} />
@@ -82,7 +88,7 @@ export default function AppRoutes() {
                   <Route
                     path="/technician"
                     element={
-                      <ProtectedRoute requiredRoles={["ROLE_TECHNICIAN", "ROLE_ADMIN"]}>
+                      <ProtectedRoute requiredRoles={['ROLE_TECHNICIAN', 'ROLE_ADMIN']}>
                         <TechnicianPanelPage />
                       </ProtectedRoute>
                     }
