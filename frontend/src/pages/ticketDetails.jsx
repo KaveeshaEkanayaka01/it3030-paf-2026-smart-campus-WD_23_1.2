@@ -41,7 +41,7 @@ export const TicketDetailsPage = () => {
   const [technicianOptions, setTechnicianOptions] = useState([]);
   const [userDisplayMap, setUserDisplayMap] = useState({});
   const [assigning, setAssigning] = useState(false);
-  const currentUserId = user?.id || getCurrentUserId() || 'wd23-student';
+  const currentUserId = user?.id || '';
   const currentUserRole = useMemo(() => {
     const roles = Array.isArray(user?.roles) ? user.roles : [];
     if (roles.includes('ROLE_ADMIN')) return 'ADMIN';
@@ -68,9 +68,7 @@ export const TicketDetailsPage = () => {
         .filter(Boolean)
     );
   }, [currentUserId, user]);
-  const currentCommentIdentityId = useMemo(() => {
-    return String(getCurrentUserId() || user?.id || '').trim();
-  }, [user]);
+  const currentCommentIdentityId = user?.id || '';
 
   const createdByDisplayName = useMemo(() => {
     const createdBy = String(ticket?.createdBy || '').trim();
@@ -618,7 +616,7 @@ export const TicketDetailsPage = () => {
               <div className="relative z-10 flex items-center justify-between">
                 <div>
                    <p className="text-[10px] font-bold uppercase tracking-widest text-indigo-200 mb-1">Assigned Technician</p>
-                   <p className="text-xl font-extrabold uppercase tracking-tight">{ticket.assignedTechnician}</p>
+                   <p className="text-xl font-extrabold uppercase tracking-tight">{userDisplayMap[ticket.assignedTechnician] || ticket.assignedTechnician}</p>
                 </div>
                 <div className="bg-white/20 p-3 rounded-full backdrop-blur-sm border border-white/30">
                   <User size={24} className="text-white" />

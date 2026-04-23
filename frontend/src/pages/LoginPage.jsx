@@ -23,9 +23,15 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (isAuthenticated) {
-      const isAdmin =
-        Array.isArray(user?.roles) && user.roles.includes('ROLE_ADMIN');
-      navigate(isAdmin ? '/admin-dashboard' : '/dashboard');
+      const isAdmin = Array.isArray(user?.roles) && user.roles.includes('ROLE_ADMIN');
+      const isTechnician = Array.isArray(user?.roles) && user.roles.includes('ROLE_TECHNICIAN');
+      if (isAdmin) {
+        navigate('/admin-dashboard');
+      } else if (isTechnician) {
+        navigate('/technician');
+      } else {
+        navigate('/dashboard');
+      }
     }
   }, [isAuthenticated, user, navigate]);
 

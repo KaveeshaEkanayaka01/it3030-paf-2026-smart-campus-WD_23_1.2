@@ -66,7 +66,7 @@ public class CommentService {
         log.info("Comment added to ticket {} by user {}", ticketId, effectiveAuthorId);
 
         // Trigger notification for new comment
-        notificationService.sendNewCommentNotification(ticketId, effectiveAuthorName);
+        notificationService.sendNewCommentNotification(ticketId, effectiveAuthorName, effectiveAuthorId);
 
         return mapToResponse(saved, currentUser.getId());
     }
@@ -118,10 +118,12 @@ public class CommentService {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Comment", commentId));
 
-        boolean isAdmin = currentUser.getRoles().contains(User.ROLE_ADMIN);
         boolean isOwner = comment.getAuthorId().equals(currentUser.getId());
+        boolean isModerator = currentUser.getRoles().contains(User.ROLE_ADMIN) 
+                || currentUser.getRoles().contains(User.ROLE_STAFF)
+                || currentUser.getRoles().contains(User.ROLE_TECHNICIAN);
 
-        if (!isAdmin && !isOwner) {
+        if (!isModerator && !isOwner) {
             throw new UnauthorizedException("You cannot delete this comment");
         }
 

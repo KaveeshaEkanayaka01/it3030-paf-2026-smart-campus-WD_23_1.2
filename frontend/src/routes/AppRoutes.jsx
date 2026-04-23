@@ -28,6 +28,7 @@ import { CreateTicketPage } from '../pages/createticket';
 import { MyTicketsPage } from '../pages/myticket';
 import { TechnicianPanelPage } from '../pages/technicianpanel';
 import { TicketDetailsPage } from '../pages/ticketDetails';
+import UserManagement from '../pages/UserManagement';
 
 export default function AppRoutes() {
   const { currentUser } = useUser();
@@ -54,7 +55,11 @@ export default function AppRoutes() {
                     path="/"
                     element={
                       <Navigate
-                        to={currentUser?.role === 'ADMIN' ? '/admin-dashboard' : '/dashboard'}
+                        to={
+                          currentUser?.role === 'ADMIN' || currentUser?.role === 'ROLE_ADMIN' 
+                            ? '/admin-dashboard' 
+                            : (currentUser?.role === 'TECHNICIAN' || currentUser?.role === 'ROLE_TECHNICIAN' ? '/technician' : '/dashboard')
+                        }
                         replace
                       />
                     }
@@ -98,6 +103,14 @@ export default function AppRoutes() {
                     element={
                       <ProtectedRoute requiredRole="ROLE_ADMIN">
                         <AdminPanelPage />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/users"
+                    element={
+                      <ProtectedRoute requiredRole="ROLE_ADMIN">
+                        <UserManagement />
                       </ProtectedRoute>
                     }
                   />

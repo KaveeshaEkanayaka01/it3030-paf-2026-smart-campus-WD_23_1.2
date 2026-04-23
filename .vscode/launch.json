@@ -3,6 +3,20 @@
   "configurations": [
     {
       "type": "java",
+      "name": "SmartCampusApplication",
+      "request": "launch",
+      "mainClass": "com.sliit.it3030.smartcampus.SmartCampusApplication",
+      "projectName": "smartcampus"
+    },
+    {
+      "type": "java",
+      "name": "SmartcampusApplication",
+      "request": "launch",
+      "mainClass": "com.sliit.it3030.smartcampus.SmartcampusApplication",
+      "projectName": "smartcampus"
+    },
+    {
+      "type": "java",
       "name": "BookingAppApplication",
       "request": "launch",
       "mainClass": "com.sliit.it3030.smartcampus.BookingAppApplication",

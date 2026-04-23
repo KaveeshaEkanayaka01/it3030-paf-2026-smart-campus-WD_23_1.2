@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CheckCircle2, ClipboardList, RefreshCcw, ShieldCheck, UserCheck, Wrench } from 'lucide-react';
 import { TicketStatusBadge } from '../components/TicketStatusBadge';
-import { getCurrentUserId, getCurrentUserRole, setCurrentUserId, ticketService } from '../api/ticketService';
+import { ticketService } from '../api/ticketService';
 import { authApi } from '../api/authApi';
 import { useAuth } from '../context/AuthContext';
 
@@ -34,48 +34,21 @@ export const TechnicianPanelPage = () => {
   const [savingTicketId, setSavingTicketId] = useState('');
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
-  const [technicianOptions, setTechnicianOptions] = useState([]);
   const [userDisplayMap, setUserDisplayMap] = useState({});
-  const [identityInput, setIdentityInput] = useState(getCurrentUserId() || user?.id || 'wd23-student');
-  const [activeIdentity, setActiveIdentity] = useState(getCurrentUserId() || user?.id || 'wd23-student');
+  const activeIdentity = user?.id || '';
 
-  const currentRole = getCurrentUserRole();
-
-  const assignmentActor = String(activeIdentity || '').trim();
-  const technicianIdentitySet = useMemo(() => {
-    return new Set(
-      [
-        activeIdentity,
-      ]
-        .map((value) => String(value || '').trim().toLowerCase())
-        .filter(Boolean)
-    );
-  }, [activeIdentity]);
-
-  const getTechnicianDisplay = (technicianOption) => {
-    const name = String(technicianOption?.name || '').trim();
-    const username = String(technicianOption?.githubUsername || '').trim();
-    const id = String(technicianOption?.id || '').trim();
-
-    if (name && id) {
-      return `${name} (${id})`;
-    }
-
-    return name || username || id || 'Unknown Technician';
-  };
-
-  const activeIdentityLabel = useMemo(() => {
-    const selected = technicianOptions.find((tech) => String(tech?.id || '') === String(activeIdentity || ''));
-    if (selected) {
-      return getTechnicianDisplay(selected);
-    }
-
-    return String(activeIdentity || '').trim() || 'Unknown User';
-  }, [technicianOptions, activeIdentity]);
+  const currentRole = useMemo(() => {
+    if (!user?.roles?.length) return 'USER';
+    if (user.roles.includes('ROLE_ADMIN')) return 'ADMIN';
+    if (user.roles.includes('ROLE_STAFF')) return 'STAFF';
+    if (user.roles.includes('ROLE_TECHNICIAN')) return 'TECHNICIAN';
+    return 'USER';
+  }, [user]);
 
   const isAssignedToCurrentTechnician = (ticket) => {
     const assigned = String(ticket?.assignedTechnician || '').trim().toLowerCase();
-    return Boolean(assigned) && technicianIdentitySet.has(assigned);
+    const active = String(activeIdentity || '').trim().toLowerCase();
+    return Boolean(assigned) && Boolean(active) && assigned === active;
   };
 
   const canManage = TECH_ROLES.includes(currentRole);
@@ -121,51 +94,6 @@ export const TechnicianPanelPage = () => {
     loadUserDisplayMap();
   }, []);
 
-  useEffect(() => {
-    const loadTechnicians = async () => {
-      try {
-        const response = await authApi.getTechnicians();
-        const technicians = Array.isArray(response?.data) ? response.data : [];
-        setTechnicianOptions(technicians);
-
-        if (!identityInput && technicians.length > 0) {
-          const fallbackId = String(technicians[0]?.id || '').trim();
-          if (fallbackId) {
-            setIdentityInput(fallbackId);
-          }
-        }
-      } catch {
-        setTechnicianOptions([]);
-      }
-    };
-
-    loadTechnicians();
-  }, []);
-
-  useEffect(() => {
-    const persistedIdentity = getCurrentUserId();
-    if (persistedIdentity) {
-      setIdentityInput(persistedIdentity);
-      setActiveIdentity(persistedIdentity);
-    }
-  }, []);
-
-  const applyIdentity = () => {
-    const selectedIdentity = String(identityInput || '').trim();
-    if (!selectedIdentity) {
-      setError('Select a technician identity before continuing.');
-      return;
-    }
-
-    if (!setCurrentUserId(selectedIdentity)) {
-      setError('Failed to set technician identity.');
-      return;
-    }
-
-    setActiveIdentity(selectedIdentity);
-    setError('');
-  };
-
   const updateTicketInState = (updatedTicket) => {
     setTickets((prev) => prev.map((ticket) => (ticket.id === updatedTicket.id ? { ...ticket, ...updatedTicket } : ticket)));
   };
@@ -184,8 +112,8 @@ export const TechnicianPanelPage = () => {
     try {
       setSavingTicketId(ticket.id);
       setError('');
-      const updated = await ticketService.assignTechnician(ticket.id, assignmentActor, currentRole);
-      updateTicketInState(updated || { ...ticket, assignedTechnician: assignmentActor });
+      const updated = await ticketService.assignTechnician(ticket.id, activeIdentity, currentRole);
+      updateTicketInState(updated || { ...ticket, assignedTechnician: activeIdentity });
     } catch (err) {
       console.error('Failed to claim ticket:', err);
       const backendMessage = err?.response?.data?.message || err?.response?.data?.detail || err?.response?.data?.error;
@@ -234,11 +162,7 @@ export const TechnicianPanelPage = () => {
 
   const filteredTickets = useMemo(() => {
     const needle = search.toLowerCase();
-    const base = tickets.filter((ticket) => {
-      const mine = isAssignedToCurrentTechnician(ticket);
-      const unassigned = !String(ticket.assignedTechnician || '').trim();
-      return mine || unassigned;
-    });
+    const base = tickets.filter((ticket) => isAssignedToCurrentTechnician(ticket));
 
     return base.filter((ticket) => (
       String(ticket.category || '').toLowerCase().includes(needle)
@@ -247,10 +171,9 @@ export const TechnicianPanelPage = () => {
       || String(ticket.createdBy || '').toLowerCase().includes(needle)
       || String(getCreatedByDisplay(ticket.createdBy)).toLowerCase().includes(needle)
     ));
-  }, [tickets, search, technicianIdentitySet, userDisplayMap]);
+  }, [tickets, search, activeIdentity, userDisplayMap]);
 
-  const assignedToMe = filteredTickets.filter((ticket) => isAssignedToCurrentTechnician(ticket));
-  const unassigned = filteredTickets.filter((ticket) => !String(ticket.assignedTechnician || '').trim());
+  const assignedToMe = filteredTickets;
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 relative page-enter">
@@ -280,50 +203,19 @@ export const TechnicianPanelPage = () => {
         </div>
       </div>
 
-      <div className="mb-6 glass-panel border-sky-500/25 bg-sky-500/10 px-5 py-4 rounded-2xl backdrop-blur-md">
-        <p className="text-[11px] font-bold uppercase tracking-wider text-sky-300">Technician Identity Switch</p>
-        <p className="mt-1 text-xs text-sky-100/80">
-          Choose which technician profile to act as when claiming and viewing assigned tickets.
-        </p>
-        <div className="mt-3 flex flex-col gap-2.5 sm:flex-row sm:items-center">
-          <select
-            value={identityInput}
-            onChange={(e) => setIdentityInput(e.target.value)}
-            className="w-full glass-input rounded-xl px-3.5 py-2.5 text-xs font-semibold outline-none text-slate-200 cursor-pointer"
-          >
-            <option value="" className="bg-slate-900 text-slate-300">Select technician identity</option>
-            {technicianOptions.map((tech) => (
-              <option key={tech.id} value={tech.id} className="bg-slate-900 text-slate-200">
-                {getTechnicianDisplay(tech)}
-              </option>
-            ))}
-          </select>
-          <button
-            type="button"
-            onClick={applyIdentity}
-            className="bg-sky-500 text-white px-4 py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-wider hover:bg-sky-600 transition-colors shadow-lg shadow-sky-500/20 sm:whitespace-nowrap"
-          >
-            Use This Identity
-          </button>
-        </div>
-        {technicianOptions.length === 0 && (
-          <p className="mt-3 text-xs font-semibold text-amber-300">No technicians found in database.</p>
-        )}
-      </div>
-
       {error && (
         <div className="mb-6 glass-panel border-rose-500/30 bg-rose-500/10 p-5 rounded-2xl text-sm font-semibold text-rose-300">
           {error}
         </div>
       )}
 
-      <div className="mb-8 grid grid-cols-1 gap-5 md:grid-cols-3">
+      <div className="mb-8 grid grid-cols-1 gap-5 md:grid-cols-2">
         <div className="glass-panel-strong rounded-2xl p-6 shadow-lg border-t-[3px] border-t-indigo-500 relative overflow-hidden group">
           <div className="absolute -right-4 -top-4 opacity-5 group-hover:opacity-10 transition-opacity">
             <UserCheck size={80} />
           </div>
-          <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 relative z-10">Acting Technician</p>
-          <p className="mt-2 text-lg font-bold text-slate-200 relative z-10 truncate">{activeIdentityLabel}</p>
+          <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 relative z-10">Logged in Technician</p>
+          <p className="mt-2 text-lg font-bold text-slate-200 relative z-10 truncate">{user?.name || getCreatedByDisplay(activeIdentity)}</p>
         </div>
         <div className="glass-panel-strong rounded-2xl p-6 shadow-lg border-t-[3px] border-t-emerald-500 relative overflow-hidden group">
           <div className="absolute -right-4 -top-4 opacity-5 group-hover:opacity-10 transition-opacity">
@@ -331,13 +223,6 @@ export const TechnicianPanelPage = () => {
           </div>
           <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 relative z-10">Assigned to me</p>
           <p className="mt-2 text-3xl font-black text-emerald-400 relative z-10">{assignedToMe.length}</p>
-        </div>
-        <div className="glass-panel-strong rounded-2xl p-6 shadow-lg border-t-[3px] border-t-amber-500 relative overflow-hidden group">
-          <div className="absolute -right-4 -top-4 opacity-5 group-hover:opacity-10 transition-opacity">
-            <ShieldCheck size={80} />
-          </div>
-          <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 relative z-10">Unassigned queue</p>
-          <p className="mt-2 text-3xl font-black text-amber-400 relative z-10">{unassigned.length}</p>
         </div>
       </div>
 
@@ -391,7 +276,7 @@ export const TechnicianPanelPage = () => {
                   </div>
                   <div className="glass-panel bg-black/20 p-3 rounded-xl border border-white/5">
                     <p>Technician</p>
-                    <p className="mt-1 text-slate-200 truncate">{ticket.assignedTechnician || 'Unassigned'}</p>
+                    <p className="mt-1 text-slate-200 truncate">{ticket.assignedTechnician ? (userDisplayMap[ticket.assignedTechnician] || ticket.assignedTechnician) : 'Unassigned'}</p>
                   </div>
                 </div>
 

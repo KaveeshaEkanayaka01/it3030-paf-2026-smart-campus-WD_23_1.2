@@ -24,7 +24,14 @@ export default function AuthCallbackPage() {
     if (!loading) {
       if (isAuthenticated) {
         const isAdmin = Array.isArray(user?.roles) && user.roles.includes('ROLE_ADMIN');
-        navigate(isAdmin ? '/admin-dashboard' : '/dashboard', { replace: true });
+        const isTechnician = Array.isArray(user?.roles) && user.roles.includes('ROLE_TECHNICIAN');
+        if (isAdmin) {
+          navigate('/admin-dashboard', { replace: true });
+        } else if (isTechnician) {
+          navigate('/technician', { replace: true });
+        } else {
+          navigate('/dashboard', { replace: true });
+        }
       } else {
         navigate('/login', { replace: true });
       }

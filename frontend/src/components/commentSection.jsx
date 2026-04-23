@@ -49,7 +49,7 @@ export const CommentSection = ({ comments, onAddComment, onDeleteComment, onUpda
           >
               {(() => {
                 const canEdit = comment.isOwner || comment.authorId === currentUserId;
-                const canDelete = canEdit || String(currentUserRole || '').toUpperCase() === 'ADMIN';
+                const canDelete = canEdit || isPrivilegedRole(currentUserRole);
                 const isEditing = editingCommentId === comment.id;
 
                 return (

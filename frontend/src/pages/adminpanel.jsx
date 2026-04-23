@@ -2,8 +2,9 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Shield, RefreshCcw, Search, UserCheck, Wrench, Trash2 } from 'lucide-react';
 import { TicketStatusBadge } from '../components/TicketStatusBadge';
 import { PriorityBadge } from '../components/PriorityBadge';
-import { getCurrentUserRole, ticketService } from '../api/ticketService';
+import { ticketService } from '../api/ticketService';
 import { authApi } from '../api/authApi';
+import { useAuth } from '../context/AuthContext';
 
 const PRIVILEGED_ROLES = ['ADMIN', 'STAFF', 'TECHNICIAN'];
 
@@ -39,8 +40,15 @@ export const AdminPanelPage = () => {
   const [resolutionNotes, setResolutionNotes] = useState('');
   const [rejectionReason, setRejectionReason] = useState('');
   const [userDisplayMap, setUserDisplayMap] = useState({});
+  const { user } = useAuth();
 
-  const currentRole = getCurrentUserRole();
+  const currentRole = useMemo(() => {
+    if (!user?.roles?.length) return 'USER';
+    if (user.roles.includes('ROLE_ADMIN')) return 'ADMIN';
+    if (user.roles.includes('ROLE_STAFF')) return 'STAFF';
+    if (user.roles.includes('ROLE_TECHNICIAN')) return 'TECHNICIAN';
+    return 'USER';
+  }, [user]);
   const canManage = PRIVILEGED_ROLES.includes(currentRole);
 
   const selectedTicket = useMemo(
@@ -318,7 +326,7 @@ export const AdminPanelPage = () => {
                   <p className="line-clamp-2 text-xs text-slate-400 leading-relaxed font-light">{ticket.description || 'No description provided.'}</p>
                   <div className="mt-4 flex items-center justify-between text-[9px] font-bold uppercase tracking-wider text-slate-500 pt-3 border-t border-white/5">
                     <span className="flex items-center gap-1"><Shield size={10} /> {getCreatedByDisplay(ticket.createdBy)}</span>
-                    <span className="truncate max-w-[120px]">{ticket.assignedTechnician || 'Unassigned'}</span>
+                    <span className="truncate max-w-[120px]">{ticket.assignedTechnician ? (userDisplayMap[ticket.assignedTechnician] || ticket.assignedTechnician) : 'Unassigned'}</span>
                   </div>
                 </button>
               ))}
@@ -370,7 +378,7 @@ export const AdminPanelPage = () => {
                   </div>
                   <div className="glass-panel bg-black/20 p-4 rounded-xl border border-white/5">
                     <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Technician</p>
-                    <p className="mt-2 text-sm font-semibold text-pink-300 truncate">{selectedTicket.assignedTechnician || 'Unassigned'}</p>
+                    <p className="mt-2 text-sm font-semibold text-pink-300 truncate">{selectedTicket.assignedTechnician ? (userDisplayMap[selectedTicket.assignedTechnician] || selectedTicket.assignedTechnician) : 'Unassigned'}</p>
                   </div>
                 </div>
 

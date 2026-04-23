@@ -64,8 +64,19 @@ public class UserService {
                 .orElseThrow(() -> new ResourceNotFoundException("User", userId));
 
         if ("ADD".equalsIgnoreCase(request.getAction())) {
-            user.getRoles().add(request.getRole());
-            log.info("Added role {} to user {}", request.getRole(), userId);
+            // Exclusive Role Rule: Admin and Technician are mutually exclusive
+            if (User.ROLE_ADMIN.equals(request.getRole())) {
+                user.getRoles().remove(User.ROLE_TECHNICIAN);
+                user.getRoles().add(User.ROLE_ADMIN);
+                log.info("Set user {} to ADMIN (removed technician if present)", userId);
+            } else if (User.ROLE_TECHNICIAN.equals(request.getRole())) {
+                user.getRoles().remove(User.ROLE_ADMIN);
+                user.getRoles().add(User.ROLE_TECHNICIAN);
+                log.info("Set user {} to TECHNICIAN (removed admin if present)", userId);
+            } else {
+                user.getRoles().add(request.getRole());
+                log.info("Added role {} to user {}", request.getRole(), userId);
+            }
         } else if ("REMOVE".equalsIgnoreCase(request.getAction())) {
             // Prevent removing last role
             if (user.getRoles().size() <= 1) {

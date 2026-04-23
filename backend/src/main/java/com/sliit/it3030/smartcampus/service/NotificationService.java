@@ -122,22 +122,32 @@ public class NotificationService {
     }
 
     // Called when a new comment is added
-    public void sendNewCommentNotification(String ticketId, String commenterName) {
+    public void sendNewCommentNotification(String ticketId, String commenterName, String commenterId) {
         ticketRepository.findById(ticketId).ifPresentOrElse(ticket -> {
             String ticketOwnerId = ticket.getCreatedBy();
+            String assignedTechId = ticket.getAssignedTechnician();
 
-            if (ticketOwnerId == null || ticketOwnerId.isBlank()) {
-                log.warn("Skipping comment notification for ticket {} because owner is missing", ticketId);
-                return;
+            // Notify Ticket Owner
+            if (ticketOwnerId != null && !ticketOwnerId.isBlank() && !ticketOwnerId.equals(commenterId)) {
+                createNotification(
+                        ticketOwnerId,
+                        "New Comment 💬",
+                        commenterName + " commented on your ticket.",
+                        NotificationType.NEW_COMMENT,
+                        ticketId
+                );
             }
 
-            createNotification(
-                    ticketOwnerId,
-                    "New Comment",
-                    commenterName + " commented on your ticket.",
-                    NotificationType.NEW_COMMENT,
-                    ticketId
-            );
+            // Notify Assigned Technician
+            if (assignedTechId != null && !assignedTechId.isBlank() && !assignedTechId.equals(commenterId)) {
+                createNotification(
+                        assignedTechId,
+                        "New Comment on Assigned Ticket 💬",
+                        commenterName + " commented on a ticket assigned to you.",
+                        NotificationType.NEW_COMMENT,
+                        ticketId
+                );
+            }
         }, () -> log.warn("Skipping comment notification because ticket {} was not found", ticketId));
     }
 

@@ -8,6 +8,7 @@ import {
   PlusCircle,
   BookOpen,
   User,
+  Users,
   Shield,
   Wrench,
   ClipboardList,
@@ -25,7 +26,6 @@ export default function Navbar() {
   const role = currentUser?.role || '';
   const isAdmin = role === 'ADMIN' || role === 'ROLE_ADMIN';
   const isTechnician = role === 'TECHNICIAN' || role === 'ROLE_TECHNICIAN';
-  const canOpenTechnicianPanel = isAdmin || isTechnician;
 
   const handleLogout = () => {
     logout();
@@ -50,22 +50,23 @@ export default function Navbar() {
     { to: '/admin-dashboard', icon: <LayoutDashboard size={16} />, label: 'Admin' },
     { to: '/resources', icon: <Package size={16} />, label: 'Resources' },
     { to: '/admin', icon: <Shield size={16} />, label: 'Tickets' },
-    { to: '/technician', icon: <Wrench size={16} />, label: 'Tech' },
+    { to: '/users', icon: <Users size={16} />, label: 'Users' },
     { to: '/calendar', icon: <CalendarDays size={16} />, label: 'Calendar' },
+  ];
+
+  const technicianLinks = [
+    { to: '/technician', icon: <Wrench size={16} />, label: 'Tech Workspace' },
   ];
 
   const links = useMemo(() => {
     if (isAdmin) return adminLinks;
 
-    if (canOpenTechnicianPanel) {
-      return [
-        ...userLinks,
-        { to: '/technician', icon: <Wrench size={16} />, label: 'Tech' },
-      ];
+    if (isTechnician) {
+      return technicianLinks;
     }
 
     return userLinks;
-  }, [isAdmin, canOpenTechnicianPanel]);
+  }, [isAdmin, isTechnician]);
 
   return (
     <nav
