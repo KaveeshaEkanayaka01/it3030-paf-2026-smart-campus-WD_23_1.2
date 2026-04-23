@@ -1,23 +1,16 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
 import { bookingApi } from '../api/bookingApi';
+import { resourceApi } from '../api/resourceApi';
 import toast from 'react-hot-toast';
 import { PlusCircle, Calendar, Clock, MapPin, FileText, ChevronRight } from 'lucide-react';
 import { toUserBookingReference } from '../utils/bookingReference';
 
-const RESOURCES = [
-  { id: 'room_001', name: 'Conference Room A' },
-  { id: 'room_002', name: 'Conference Room B' },
-  { id: 'lab_001', name: 'Computer Lab 1' },
-  { id: 'lab_002', name: 'Computer Lab 2' },
-  { id: 'hall_001', name: 'Main Auditorium' },
-  { id: 'gym_001', name: 'Sports Hall' },
-];
-
 export default function CreateBookingPage() {
   const { currentUser } = useUser();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const today = new Date().toISOString().slice(0, 16);
 
@@ -29,7 +22,30 @@ export default function CreateBookingPage() {
     purpose: '',
   });
   const [loading, setLoading] = useState(false);
+  const [resources, setResources] = useState([]);
+  const [resourcesLoading, setResourcesLoading] = useState(true);
   const [nextBookingSequence, setNextBookingSequence] = useState(1);
+
+  const selectedResourceId = location?.state?.selectedResourceId;
+  const selectedResourceName = location?.state?.selectedResourceName;
+
+  useEffect(() => {
+    const loadResources = async () => {
+      setResourcesLoading(true);
+      try {
+        const res = await resourceApi.getAll();
+        const allResources = Array.isArray(res.data) ? res.data : [];
+        setResources(allResources);
+      } catch (err) {
+        toast.error(err?.response?.data?.message || 'Failed to load resources.');
+        setResources([]);
+      } finally {
+        setResourcesLoading(false);
+      }
+    };
+
+    loadResources();
+  }, []);
 
   useEffect(() => {
     const loadMyBookings = async () => {
@@ -46,11 +62,38 @@ export default function CreateBookingPage() {
     loadMyBookings();
   }, [currentUser.userId]);
 
+  useEffect(() => {
+    if (!resources.length) return;
+
+    if (selectedResourceId) {
+      const selected = resources.find((r) => (r.id || r._id) === selectedResourceId);
+      if (selected) {
+        setForm((prev) => ({
+          ...prev,
+          resourceId: selected.id || selected._id,
+          resourceName: selected.name || selectedResourceName || '',
+        }));
+        return;
+      }
+    }
+
+    if (form.resourceId) {
+      const current = resources.find((r) => (r.id || r._id) === form.resourceId);
+      if (!current) {
+        setForm((prev) => ({
+          ...prev,
+          resourceId: '',
+          resourceName: '',
+        }));
+      }
+    }
+  }, [resources, selectedResourceId, selectedResourceName]);
+
   const handleResourceChange = (e) => {
-    const selected = RESOURCES.find(r => r.id === e.target.value);
+    const selected = resources.find(r => (r.id || r._id) === e.target.value);
     setForm(prev => ({
       ...prev,
-      resourceId: selected?.id || '',
+      resourceId: (selected?.id || selected?._id) || '',
       resourceName: selected?.name || '',
     }));
   };
@@ -109,6 +152,7 @@ export default function CreateBookingPage() {
             <select
               value={form.resourceId}
               onChange={handleResourceChange}
+              disabled={resourcesLoading}
               className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-all duration-200"
               style={{
                 background: 'rgba(15, 23, 42, 0.6)',
@@ -123,12 +167,12 @@ export default function CreateBookingPage() {
                 value=""
                 style={{ backgroundColor: '#0f172a', color: 'var(--text-secondary)' }}
               >
-                Select a resource...
+                {resourcesLoading ? 'Loading resources...' : 'Select a resource...'}
               </option>
-              {RESOURCES.map(r => (
+              {resources.map(r => (
                 <option
-                  key={r.id}
-                  value={r.id}
+                  key={r.id || r._id}
+                  value={r.id || r._id}
                   style={{ backgroundColor: '#0f172a', color: 'var(--text-primary)' }}
                 >
                   {r.name}

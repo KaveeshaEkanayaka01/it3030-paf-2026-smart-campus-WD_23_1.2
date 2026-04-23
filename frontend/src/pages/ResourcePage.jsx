@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   Search,
   RefreshCw,
@@ -18,6 +19,7 @@ const FILTER_STATUS = ['ALL', 'ACTIVE', 'OUT_OF_SERVICE']
 
 export default function ResourcePage() {
   const { user } = useAuth()
+  const navigate = useNavigate()
   const isAdmin =
     Array.isArray(user?.roles) && user.roles.includes('ROLE_ADMIN')
 
@@ -131,6 +133,21 @@ export default function ResourcePage() {
     setModalOpen(false)
     setEditingResource(null)
     setViewingResource(null)
+  }
+
+  const openBookingForm = (resource) => {
+    const resourceId = resource?.id || resource?._id
+    if (!resourceId) {
+      toast.error('Unable to book this resource.')
+      return
+    }
+
+    navigate('/create-booking', {
+      state: {
+        selectedResourceId: resourceId,
+        selectedResourceName: resource?.name || '',
+      },
+    })
   }
 
   return (
@@ -372,6 +389,7 @@ export default function ResourcePage() {
                 isAdmin={isAdmin}
                 layout="grid"
                 onView={openViewModal}
+                onBook={openBookingForm}
                 onEdit={openEditModal}
                 onDelete={handleDelete}
               />
@@ -386,6 +404,7 @@ export default function ResourcePage() {
                 isAdmin={isAdmin}
                 layout="list"
                 onView={openViewModal}
+                onBook={openBookingForm}
                 onEdit={openEditModal}
                 onDelete={handleDelete}
               />

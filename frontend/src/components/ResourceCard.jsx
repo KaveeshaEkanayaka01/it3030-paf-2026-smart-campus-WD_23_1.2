@@ -7,12 +7,14 @@ import {
   Trash2,
   Clock3,
   Eye,
+  CalendarPlus,
 } from 'lucide-react'
 
 export default function ResourceCard({
   resource,
   isAdmin = false,
   onView,
+  onBook,
   onEdit,
   onDelete,
   layout = 'grid',
@@ -134,6 +136,22 @@ export default function ResourceCard({
               <Eye size={16} />
               View Only
             </button>
+
+            {!isAdmin && (
+              <button
+                onClick={() => onBook?.(resource)}
+                className="px-4 py-2 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all hover:opacity-90"
+                style={{
+                  background:
+                    'linear-gradient(135deg, var(--accent-start), var(--accent-end))',
+                  color: '#fff',
+                  border: '1px solid rgba(34,211,238,0.25)',
+                }}
+              >
+                <CalendarPlus size={16} />
+                Book Now
+              </button>
+            )}
 
             {isAdmin && (
               <>
@@ -299,18 +317,34 @@ export default function ResourceCard({
             </button>
           </div>
         ) : (
-          <button
-            onClick={() => onView?.(resource)}
-            className="w-full px-4 py-2 rounded-xl text-sm font-semibold flex items-center justify-center gap-2"
-            style={{
-              background: 'rgba(14,165,233,0.08)',
-              color: 'var(--accent-mid)',
-              border: '1px solid rgba(14,165,233,0.12)',
-            }}
-          >
-            <Eye size={16} />
-            View Only
-          </button>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              onClick={() => onView?.(resource)}
+              className="px-4 py-2 rounded-xl text-sm font-semibold flex items-center justify-center gap-2"
+              style={{
+                background: 'rgba(14,165,233,0.08)',
+                color: 'var(--accent-mid)',
+                border: '1px solid rgba(14,165,233,0.12)',
+              }}
+            >
+              <Eye size={16} />
+              View Only
+            </button>
+
+            <button
+              onClick={() => onBook?.(resource)}
+              className="px-4 py-2 rounded-xl text-sm font-semibold flex items-center justify-center gap-2"
+              style={{
+                background:
+                  'linear-gradient(135deg, var(--accent-start), var(--accent-end))',
+                color: '#fff',
+                border: '1px solid rgba(34,211,238,0.25)',
+              }}
+            >
+              <CalendarPlus size={16} />
+              Book Now
+            </button>
+          </div>
         )}
       </div>
     </div>
