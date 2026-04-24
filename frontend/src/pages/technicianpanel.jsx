@@ -68,8 +68,13 @@ export const TechnicianPanelPage = () => {
 
   const loadUserDisplayMap = async () => {
     try {
-      const response = await authApi.getAllUsers();
-      const users = Array.isArray(response?.data) ? response.data : [];
+      const [usersResponse, techniciansResponse] = await Promise.all([
+        authApi.getAllUsers(),
+        authApi.getTechnicians()
+      ]);
+      
+      const users = Array.isArray(usersResponse?.data) ? usersResponse.data : [];
+      const technicians = Array.isArray(techniciansResponse?.data) ? techniciansResponse.data : [];
       const nextMap = {};
 
       users.forEach((userEntry) => {
@@ -81,6 +86,17 @@ export const TechnicianPanelPage = () => {
         ).trim();
 
         nextMap[id] = display || id;
+      });
+
+      // Also add technicians to the map
+      technicians.forEach((tech) => {
+        const id = String(tech?.id || '').trim();
+        if (id && !nextMap[id]) {
+          const display = String(
+            tech?.name || tech?.githubUsername || tech?.email || id,
+          ).trim();
+          nextMap[id] = display || id;
+        }
       });
 
       setUserDisplayMap(nextMap);

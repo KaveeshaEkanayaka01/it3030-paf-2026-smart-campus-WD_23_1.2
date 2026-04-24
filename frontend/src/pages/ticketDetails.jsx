@@ -160,6 +160,21 @@ export const TicketDetailsPage = () => {
         const response = await authApi.getTechnicians();
         const technicians = Array.isArray(response?.data) ? response.data : [];
         setTechnicianOptions(technicians);
+        
+        // Also add technicians to userDisplayMap for proper name resolution
+        setUserDisplayMap((prevMap) => {
+          const updatedMap = { ...prevMap };
+          technicians.forEach((tech) => {
+            const id = String(tech?.id || '').trim();
+            if (id) {
+              const display = String(
+                tech?.name || tech?.githubUsername || tech?.email || id,
+              ).trim();
+              updatedMap[id] = display || id;
+            }
+          });
+          return updatedMap;
+        });
       } catch {
         setTechnicianOptions([]);
       }
