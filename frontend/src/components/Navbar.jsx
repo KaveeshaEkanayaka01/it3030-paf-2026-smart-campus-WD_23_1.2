@@ -38,6 +38,7 @@ export default function Navbar() {
 
   // 🔥 Shortened labels so everything fits perfectly
   const userLinks = [
+    { to: '/dashboard', icon: <LayoutDashboard size={16} />, label: 'Dashboard' },
     { to: '/create', icon: <PlusCircle size={16} />, label: 'Booking' },
     { to: '/my-bookings', icon: <BookOpen size={16} />, label: 'Bookings' },
     { to: '/resources', icon: <Package size={16} />, label: 'Resources' },
@@ -47,7 +48,7 @@ export default function Navbar() {
   ];
 
   const adminLinks = [
-    { to: '/admin-dashboard', icon: <LayoutDashboard size={16} />, label: 'Admin' },
+    { to: '/admin-dashboard', icon: <LayoutDashboard size={16} />, label: 'Dashboard' },
     { to: '/resources', icon: <Package size={16} />, label: 'Resources' },
     { to: '/admin', icon: <Shield size={16} />, label: 'Tickets' },
     { to: '/users', icon: <Users size={16} />, label: 'Users' },
@@ -55,6 +56,7 @@ export default function Navbar() {
   ];
 
   const technicianLinks = [
+    { to: '/technician', icon: <LayoutDashboard size={16} />, label: 'Dashboard' },
     { to: '/technician', icon: <Wrench size={16} />, label: 'Tech Workspace' },
   ];
 
@@ -129,10 +131,19 @@ export default function Navbar() {
 
             <button
               onClick={goToDashboard}
-              className="flex items-center gap-2 px-2 py-1 rounded-lg"
+              className="flex items-center gap-2 px-2 py-1 rounded-lg transition-all"
               style={{
                 background: 'rgba(15,23,42,0.5)',
                 border: '1px solid rgba(148,163,184,0.2)',
+                color: 'var(--text-secondary)',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'rgba(15,23,42,0.7)';
+                e.currentTarget.style.borderColor = 'rgba(148,163,184,0.4)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'rgba(15,23,42,0.5)';
+                e.currentTarget.style.borderColor = 'rgba(148,163,184,0.2)';
               }}
             >
               <User size={14} />
@@ -143,10 +154,16 @@ export default function Navbar() {
 
             <button
               onClick={handleLogout}
-              className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs"
+              className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs transition-all"
               style={{
                 background: 'rgba(239,68,68,0.12)',
                 color: '#f87171',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'rgba(239,68,68,0.2)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'rgba(239,68,68,0.12)';
               }}
             >
               <LogOut size={14} />
