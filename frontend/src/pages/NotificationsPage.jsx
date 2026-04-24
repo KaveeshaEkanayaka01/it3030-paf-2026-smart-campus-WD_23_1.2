@@ -1,5 +1,6 @@
 import { useNotifications } from '../context/NotificationContext';
 import { FaTrash, FaCheckDouble } from 'react-icons/fa';
+import { ArrowLeft } from 'lucide-react';
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 
@@ -11,11 +12,24 @@ export default function NotificationsPage() {
     <div className="min-h-screen page-enter" style={{ background: 'var(--bg-primary)' }}>
       <nav className="shadow-sm px-6 py-4 flex items-center gap-4 border-b" style={{ borderColor: 'rgba(148, 163, 184, 0.25)', background: 'rgba(15, 23, 42, 0.4)' }}>
         <button
-          onClick={() => navigate('/dashboard')}
-          className="flex items-center gap-2 text-sm font-medium transition-colors"
-          style={{ color: 'var(--accent-mid)' }}
+          onClick={() => navigate(-1)}
+          className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium border transition-all"
+          style={{
+            background: 'rgba(15, 23, 42, 0.5)',
+            borderColor: 'rgba(148, 163, 184, 0.25)',
+            color: 'var(--text-secondary)',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = 'rgba(15, 23, 42, 0.7)';
+            e.currentTarget.style.borderColor = 'rgba(148, 163, 184, 0.4)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = 'rgba(15, 23, 42, 0.5)';
+            e.currentTarget.style.borderColor = 'rgba(148, 163, 184, 0.25)';
+          }}
         >
-          ← Back
+          <ArrowLeft size={16} />
+          Back
         </button>
         <h1 className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>🔔 Notifications</h1>
       </nav>
