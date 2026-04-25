@@ -34,6 +34,7 @@ public class AuthService {
                 .email(user.getEmail())
                 .avatarUrl(user.getAvatarUrl())
                 .githubUsername(user.getGithubUsername())
+                .provider(user.getProvider())
                 .roles(user.getRoles())
                 .active(user.isActive())
                 .createdAt(user.getCreatedAt())

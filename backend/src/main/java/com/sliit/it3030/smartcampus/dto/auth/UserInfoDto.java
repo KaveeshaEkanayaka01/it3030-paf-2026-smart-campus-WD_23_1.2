@@ -14,6 +14,7 @@ public class UserInfoDto {
     private String email;
     private String avatarUrl;
     private String githubUsername;
+    private String provider;
     private Set<String> roles;
     private boolean active;
     private LocalDateTime createdAt;
