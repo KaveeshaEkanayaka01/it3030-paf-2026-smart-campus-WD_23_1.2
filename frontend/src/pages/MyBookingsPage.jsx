@@ -70,7 +70,7 @@ export default function MyBookingsPage() {
             </div>
           </div>
           <div className="flex gap-3">
-            <button onClick={fetchBookings} className="p-2 rounded-xl transition-colors hover:bg-white/10" style={{ color: 'var(--accent-mid)' }}>
+            <button onClick={fetchBookings} className="p-2 rounded-xl transition-colors hover:bg-[var(--bg-section)]" style={{ color: 'var(--primary)' }}>
               <RefreshCw size={18} />
             </button>
             <Link
@@ -87,13 +87,13 @@ export default function MyBookingsPage() {
         {/* Search + Filter */}
         <div className="glass-card p-4 mb-6 flex flex-col sm:flex-row gap-3">
           <div className="flex-1 relative">
-            <Search size={16} className="absolute left-3 top-3" style={{ color: 'var(--muted)' }} />
+            <Search size={16} className="absolute left-3 top-3" style={{ color: 'var(--text-secondary)' }} />
             <input
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder="Search by resource or purpose..."
               className="w-full pl-9 pr-4 py-2.5 rounded-xl text-sm outline-none"
-              style={{ background: 'transparent', border: '1px solid rgba(15,23,42,0.06)', color: 'var(--text-primary)' }}
+              style={{ background: 'white', border: '1px solid var(--border)', color: 'var(--text-primary)' }}
             />
           </div>
           <div className="flex gap-2 flex-wrap">
@@ -105,7 +105,7 @@ export default function MyBookingsPage() {
                 style={{
                   background: filter === f ? (f === 'PENDING' ? 'var(--status-pending-bg)' : f === 'APPROVED' ? 'var(--status-approved-bg)' : f === 'REJECTED' ? 'var(--status-rejected-bg)' : 'var(--status-cancelled-bg)') : 'transparent',
                   color: filter === f ? (filterBg[f] || 'var(--accent-mid)') : 'var(--muted)',
-                  border: filter === f ? `1px solid ${f === 'PENDING' ? 'var(--status-pending-border)' : f === 'APPROVED' ? 'var(--status-approved-border)' : f === 'REJECTED' ? 'var(--status-rejected-border)' : 'var(--status-cancelled-border)'}` : '1px solid rgba(15,23,42,0.04)',
+                  border: filter === f ? `1px solid ${f === 'PENDING' ? 'var(--status-pending-border)' : f === 'APPROVED' ? 'var(--status-approved-border)' : f === 'REJECTED' ? 'var(--status-rejected-border)' : 'var(--status-cancelled-border)'}` : '1px solid var(--border)',
                 }}
               >
                 {f}
@@ -132,7 +132,7 @@ export default function MyBookingsPage() {
         {/* Content */}
         {loading ? (
           <div className="flex items-center justify-center py-20">
-            <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+            <div className="w-8 h-8 border-2 border-[var(--primary)] border-t-transparent rounded-full animate-spin" />
           </div>
         ) : filtered.length === 0 ? (
           <div className="glass-card p-16 text-center">
@@ -141,7 +141,7 @@ export default function MyBookingsPage() {
             <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>
               {search || filter !== 'ALL' ? 'Try adjusting your search or filter.' : 'Create your first booking!'}
             </p>
-            <Link to="/create" className="inline-flex items-center gap-2 mt-6 px-5 py-2.5 rounded-xl text-sm font-semibold text-white" style={{ background: 'linear-gradient(135deg, var(--accent-start), var(--accent-end))' }}>
+            <Link to="/create" className="inline-flex items-center gap-2 mt-6 px-5 py-2.5 rounded-xl text-sm font-semibold text-white" style={{ background: 'linear-gradient(135deg, var(--primary), var(--primary-hover))' }}>
               <PlusCircle size={16} /> Create Booking
             </Link>
           </div>

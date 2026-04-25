@@ -2,11 +2,11 @@ import React from 'react'
 import { AlertTriangle } from 'lucide-react'
 
 const PRIORITY_STYLES = {
-  LOW: 'text-emerald-200 bg-emerald-500/15 border border-emerald-400/30',
-  MEDIUM: 'text-amber-200 bg-amber-500/15 border border-amber-400/30',
-  HIGH: 'text-orange-200 bg-orange-500/15 border border-orange-400/30',
-  CRITICAL: 'text-rose-200 bg-rose-500/15 border border-rose-400/40 shadow-[0_0_18px_rgba(244,63,94,0.18)]',
-  UNKNOWN: 'text-slate-200 bg-slate-500/15 border border-slate-400/30',
+  LOW: 'text-[var(--text-secondary)] bg-[var(--bg-section)] border border-[var(--border)]',
+  MEDIUM: 'text-amber-700 bg-amber-100 border border-amber-200',
+  HIGH: 'text-[var(--primary)] bg-[rgba(249,115,22,0.12)] border border-[rgba(249,115,22,0.22)]',
+  CRITICAL: 'text-rose-700 bg-rose-100 border border-rose-200 shadow-[0_0_18px_rgba(244,63,94,0.1)]',
+  UNKNOWN: 'text-[var(--text-secondary)] bg-[var(--bg-section)] border border-[var(--border)]',
 }
 
 export function PriorityBadge({ priority, className = '' }) {

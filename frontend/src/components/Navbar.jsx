@@ -74,9 +74,9 @@ export default function Navbar() {
     <nav
       className="sticky top-0 z-50"
       style={{
-        background: 'rgba(2,6,23,0.72)',
+        background: 'rgba(255,255,255,0.88)',
         backdropFilter: 'blur(12px)',
-        borderBottom: '1px solid rgba(148,163,184,0.2)',
+        borderBottom: '1px solid var(--border)',
       }}
     >
       <div className="max-w-7xl mx-auto px-4">
@@ -95,7 +95,7 @@ export default function Navbar() {
             >
               <CalendarDays size={16} className="text-white" />
             </div>
-            <span className="font-bold text-sm whitespace-nowrap text-white">
+            <span className="font-bold text-sm whitespace-nowrap" style={{ color: 'var(--text-primary)' }}>
               SmartCampus
             </span>
           </Link>
@@ -111,10 +111,10 @@ export default function Navbar() {
                   to={link.to}
                   className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs font-medium transition-all"
                   style={{
-                    background: active ? 'rgba(99,102,241,0.08)' : 'transparent',
-                    color: active ? 'var(--accent-mid)' : 'var(--text-secondary)',
+                    background: active ? 'rgba(249,115,22,0.1)' : 'transparent',
+                    color: active ? 'var(--primary)' : 'var(--text-secondary)',
                     border: active
-                      ? '1px solid rgba(56,189,248,0.3)'
+                      ? '1px solid rgba(249,115,22,0.2)'
                       : '1px solid transparent',
                   }}
                 >
@@ -133,17 +133,17 @@ export default function Navbar() {
               onClick={goToDashboard}
               className="flex items-center gap-2 px-2 py-1 rounded-lg transition-all"
               style={{
-                background: 'rgba(15,23,42,0.5)',
-                border: '1px solid rgba(148,163,184,0.2)',
+                background: 'rgba(255,255,255,0.95)',
+                border: '1px solid var(--border)',
                 color: 'var(--text-secondary)',
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.background = 'rgba(15,23,42,0.7)';
-                e.currentTarget.style.borderColor = 'rgba(148,163,184,0.4)';
+                e.currentTarget.style.background = 'var(--surface-hover)';
+                e.currentTarget.style.borderColor = 'rgba(249,115,22,0.22)';
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'rgba(15,23,42,0.5)';
-                e.currentTarget.style.borderColor = 'rgba(148,163,184,0.2)';
+                e.currentTarget.style.background = 'rgba(255,255,255,0.95)';
+                e.currentTarget.style.borderColor = 'var(--border)';
               }}
             >
               <User size={14} />
@@ -156,14 +156,14 @@ export default function Navbar() {
               onClick={handleLogout}
               className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs transition-all"
               style={{
-                background: 'rgba(239,68,68,0.12)',
-                color: '#f87171',
+                background: 'rgba(249,115,22,0.1)',
+                color: 'var(--primary)',
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.background = 'rgba(239,68,68,0.2)';
+                e.currentTarget.style.background = 'rgba(249,115,22,0.16)';
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'rgba(239,68,68,0.12)';
+                e.currentTarget.style.background = 'rgba(249,115,22,0.1)';
               }}
             >
               <LogOut size={14} />

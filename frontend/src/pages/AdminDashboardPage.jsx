@@ -129,7 +129,7 @@ export default function AdminDashboardPage() {
   const bookingReferences = buildBookingReferenceMap(bookings);
 
   const statCards = [
-    { label: 'Total', value: stats.TOTAL || 0, icon: <Users size={20} />, color: 'var(--accent-mid)', bg: 'rgba(99,102,241,0.12)' },
+    { label: 'Total', value: stats.TOTAL || 0, icon: <Users size={20} />, color: 'var(--primary)', bg: 'rgba(249,115,22,0.08)' },
     { label: 'Pending', value: stats.PENDING || 0, icon: <Clock size={20} />, color: 'var(--status-pending)', bg: 'var(--status-pending-bg)' },
     { label: 'Approved', value: stats.APPROVED || 0, icon: <CheckSquare size={20} />, color: 'var(--status-approved)', bg: 'var(--status-approved-bg)' },
     { label: 'Rejected', value: stats.REJECTED || 0, icon: <AlertCircle size={20} />, color: 'var(--status-rejected)', bg: 'var(--status-rejected-bg)' },
@@ -155,7 +155,7 @@ export default function AdminDashboardPage() {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, var(--status-pending), var(--accent-mid))' }}>
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, var(--primary), var(--primary-hover))' }}>
               <LayoutDashboard size={20} className="text-white" />
             </div>
             <div>
@@ -163,7 +163,7 @@ export default function AdminDashboardPage() {
               <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Review and manage all booking requests</p>
             </div>
           </div>
-          <button onClick={fetchData} className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-colors hover:bg-white/10" style={{ color: 'var(--accent-mid)' }}>
+          <button onClick={fetchData} className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-colors hover:bg-[var(--bg-section)]" style={{ color: 'var(--primary)' }}>
             <RefreshCw size={16} /> Refresh
           </button>
         </div>
@@ -216,7 +216,7 @@ export default function AdminDashboardPage() {
         {/* Table */}
         {loading ? (
           <div className="flex items-center justify-center py-20">
-            <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+            <div className="w-8 h-8 border-2 border-[var(--primary)] border-t-transparent rounded-full animate-spin" />
           </div>
         ) : (
           <div className="glass-card overflow-hidden">
@@ -246,10 +246,10 @@ export default function AdminDashboardPage() {
                       className="transition-colors"
                         style={{
                         borderBottom: '1px solid rgba(15,23,42,0.04)',
-                        background: i % 2 === 0 ? 'transparent' : 'rgba(15,23,42,0.02)',
+                        background: i % 2 === 0 ? 'transparent' : 'var(--bg-section)',
                       }}
-                      onMouseEnter={e => e.currentTarget.style.background = 'rgba(99,102,241,0.03)'}
-                      onMouseLeave={e => e.currentTarget.style.background = i % 2 === 0 ? 'transparent' : 'rgba(15,23,42,0.02)'}
+                      onMouseEnter={e => e.currentTarget.style.background = 'rgba(249,115,22,0.04)'}
+                      onMouseLeave={e => e.currentTarget.style.background = i % 2 === 0 ? 'transparent' : 'var(--bg-section)'}
                     >
                       <td style={{ padding: '14px 16px', color: 'var(--text-secondary)' }} className="text-xs font-mono">{bookingReferences[b.id]}</td>
                       <td style={{ padding: '14px 16px' }}>

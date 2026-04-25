@@ -67,17 +67,17 @@ export default function TicketComments({ ticketId }) {
 
   return (
     <div className="mt-6">
-      <h3 className="text-lg font-semibold text-gray-800 mb-4">
+      <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-4">
         💬 Comments ({comments.length})
       </h3>
 
       {/* Comments List */}
       <div className="space-y-4 mb-6">
         {comments.length === 0 && (
-          <p className="text-gray-400 text-sm">No comments yet. Be the first!</p>
+          <p className="text-[var(--text-secondary)] text-sm">No comments yet. Be the first!</p>
         )}
         {comments.map((comment) => (
-          <div key={comment.id} className="bg-gray-50 rounded-lg p-4">
+          <div key={comment.id} className="bg-[var(--bg-section)] rounded-lg p-4 border border-[var(--border)]">
             <div className="flex items-center gap-3 mb-2">
               {comment.authorAvatar && (
                 <img
@@ -87,13 +87,13 @@ export default function TicketComments({ ticketId }) {
                 />
               )}
               <div>
-                <span className="font-medium text-sm text-gray-800">
+                <span className="font-medium text-sm text-[var(--text-primary)]">
                   {comment.authorName}
                 </span>
                 {comment.edited && (
-                  <span className="text-xs text-gray-400 ml-2">(edited)</span>
+                  <span className="text-xs text-[var(--text-secondary)] ml-2">(edited)</span>
                 )}
-                <p className="text-xs text-gray-400">
+                <p className="text-xs text-[var(--text-secondary)]">
                   {format(new Date(comment.createdAt), 'MMM dd, yyyy HH:mm')}
                 </p>
               </div>
@@ -104,27 +104,28 @@ export default function TicketComments({ ticketId }) {
                 <textarea
                   value={editContent}
                   onChange={(e) => setEditContent(e.target.value)}
-                  className="w-full border rounded-lg p-2 text-sm resize-none
-                             focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full border rounded-lg p-2 text-sm resize-none bg-white text-[var(--text-primary)]
+                             focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
+                  style={{ borderColor: 'var(--border)' }}
                   rows={3}
                 />
                 <div className="flex gap-2 mt-2">
                   <button
                     onClick={() => handleEdit(comment.id)}
-                    className="bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600"
+                    className="bg-[var(--primary)] text-white px-3 py-1 rounded text-sm hover:bg-[var(--primary-hover)]"
                   >
                     Save
                   </button>
                   <button
                     onClick={() => setEditingId(null)}
-                    className="bg-gray-300 text-gray-700 px-3 py-1 rounded text-sm"
+                    className="bg-[var(--bg-section)] text-[var(--text-secondary)] px-3 py-1 rounded text-sm border border-[var(--border)]"
                   >
                     Cancel
                   </button>
                 </div>
               </div>
             ) : (
-              <p className="text-gray-700 text-sm">{comment.content}</p>
+              <p className="text-[var(--text-primary)] text-sm">{comment.content}</p>
             )}
 
             {comment.isOwner && editingId !== comment.id && (
@@ -134,7 +135,7 @@ export default function TicketComments({ ticketId }) {
                     setEditingId(comment.id);
                     setEditContent(comment.content);
                   }}
-                  className="text-blue-500 hover:text-blue-700 text-xs flex items-center gap-1"
+                  className="text-[var(--primary)] hover:text-[var(--primary-hover)] text-xs flex items-center gap-1"
                 >
                   <FaEdit size={12} /> Edit
                 </button>
@@ -156,15 +157,16 @@ export default function TicketComments({ ticketId }) {
           value={newComment}
           onChange={(e) => setNewComment(e.target.value)}
           placeholder="Write a comment..."
-          className="flex-1 border border-gray-300 rounded-lg p-3 text-sm
-                     resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="flex-1 border rounded-lg p-3 text-sm resize-none bg-white text-[var(--text-primary)]
+                     focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
+          style={{ borderColor: 'var(--border)' }}
           rows={3}
           maxLength={1000}
         />
         <button
           type="submit"
           disabled={loading || !newComment.trim()}
-          className="bg-blue-500 text-white px-4 rounded-lg hover:bg-blue-600
+          className="bg-[var(--primary)] text-white px-4 rounded-lg hover:bg-[var(--primary-hover)]
                      disabled:opacity-50 disabled:cursor-not-allowed
                      flex items-center gap-2 self-end py-3"
         >

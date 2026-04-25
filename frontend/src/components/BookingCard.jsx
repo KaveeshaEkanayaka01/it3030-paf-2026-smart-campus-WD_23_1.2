@@ -9,7 +9,7 @@ export default function BookingCard({ booking, onCancel, showUser = false, booki
   return (
     <div
       className="glass-card p-5 transition-all duration-200 hover:scale-[1.01]"
-      style={{ borderColor: booking.status === 'APPROVED' ? 'var(--status-approved-border)' : 'rgba(15,23,42,0.04)' }}
+      style={{ borderColor: booking.status === 'APPROVED' ? 'var(--status-approved-border)' : 'var(--border)' }}
     >
       {/* Header */}
       <div className="flex items-start justify-between gap-3 mb-4">
@@ -24,8 +24,8 @@ export default function BookingCard({ booking, onCancel, showUser = false, booki
       </div>
 
       {/* Time */}
-      <div className="flex items-center gap-2 mb-3 p-3 rounded-xl" style={{ background: 'rgba(15,23,42,0.02)' }}>
-        <CalendarDays size={14} style={{ color: 'var(--accent-mid)' }} />
+      <div className="flex items-center gap-2 mb-3 p-3 rounded-xl" style={{ background: 'var(--bg-section)' }}>
+        <CalendarDays size={14} style={{ color: 'var(--primary)' }} />
         <div className="text-sm">
           <span style={{ color: 'var(--accent-mid)' }} className="font-medium">
             {format(new Date(booking.startTime), 'MMM d, yyyy')}
@@ -40,7 +40,7 @@ export default function BookingCard({ booking, onCancel, showUser = false, booki
 
       {/* Purpose */}
       <div className="flex items-start gap-2 mb-3">
-        <FileText size={14} style={{ color: 'var(--accent-mid)', marginTop: 2 }} />
+        <FileText size={14} style={{ color: 'var(--primary)', marginTop: 2 }} />
         <p className="text-sm line-clamp-2" style={{ color: 'var(--text-secondary)' }}>{booking.purpose}</p>
       </div>
 
@@ -62,7 +62,7 @@ export default function BookingCard({ booking, onCancel, showUser = false, booki
       )}
 
       {/* Footer */}
-      <div className="flex items-center justify-between mt-4 pt-4" style={{ borderTop: '1px solid rgba(15,23,42,0.04)' }}>
+      <div className="flex items-center justify-between mt-4 pt-4" style={{ borderTop: '1px solid var(--border)' }}>
         <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>
           {(bookingReference || toBookingReference(booking.id))} · {booking.createdAt ? format(new Date(booking.createdAt), 'MMM d') : 'Just now'}
         </span>

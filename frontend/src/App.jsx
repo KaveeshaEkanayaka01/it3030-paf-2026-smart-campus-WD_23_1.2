@@ -12,7 +12,7 @@ function App() {
       <NotificationProvider>
         <UserProvider>
           <AppProvider>
-            <div className="min-h-screen font-sans text-slate-100 bg-transparent">
+            <div className="min-h-screen font-sans text-[var(--text-primary)] bg-transparent">
               <main>
                 <AppRoutes />
               </main>
@@ -21,15 +21,15 @@ function App() {
                 position="top-right"
                 toastOptions={{
                   style: {
-                    background: 'rgba(26, 26, 46, 0.95)',
-                    color: '#e2e8f0',
-                    border: '1px solid rgba(255,255,255,0.1)',
+                    background: '#ffffff',
+                    color: '#111827',
+                    border: '1px solid #e5e7eb',
                     backdropFilter: 'blur(12px)',
                     borderRadius: '12px',
                     fontSize: '14px',
                   },
                   success: {
-                    iconTheme: { primary: '#4ade80', secondary: 'transparent' },
+                    iconTheme: { primary: '#f97316', secondary: 'transparent' },
                   },
                   error: {
                     iconTheme: { primary: '#f87171', secondary: 'transparent' },

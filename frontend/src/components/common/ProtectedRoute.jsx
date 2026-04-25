@@ -7,7 +7,7 @@ export default function ProtectedRoute({ children, requiredRole, requiredRoles }
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-500"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-[var(--primary)]"></div>
       </div>
     );
   }
@@ -25,8 +25,8 @@ export default function ProtectedRoute({ children, requiredRole, requiredRoles }
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-red-600">Access Denied ❌</h2>
-          <p className="text-gray-500 mt-2">
+          <h2 className="text-2xl font-bold text-[var(--text-primary)]">Access Denied</h2>
+          <p className="text-[var(--text-secondary)] mt-2">
             You don't have permission to view this page.
           </p>
         </div>

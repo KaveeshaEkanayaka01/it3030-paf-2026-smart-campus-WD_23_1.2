@@ -2,9 +2,9 @@ import React from 'react'
 
 const STATUS_STYLES = {
   OPEN: 'bg-amber-500/20 text-amber-300 border border-amber-400/30',
-  IN_PROGRESS: 'bg-indigo-500/20 text-indigo-300 border border-indigo-400/30',
+  IN_PROGRESS: 'bg-[rgba(249,115,22,0.12)] text-[var(--primary)] border border-[rgba(249,115,22,0.22)]',
   RESOLVED: 'bg-emerald-500/20 text-emerald-300 border border-emerald-400/30',
-  CLOSED: 'bg-slate-500/20 text-slate-300 border border-slate-400/30',
+  CLOSED: 'bg-slate-100 text-slate-600 border border-slate-200',
   REJECTED: 'bg-rose-500/20 text-rose-300 border border-rose-400/30',
 }
 

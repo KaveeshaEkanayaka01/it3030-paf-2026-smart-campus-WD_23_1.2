@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { authApi } from '../api/authApi';
 import { API_BASE_URL } from '../api/httpClient';
-import { FaGoogle, FaGithub } from 'react-icons/fa';
+import { FaArrowLeft, FaGithub, FaGoogle, FaLock } from 'react-icons/fa';
 
 export default function LocalLoginPage() {
   const location = useLocation();
@@ -42,176 +42,176 @@ export default function LocalLoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center text-white px-4"
-         style={{ backgroundColor: '#021026' }}>
-      <div className="w-full max-w-4xl rounded-2xl bg-white/5 backdrop-blur-sm
-                      border border-white/10 grid grid-cols-1 md:grid-cols-2
-                      overflow-hidden shadow-2xl relative">
+    <div className="relative min-h-screen overflow-hidden px-4 py-10" style={{ background: 'var(--bg-primary)' }}>
+      <div className="pointer-events-none absolute inset-0">
+        <div className="auth-orb-a absolute -top-14 -left-16 h-72 w-72 rounded-full blur-3xl" style={{ background: 'rgba(249,115,22,0.18)' }} />
+        <div className="auth-orb-b absolute bottom-0 right-0 h-80 w-80 rounded-full blur-3xl" style={{ background: 'rgba(253,186,116,0.24)' }} />
+      </div>
 
-        {/* Left Visual Panel */}
-        <div className="hidden md:flex flex-col justify-center gap-4 p-8
-                        bg-gradient-to-br from-blue-500 to-purple-600
-                        text-white relative overflow-hidden">
-          <div className="absolute -right-16 -top-10 w-56 h-56 rounded-full
-                          bg-white/10 blur-3xl transform rotate-12" />
-          <div className="absolute -left-10 -bottom-10 w-40 h-40 rounded-full
-                          bg-pink-400/20 blur-2xl" />
-
-          <h3 className="text-3xl font-black">Welcome back</h3>
-          <p className="text-white/90">
-            Sign in to access your dashboard, bookings and incident tickets.
-            Use your email or social login.
-          </p>
-
-          <div className="mt-6 grid gap-3">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-teal-300
-                              to-blue-500 rounded-lg shadow" />
-              <div>
-                <p className="text-sm font-bold">Resource Booking</p>
-                <p className="text-xs text-white/80">Manage bookings with ease</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-pink-300
-                              to-purple-500 rounded-lg shadow" />
-              <div>
-                <p className="text-sm font-bold">Incident Tickets</p>
-                <p className="text-xs text-white/80">Report and track issues</p>
-              </div>
-            </div>
+      <div className="relative mx-auto grid w-full max-w-6xl overflow-hidden rounded-3xl border shadow-sm lg:grid-cols-[1.05fr_1fr]" style={{ borderColor: 'var(--border)', background: 'rgba(255,255,255,0.9)' }}>
+        <aside className="auth-enter-left hidden border-r p-10 lg:block" style={{ borderColor: 'var(--border)', background: 'linear-gradient(165deg, rgba(249,115,22,0.1), rgba(253,186,116,0.2))' }}>
+          <div className="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[11px] font-bold uppercase tracking-wider" style={{ borderColor: 'rgba(249,115,22,0.28)', color: 'var(--primary)', background: 'rgba(255,255,255,0.65)' }}>
+            <FaLock size={10} /> Secure Entry
           </div>
-        </div>
 
-        {/* Right: Login Form */}
-        <div className="p-8 bg-transparent">
-          <h2 className="text-2xl font-bold mb-1 text-white">
-            Sign in with email
-          </h2>
-          <p className="text-sm text-white/80 mb-6">
-            Enter your campus email and password.
+          <h1 className="mt-6 text-4xl font-black leading-tight" style={{ color: 'var(--text-primary)' }}>
+            Sign in to
+            <span className="block" style={{ color: 'var(--primary)' }}>Campus Control Center</span>
+          </h1>
+
+          <p className="mt-4 text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+            Access your bookings, incidents, and notifications from one role-aware workspace tuned for operational clarity.
           </p>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="mt-8 space-y-4">
+            {[
+              'Centralized booking lifecycle visibility',
+              'Technician and admin escalation workflows',
+              'Real-time alerts with threaded collaboration',
+            ].map((item) => (
+              <div key={item} className="rounded-xl border bg-white p-4" style={{ borderColor: 'var(--border)' }}>
+                <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{item}</p>
+              </div>
+            ))}
+          </div>
+        </aside>
+
+        <section className="auth-enter-right p-6 sm:p-8 lg:p-10">
+          <button
+            type="button"
+            onClick={() => navigate('/login')}
+            className="mb-5 inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-xs font-semibold"
+            style={{ borderColor: 'var(--border)', color: 'var(--text-secondary)', background: 'var(--bg-section)' }}
+          >
+            <FaArrowLeft size={10} /> Back to Home
+          </button>
+
+          <h2 className="text-3xl font-black" style={{ color: 'var(--text-primary)' }}>Local Login</h2>
+          <p className="mt-2 text-sm" style={{ color: 'var(--text-secondary)' }}>
+            Use your email credentials to access SmartCampus.
+          </p>
+
+          <form onSubmit={handleSubmit} className="mt-6 space-y-4">
             <div>
-              <label className="text-sm text-white/80">Email</label>
+              <label className="text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>Email</label>
               <input
                 required
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full mt-2 p-3 rounded-lg bg-white/6
-                           border border-white/10 placeholder-white/50
-                           text-white outline-none
-                           focus:ring-2 focus:ring-blue-400"
+                className="mt-2 w-full rounded-xl border px-4 py-3 text-sm outline-none transition-all focus:ring-2"
+                style={{ borderColor: 'var(--border)', color: 'var(--text-primary)', background: 'white' }}
               />
             </div>
 
             <div>
-              <label className="text-sm text-white/80">Password</label>
+              <label className="text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>Password</label>
               <input
                 required
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full mt-2 p-3 rounded-lg bg-white/6
-                           border border-white/10 placeholder-white/50
-                           text-white outline-none
-                           focus:ring-2 focus:ring-emerald-400"
+                className="mt-2 w-full rounded-xl border px-4 py-3 text-sm outline-none transition-all focus:ring-2"
+                style={{ borderColor: 'var(--border)', color: 'var(--text-primary)', background: 'white' }}
               />
             </div>
 
-            {error && (
-              <div className="text-red-300 text-sm">{error}</div>
-            )}
+            {error && <div className="rounded-xl border px-3 py-2 text-sm" style={{ borderColor: 'rgba(239,68,68,0.3)', color: '#dc2626', background: 'rgba(254,242,242,0.9)' }}>{error}</div>}
 
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-center gap-3 pt-2">
               <button
                 type="submit"
                 disabled={loading}
-                className="px-5 py-3 bg-gradient-to-r from-emerald-400
-                           to-cyan-500 text-white rounded-lg font-semibold
-                           shadow-lg hover:scale-[1.01] transition-transform
-                           disabled:opacity-50"
+                className="rounded-xl px-5 py-3 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 disabled:opacity-50"
+                style={{ background: 'linear-gradient(135deg, var(--primary), var(--primary-hover))' }}
               >
                 {loading ? 'Signing in...' : 'Sign In'}
               </button>
 
               <button
                 type="button"
-                onClick={() => navigate('/login')}
-                className="text-sm text-white/80 underline"
-              >
-                Back
-              </button>
-            </div>
-
-            <div className="text-sm text-white/80">
-              New here?{' '}
-              <button
-                type="button"
                 onClick={() => navigate('/signup')}
-                className="underline text-cyan-300"
+                className="rounded-xl border px-5 py-3 text-sm font-semibold"
+                style={{ borderColor: 'var(--border)', color: 'var(--text-secondary)', background: 'var(--bg-section)' }}
               >
-                Create an account
+                Create Account
               </button>
             </div>
           </form>
 
-          {/* Divider */}
           <div className="my-6 flex items-center gap-3">
-            <div className="flex-1 h-px bg-white/10" />
-            <div className="text-xs text-white/80 uppercase font-semibold">
-              Or continue with
-            </div>
-            <div className="flex-1 h-px bg-white/10" />
+            <div className="h-px flex-1" style={{ background: 'var(--border)' }} />
+            <p className="text-[11px] font-bold uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>or continue with</p>
+            <div className="h-px flex-1" style={{ background: 'var(--border)' }} />
           </div>
 
-          {/* OAuth Buttons */}
-          <div className="grid grid-cols-1 gap-3">
-
-            {/* ✅ Google Button - now working */}
+          <div className="grid gap-3 sm:grid-cols-2">
             <button
               type="button"
               onClick={handleGoogleLogin}
-              className="flex items-center justify-center gap-2
-                         bg-gradient-to-r from-red-500 to-yellow-400
-                         text-white px-4 py-3 rounded-lg text-sm
-                         font-medium shadow-md hover:opacity-90
-                         hover:scale-[1.01] transition-all duration-200
-                         cursor-pointer"
+              className="rounded-xl border px-4 py-3 text-sm font-semibold transition-all hover:-translate-y-0.5"
+              style={{ borderColor: 'var(--border)', background: 'white', color: 'var(--text-primary)' }}
             >
-              <FaGoogle />
-              Continue with Google
+              <span className="inline-flex items-center gap-2"><FaGoogle /> Continue with Google</span>
             </button>
 
-            <div className="flex gap-3">
-              <button
-                type="button"
-                onClick={handleGitHubLogin}
-                className="flex-1 inline-flex items-center justify-center
-                           gap-2 bg-black text-white px-4 py-3 rounded-lg
-                           text-sm font-medium shadow-md hover:shadow-lg
-                           hover:scale-[1.01] transition-all duration-200"
-              >
-                <FaGithub />
-                Continue with GitHub
-              </button>
-
-              <button
-                type="button"
-                onClick={handleGitHubLogin}
-                className="px-4 py-3 text-sm text-white
-                           bg-gradient-to-r from-purple-500 to-pink-500
-                           rounded-lg hover:opacity-95 shadow-md
-                           hover:scale-[1.01] transition-all duration-200"
-              >
-                Connect Now
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={handleGitHubLogin}
+              className="rounded-xl px-4 py-3 text-sm font-semibold text-white transition-all hover:-translate-y-0.5"
+              style={{ background: 'linear-gradient(135deg, #111827, #1f2937)' }}
+            >
+              <span className="inline-flex items-center gap-2"><FaGithub /> Continue with GitHub</span>
+            </button>
           </div>
-        </div>
+        </section>
       </div>
+
+      <style>{`
+        .auth-enter-left {
+          opacity: 0;
+          transform: translateX(-20px);
+          animation: authInLeft 0.6s ease-out forwards;
+        }
+
+        .auth-enter-right {
+          opacity: 0;
+          transform: translateX(20px);
+          animation: authInRight 0.62s ease-out 0.08s forwards;
+        }
+
+        .auth-orb-a {
+          animation: orbA 12s ease-in-out infinite;
+        }
+
+        .auth-orb-b {
+          animation: orbB 14s ease-in-out infinite;
+        }
+
+        @keyframes authInLeft {
+          to {
+            opacity: 1;
+            transform: translateX(0);
+          }
+        }
+
+        @keyframes authInRight {
+          to {
+            opacity: 1;
+            transform: translateX(0);
+          }
+        }
+
+        @keyframes orbA {
+          0%, 100% { transform: translate(0, 0); }
+          50% { transform: translate(16px, 22px); }
+        }
+
+        @keyframes orbB {
+          0%, 100% { transform: translate(0, 0); }
+          50% { transform: translate(-20px, -16px); }
+        }
+      `}</style>
     </div>
   );
 }

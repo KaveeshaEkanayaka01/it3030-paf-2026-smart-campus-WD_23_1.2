@@ -10,22 +10,22 @@ export default function NotificationsPage() {
 
   return (
     <div className="min-h-screen page-enter" style={{ background: 'var(--bg-primary)' }}>
-      <nav className="shadow-sm px-6 py-4 flex items-center gap-4 border-b" style={{ borderColor: 'rgba(148, 163, 184, 0.25)', background: 'rgba(15, 23, 42, 0.4)' }}>
+      <nav className="shadow-sm px-6 py-4 flex items-center gap-4 border-b" style={{ borderColor: 'var(--border)', background: 'rgba(255,255,255,0.9)' }}>
         <button
           onClick={() => navigate(-1)}
           className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium border transition-all"
           style={{
-            background: 'rgba(15, 23, 42, 0.5)',
-            borderColor: 'rgba(148, 163, 184, 0.25)',
+            background: 'var(--bg-section)',
+            borderColor: 'var(--border)',
             color: 'var(--text-secondary)',
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.background = 'rgba(15, 23, 42, 0.7)';
-            e.currentTarget.style.borderColor = 'rgba(148, 163, 184, 0.4)';
+            e.currentTarget.style.background = 'var(--surface-hover)';
+            e.currentTarget.style.borderColor = 'rgba(249,115,22,0.22)';
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.background = 'rgba(15, 23, 42, 0.5)';
-            e.currentTarget.style.borderColor = 'rgba(148, 163, 184, 0.25)';
+            e.currentTarget.style.background = 'var(--bg-section)';
+            e.currentTarget.style.borderColor = 'var(--border)';
           }}
         >
           <ArrowLeft size={16} />
@@ -42,7 +42,7 @@ export default function NotificationsPage() {
           <button
             onClick={markAllAsRead}
             className="flex items-center gap-2 text-sm font-medium transition-colors hover:opacity-80"
-            style={{ color: 'var(--accent-mid)' }}
+            style={{ color: 'var(--primary)' }}
           >
             <FaCheckDouble size={14} />
             Mark all as read
@@ -51,7 +51,7 @@ export default function NotificationsPage() {
 
         <div className="space-y-3">
           {notifications.length === 0 ? (
-            <div className="rounded-xl p-8 text-center glass-card border" style={{ borderColor: 'rgba(148, 163, 184, 0.25)', color: 'var(--text-secondary)' }}>
+            <div className="rounded-xl p-8 text-center glass-card border" style={{ borderColor: 'var(--border)', color: 'var(--text-secondary)' }}>
               No notifications yet 🔔
             </div>
           ) : (
@@ -61,7 +61,7 @@ export default function NotificationsPage() {
                 onClick={() => !notification.read && markAsRead(notification.id)}
                 className="rounded-xl p-5 cursor-pointer transition-all duration-200 glass-card border hover:shadow-lg"
                 style={{
-                  borderColor: !notification.read ? 'var(--accent-mid)' : 'rgba(148, 163, 184, 0.25)',
+                  borderColor: !notification.read ? 'var(--primary)' : 'var(--border)',
                   borderLeft: !notification.read ? '4px solid' : '1px solid',
                 }}
               >
@@ -79,7 +79,7 @@ export default function NotificationsPage() {
                   </div>
                   <div className="flex items-center gap-3">
                     {!notification.read && (
-                      <span className="text-xs px-2 py-1 rounded-full font-medium" style={{ background: 'rgba(15, 23, 42, 0.4)', color: 'var(--accent-mid)', border: '1px solid rgba(148, 163, 184, 0.25)' }}>
+                      <span className="text-xs px-2 py-1 rounded-full font-medium" style={{ background: 'rgba(249,115,22,0.08)', color: 'var(--primary)', border: '1px solid var(--border)' }}>
                         New
                       </span>
                     )}
@@ -89,7 +89,7 @@ export default function NotificationsPage() {
                         deleteNotification(notification.id);
                       }}
                       className="transition-colors"
-                      style={{ color: 'var(--accent-mid)' }}
+                      style={{ color: 'var(--primary)' }}
                       onMouseEnter={(e) => e.target.style.opacity = '0.7'}
                       onMouseLeave={(e) => e.target.style.opacity = '1'}
                     >
