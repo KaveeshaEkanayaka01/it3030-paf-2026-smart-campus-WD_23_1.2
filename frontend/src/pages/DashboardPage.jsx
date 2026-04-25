@@ -11,6 +11,7 @@ import {
   FaBell,
   FaUserShield,
   FaGithub,
+  FaGoogle,
   FaCheckCircle,
 } from 'react-icons/fa';
 
@@ -162,10 +163,18 @@ export default function DashboardPage() {
                 <div>
                   <h2 className="text-2xl font-bold">{user?.name}</h2>
                   <p className="text-white/70 text-sm mt-1">{user?.email}</p>
+                  {user?.githubUsername && (
                   <div className="flex items-center gap-2 mt-2">
                     <FaGithub size={14} className="text-white/60" />
                     <span className="text-white/70 text-sm">@{user?.githubUsername}</span>
                   </div>
+                )}
+                {user?.provider === 'google' && !user?.githubUsername && (
+                  <div className="flex items-center gap-2 mt-2">
+                    <FaGoogle size={14} className="text-white/60" />
+                    <span className="text-white/70 text-sm">Google Account</span>
+                  </div>
+                )}
                 </div>
               </div>
             </div>
@@ -183,10 +192,12 @@ export default function DashboardPage() {
                   <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{user?.email}</span>
                 </div>
 
-                <div className="flex justify-between items-center py-3 border-b" style={{ borderColor: 'rgba(148, 163, 184, 0.15)' }}>
-                  <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>GitHub Username</span>
-                  <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>@{user?.githubUsername}</span>
-                </div>
+                {user?.githubUsername && (
+                  <div className="flex justify-between items-center py-3 border-b" style={{ borderColor: 'rgba(148, 163, 184, 0.15)' }}>
+                    <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>GitHub Username</span>
+                    <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>@{user?.githubUsername}</span>
+                  </div>
+                )}
 
                 <div className="flex justify-between items-center py-3 border-b" style={{ borderColor: 'rgba(148, 163, 184, 0.15)' }}>
                   <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>Account Status</span>
@@ -217,23 +228,7 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            <div className="rounded-2xl p-6 border glass-card" style={{ borderColor: 'rgba(148, 163, 184, 0.25)' }}>
-              <h3 className="font-bold text-base mb-4" style={{ color: 'var(--text-primary)' }}>Authentication</h3>
-              <div className="flex items-center gap-4 p-4 rounded-xl" style={{ background: 'rgba(15, 23, 42, 0.4)' }}>
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'linear-gradient(135deg, var(--accent-start), var(--accent-end))' }}>
-                  <FaGithub className="text-white" size={20} />
-                </div>
-                <div>
-                  <p className="font-medium text-sm" style={{ color: 'var(--text-primary)' }}>GitHub OAuth 2.0</p>
-                  <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>Signed in via GitHub authentication</p>
-                </div>
-                <div className="ml-auto">
-                  <span className="text-xs px-2 py-1 rounded-full font-medium" style={{ background: 'rgba(15, 23, 42, 0.4)', color: 'var(--accent-mid)', border: '1px solid rgba(148, 163, 184, 0.25)' }}>
-                    Connected
-                  </span>
-                </div>
-              </div>
-            </div>
+            
           </div>
         ) : (
           <>
@@ -248,10 +243,18 @@ export default function DashboardPage() {
                     Welcome back, {user?.name?.split(' ')[0]}!
                   </h2>
                   <p className="text-white/70 text-sm">Here's what's happening in your campus today.</p>
-                  <div className="flex items-center gap-2 mt-3">
-                    <FaGithub size={14} className="text-white/60" />
-                    <span className="text-white/70 text-xs">@{user?.githubUsername}</span>
-                  </div>
+                  {user?.githubUsername && (
+                    <div className="flex items-center gap-2 mt-3">
+                      <FaGithub size={14} className="text-white/60" />
+                      <span className="text-white/70 text-xs">@{user?.githubUsername}</span>
+                    </div>
+                  )}
+                  {user?.provider === 'google' && !user?.githubUsername && (
+                    <div className="flex items-center gap-2 mt-3">
+                      <FaGoogle size={14} className="text-white/60" />
+                      <span className="text-white/70 text-xs">Google User</span>
+                    </div>
+                  )}
                 </div>
 
                 {user?.avatarUrl && (
