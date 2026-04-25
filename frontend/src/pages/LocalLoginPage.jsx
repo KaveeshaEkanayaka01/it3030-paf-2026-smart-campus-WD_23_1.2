@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { authApi } from '../api/authApi';
 import { API_BASE_URL } from '../api/httpClient';
 import { FaArrowLeft, FaGithub, FaGoogle, FaLock } from 'react-icons/fa';
+import heroImage from '../assets/hero.png';
 
 export default function LocalLoginPage() {
   const location = useLocation();
@@ -44,12 +45,13 @@ export default function LocalLoginPage() {
   return (
     <div className="relative min-h-screen overflow-hidden px-4 py-10" style={{ background: 'var(--bg-primary)' }}>
       <div className="pointer-events-none absolute inset-0">
+        <div className="auth-photo-bg absolute inset-0" style={{ backgroundImage: `url(${heroImage})` }} />
         <div className="auth-orb-a absolute -top-14 -left-16 h-72 w-72 rounded-full blur-3xl" style={{ background: 'rgba(249,115,22,0.18)' }} />
         <div className="auth-orb-b absolute bottom-0 right-0 h-80 w-80 rounded-full blur-3xl" style={{ background: 'rgba(253,186,116,0.24)' }} />
       </div>
 
-      <div className="relative mx-auto grid w-full max-w-6xl overflow-hidden rounded-3xl border shadow-sm lg:grid-cols-[1.05fr_1fr]" style={{ borderColor: 'var(--border)', background: 'rgba(255,255,255,0.9)' }}>
-        <aside className="auth-enter-left hidden border-r p-10 lg:block" style={{ borderColor: 'var(--border)', background: 'linear-gradient(165deg, rgba(249,115,22,0.1), rgba(253,186,116,0.2))' }}>
+      <div className="relative mx-auto grid w-full max-w-6xl overflow-hidden rounded-3xl border shadow-sm backdrop-blur-md lg:grid-cols-[1.05fr_1fr]" style={{ borderColor: 'rgba(229,231,235,0.9)', background: 'rgba(255,255,255,0.7)' }}>
+        <aside className="auth-enter-left hidden border-r p-10 lg:block" style={{ borderColor: 'rgba(229,231,235,0.85)', background: 'linear-gradient(165deg, rgba(249,115,22,0.16), rgba(253,186,116,0.26))' }}>
           <div className="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[11px] font-bold uppercase tracking-wider" style={{ borderColor: 'rgba(249,115,22,0.28)', color: 'var(--primary)', background: 'rgba(255,255,255,0.65)' }}>
             <FaLock size={10} /> Secure Entry
           </div>
@@ -69,14 +71,14 @@ export default function LocalLoginPage() {
               'Technician and admin escalation workflows',
               'Real-time alerts with threaded collaboration',
             ].map((item) => (
-              <div key={item} className="rounded-xl border bg-white p-4" style={{ borderColor: 'var(--border)' }}>
+              <div key={item} className="rounded-xl border p-4" style={{ borderColor: 'rgba(229,231,235,0.9)', background: 'rgba(255,255,255,0.72)' }}>
                 <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{item}</p>
               </div>
             ))}
           </div>
         </aside>
 
-        <section className="auth-enter-right p-6 sm:p-8 lg:p-10">
+        <section className="auth-enter-right p-6 sm:p-8 lg:p-10" style={{ background: 'rgba(255,255,255,0.52)', backdropFilter: 'blur(5px)' }}>
           <button
             type="button"
             onClick={() => navigate('/login')}
@@ -100,7 +102,7 @@ export default function LocalLoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="mt-2 w-full rounded-xl border px-4 py-3 text-sm outline-none transition-all focus:ring-2"
-                style={{ borderColor: 'var(--border)', color: 'var(--text-primary)', background: 'white' }}
+                style={{ borderColor: 'rgba(229,231,235,0.95)', color: 'var(--text-primary)', background: 'rgba(255,255,255,0.75)' }}
               />
             </div>
 
@@ -112,7 +114,7 @@ export default function LocalLoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="mt-2 w-full rounded-xl border px-4 py-3 text-sm outline-none transition-all focus:ring-2"
-                style={{ borderColor: 'var(--border)', color: 'var(--text-primary)', background: 'white' }}
+                style={{ borderColor: 'rgba(229,231,235,0.95)', color: 'var(--text-primary)', background: 'rgba(255,255,255,0.75)' }}
               />
             </div>
 
@@ -150,7 +152,7 @@ export default function LocalLoginPage() {
               type="button"
               onClick={handleGoogleLogin}
               className="rounded-xl border px-4 py-3 text-sm font-semibold transition-all hover:-translate-y-0.5"
-              style={{ borderColor: 'var(--border)', background: 'white', color: 'var(--text-primary)' }}
+              style={{ borderColor: 'rgba(229,231,235,0.95)', background: 'rgba(255,255,255,0.78)', color: 'var(--text-primary)' }}
             >
               <span className="inline-flex items-center gap-2"><FaGoogle /> Continue with Google</span>
             </button>
@@ -188,6 +190,15 @@ export default function LocalLoginPage() {
           animation: orbB 14s ease-in-out infinite;
         }
 
+        .auth-photo-bg {
+          opacity: 0.16;
+          background-size: cover;
+          background-position: center;
+          background-repeat: no-repeat;
+          animation: photoFloat 16s ease-in-out infinite;
+          transform-origin: center;
+        }
+
         @keyframes authInLeft {
           to {
             opacity: 1;
@@ -210,6 +221,11 @@ export default function LocalLoginPage() {
         @keyframes orbB {
           0%, 100% { transform: translate(0, 0); }
           50% { transform: translate(-20px, -16px); }
+        }
+
+        @keyframes photoFloat {
+          0%, 100% { transform: scale(1.03); }
+          50% { transform: scale(1.07); }
         }
       `}</style>
     </div>

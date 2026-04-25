@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authApi } from '../api/authApi';
 import { FaArrowLeft, FaCheckCircle, FaUserShield } from 'react-icons/fa';
+import heroImage from '../assets/hero.png';
 
 export default function SignUpPage() {
   const navigate = useNavigate();
@@ -54,12 +55,13 @@ export default function SignUpPage() {
   return (
     <div className="relative min-h-screen overflow-hidden px-4 py-10" style={{ background: 'var(--bg-primary)' }}>
       <div className="pointer-events-none absolute inset-0">
+        <div className="signup-photo-bg absolute inset-0" style={{ backgroundImage: `url(${heroImage})` }} />
         <div className="signup-orb-a absolute -top-14 right-0 h-72 w-72 rounded-full blur-3xl" style={{ background: 'rgba(249,115,22,0.2)' }} />
         <div className="signup-orb-b absolute bottom-0 -left-12 h-80 w-80 rounded-full blur-3xl" style={{ background: 'rgba(253,186,116,0.2)' }} />
       </div>
 
-      <div className="relative mx-auto grid w-full max-w-6xl overflow-hidden rounded-3xl border shadow-sm lg:grid-cols-[1fr_1.1fr]" style={{ borderColor: 'var(--border)', background: 'rgba(255,255,255,0.92)' }}>
-        <aside className="signup-enter-left hidden border-r p-10 lg:block" style={{ borderColor: 'var(--border)', background: 'var(--bg-section)' }}>
+      <div className="relative mx-auto grid w-full max-w-6xl overflow-hidden rounded-3xl border shadow-sm backdrop-blur-md lg:grid-cols-[1fr_1.1fr]" style={{ borderColor: 'rgba(229,231,235,0.9)', background: 'rgba(255,255,255,0.7)' }}>
+        <aside className="signup-enter-left hidden border-r p-10 lg:block" style={{ borderColor: 'rgba(229,231,235,0.9)', background: 'rgba(249,250,251,0.66)' }}>
           <div className="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[11px] font-black uppercase tracking-wider" style={{ borderColor: 'rgba(249,115,22,0.3)', color: 'var(--primary)', background: 'rgba(249,115,22,0.08)' }}>
             <FaUserShield size={10} /> New User Onboarding
           </div>
@@ -79,7 +81,7 @@ export default function SignUpPage() {
               'Immediate access to booking and ticket modules',
               'Consistent role controls across all pages',
             ].map((line) => (
-              <div key={line} className="flex items-start gap-3 rounded-xl border bg-white p-4" style={{ borderColor: 'var(--border)' }}>
+              <div key={line} className="flex items-start gap-3 rounded-xl border p-4" style={{ borderColor: 'rgba(229,231,235,0.9)', background: 'rgba(255,255,255,0.72)' }}>
                 <FaCheckCircle className="mt-0.5" style={{ color: 'var(--primary)' }} />
                 <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{line}</p>
               </div>
@@ -87,7 +89,7 @@ export default function SignUpPage() {
           </div>
         </aside>
 
-        <section className="signup-enter-right p-6 sm:p-8 lg:p-10">
+        <section className="signup-enter-right p-6 sm:p-8 lg:p-10" style={{ background: 'rgba(255,255,255,0.52)', backdropFilter: 'blur(5px)' }}>
           <button
             type="button"
             onClick={() => navigate('/login')}
@@ -112,7 +114,7 @@ export default function SignUpPage() {
                 value={form.name}
                 onChange={onChange}
                 className="mt-2 w-full rounded-xl border px-4 py-3 text-sm outline-none"
-                style={{ borderColor: 'var(--border)', background: 'white', color: 'var(--text-primary)' }}
+                style={{ borderColor: 'rgba(229,231,235,0.95)', background: 'rgba(255,255,255,0.75)', color: 'var(--text-primary)' }}
                 placeholder="Enter your full name"
               />
             </div>
@@ -126,7 +128,7 @@ export default function SignUpPage() {
                 value={form.email}
                 onChange={onChange}
                 className="mt-2 w-full rounded-xl border px-4 py-3 text-sm outline-none"
-                style={{ borderColor: 'var(--border)', background: 'white', color: 'var(--text-primary)' }}
+                style={{ borderColor: 'rgba(229,231,235,0.95)', background: 'rgba(255,255,255,0.75)', color: 'var(--text-primary)' }}
                 placeholder="yourname@example.com"
               />
             </div>
@@ -142,7 +144,7 @@ export default function SignUpPage() {
                   value={form.password}
                   onChange={onChange}
                   className="mt-2 w-full rounded-xl border px-4 py-3 text-sm outline-none"
-                  style={{ borderColor: 'var(--border)', background: 'white', color: 'var(--text-primary)' }}
+                  style={{ borderColor: 'rgba(229,231,235,0.95)', background: 'rgba(255,255,255,0.75)', color: 'var(--text-primary)' }}
                   placeholder="Minimum 6 characters"
                 />
               </div>
@@ -157,7 +159,7 @@ export default function SignUpPage() {
                   value={form.confirmPassword}
                   onChange={onChange}
                   className="mt-2 w-full rounded-xl border px-4 py-3 text-sm outline-none"
-                  style={{ borderColor: 'var(--border)', background: 'white', color: 'var(--text-primary)' }}
+                  style={{ borderColor: 'rgba(229,231,235,0.95)', background: 'rgba(255,255,255,0.75)', color: 'var(--text-primary)' }}
                   placeholder="Repeat password"
                 />
               </div>
@@ -209,6 +211,15 @@ export default function SignUpPage() {
           animation: signupOrbB 14s ease-in-out infinite;
         }
 
+        .signup-photo-bg {
+          opacity: 0.16;
+          background-size: cover;
+          background-position: center;
+          background-repeat: no-repeat;
+          animation: signupPhotoFloat 16s ease-in-out infinite;
+          transform-origin: center;
+        }
+
         @keyframes signupInLeft {
           to {
             opacity: 1;
@@ -231,6 +242,11 @@ export default function SignUpPage() {
         @keyframes signupOrbB {
           0%, 100% { transform: translate(0, 0); }
           50% { transform: translate(20px, -16px); }
+        }
+
+        @keyframes signupPhotoFloat {
+          0%, 100% { transform: scale(1.03); }
+          50% { transform: scale(1.07); }
         }
       `}</style>
     </div>
