@@ -48,8 +48,9 @@ export default function ResourceCard({
             <div
               className="w-full h-44 lg:h-full min-h-[180px] rounded-xl flex items-center justify-center text-sm font-semibold"
               style={{
-                background: 'rgba(15, 23, 42, 0.35)',
+                background: 'var(--surface-muted)',
                 color: 'var(--text-secondary)',
+                border: '1px solid var(--border)',
               }}
             >
               No Image
@@ -128,9 +129,9 @@ export default function ResourceCard({
               onClick={() => onView?.(resource)}
               className="px-4 py-2 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all hover:opacity-90"
               style={{
-                background: 'rgba(14,165,233,0.08)',
-                color: 'var(--accent-mid)',
-                border: '1px solid rgba(14,165,233,0.12)',
+                background: 'var(--status-approved-bg)',
+                color: 'var(--status-approved)',
+                border: '1px solid var(--status-approved-border)',
               }}
             >
               <Eye size={16} />
@@ -159,9 +160,9 @@ export default function ResourceCard({
                   onClick={() => onEdit?.(resource)}
                   className="px-4 py-2 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all hover:opacity-90"
                   style={{
-                    background: 'rgba(99,102,241,0.12)',
-                    color: 'var(--accent-mid)',
-                    border: '1px solid rgba(99,102,241,0.18)',
+                    background: 'var(--status-pending-bg)',
+                    color: 'var(--status-pending)',
+                    border: '1px solid var(--status-pending-border)',
                   }}
                 >
                   <Pencil size={16} />
@@ -172,9 +173,9 @@ export default function ResourceCard({
                   onClick={() => onDelete?.(resource)}
                   className="px-4 py-2 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all hover:opacity-90"
                   style={{
-                    background: 'rgba(239,68,68,0.12)',
+                    background: 'var(--status-rejected-bg)',
                     color: 'var(--status-rejected)',
-                    border: '1px solid rgba(239,68,68,0.18)',
+                    border: '1px solid var(--status-rejected-border)',
                   }}
                 >
                   <Trash2 size={16} />
@@ -201,8 +202,9 @@ export default function ResourceCard({
         <div
           className="w-full h-44 rounded-xl mb-4 flex items-center justify-center text-sm font-semibold"
           style={{
-            background: 'rgba(15, 23, 42, 0.35)',
+            background: 'var(--surface-muted)',
             color: 'var(--text-secondary)',
+            border: '1px solid var(--border)',
           }}
         >
           No Image
@@ -281,9 +283,9 @@ export default function ResourceCard({
               onClick={() => onView?.(resource)}
               className="px-4 py-2 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all hover:opacity-90"
               style={{
-                background: 'rgba(14,165,233,0.08)',
-                color: 'var(--accent-mid)',
-                border: '1px solid rgba(14,165,233,0.12)',
+                background: 'var(--status-approved-bg)',
+                color: 'var(--status-approved)',
+                border: '1px solid var(--status-approved-border)',
               }}
             >
               <Eye size={16} />
@@ -294,9 +296,9 @@ export default function ResourceCard({
               onClick={() => onEdit?.(resource)}
               className="px-4 py-2 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all hover:opacity-90"
               style={{
-                background: 'rgba(99,102,241,0.12)',
-                color: 'var(--accent-mid)',
-                border: '1px solid rgba(99,102,241,0.18)',
+                background: 'var(--status-pending-bg)',
+                color: 'var(--status-pending)',
+                border: '1px solid var(--status-pending-border)',
               }}
             >
               <Pencil size={16} />
@@ -307,9 +309,9 @@ export default function ResourceCard({
               onClick={() => onDelete?.(resource)}
               className="px-4 py-2 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all hover:opacity-90"
               style={{
-                background: 'rgba(239,68,68,0.12)',
+                background: 'var(--status-rejected-bg)',
                 color: 'var(--status-rejected)',
-                border: '1px solid rgba(239,68,68,0.18)',
+                border: '1px solid var(--status-rejected-border)',
               }}
             >
               <Trash2 size={16} />
@@ -322,9 +324,9 @@ export default function ResourceCard({
               onClick={() => onView?.(resource)}
               className="px-4 py-2 rounded-xl text-sm font-semibold flex items-center justify-center gap-2"
               style={{
-                background: 'rgba(14,165,233,0.08)',
-                color: 'var(--accent-mid)',
-                border: '1px solid rgba(14,165,233,0.12)',
+                background: 'var(--status-approved-bg)',
+                color: 'var(--status-approved)',
+                border: '1px solid var(--status-approved-border)',
               }}
             >
               <Eye size={16} />

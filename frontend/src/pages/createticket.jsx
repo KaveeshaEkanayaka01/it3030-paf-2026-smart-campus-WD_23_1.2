@@ -208,54 +208,55 @@ export const CreateTicketPage = () => {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8 md:py-12 relative page-enter">
-      <div className="pointer-events-none absolute right-0 top-0 h-[500px] w-[500px] rounded-full bg-[radial-gradient(circle,_rgba(14,165,233,0.2)_0%,_rgba(14,165,233,0)_70%)] opacity-60 blur-3xl shadow-none" />
+      <div className="pointer-events-none absolute right-0 top-0 h-[500px] w-[500px] rounded-full bg-[radial-gradient(circle,_rgba(249,115,22,0.08)_0%,_rgba(249,115,22,0)_70%)] opacity-60 blur-3xl shadow-none" />
       
       <button
         type="button"
         onClick={() => navigate('/my-tickets')}
-        className="group mb-8 inline-flex items-center gap-2 glass-panel px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest text-slate-400 transition-all hover:text-white hover:glass-panel-strong border border-white/10 relative z-10"
+        className="group mb-8 inline-flex items-center gap-2 glass-panel px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all hover:glass-panel-strong border border-white/10 relative z-10"
+        style={{ color: 'var(--text-secondary)' }}
       >
         <ArrowLeft size={16} className="transition-transform group-hover:-translate-x-1" />
         Back to tickets
       </button>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[0.9fr_1.1fr] relative z-10">
-        <aside className="glass-panel-strong rounded-3xl p-8 shadow-xl backdrop-blur-md flex flex-col justify-between">
+        <aside className="glass-panel-strong rounded-3xl p-8 shadow-xl backdrop-blur-md flex flex-col justify-between" style={{ background: 'rgba(255, 255, 255, 0.7)', border: '1px solid var(--border)' }}>
           <div>
-            <p className="inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest mb-6 w-fit" style={{ borderColor: 'rgba(56,189,248,0.35)', background: 'rgba(14,165,233,0.12)', color: 'var(--accent-mid)' }}>
-              <Sparkles size={12} style={{ color: 'var(--accent-mid)' }} />
+            <p className="inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest mb-6 w-fit" style={{ borderColor: 'rgba(249,115,22,0.35)', background: 'rgba(249,115,22,0.12)', color: 'var(--primary)' }}>
+              <Sparkles size={12} style={{ color: 'var(--primary)' }} />
               Incident Desk
             </p>
-            <h1 className="text-4xl font-extrabold uppercase tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-teal-400 md:text-5xl">Create Ticket</h1>
-            <p className="mt-4 max-w-md text-sm leading-relaxed text-slate-300 font-medium">
+            <h1 className="text-4xl font-extrabold uppercase tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-amber-500 md:text-5xl">Create Ticket</h1>
+            <p className="mt-4 max-w-md text-sm leading-relaxed font-medium" style={{ color: 'var(--text-secondary)' }}>
               Report maintenance issues with clear details so technicians can respond faster and accurately.
             </p>
           </div>
 
           <div className="mt-12 grid gap-4">
-            <div className="glass-panel rounded-xl p-5 border-l-[3px] border-l-indigo-500 relative overflow-hidden group">
+            <div className="glass-panel rounded-xl p-5 border-l-[3px] border-l-orange-500 relative overflow-hidden group" style={{ background: 'var(--bg-primary)', border: '1px solid var(--border)', borderLeftWidth: '3px' }}>
               <div className="absolute right-[-10px] top-[-10px] opacity-5 group-hover:opacity-10 transition-opacity">
                 <Info size={100} />
               </div>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Current User</p>
-              <p className="text-sm font-bold text-slate-200 truncate">{displayUserName || 'Not set yet'}</p>
+              <p className="text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color: 'var(--text-secondary)' }}>Current User</p>
+              <p className="text-sm font-bold truncate" style={{ color: 'var(--text-primary)' }}>{displayUserName || 'Not set yet'}</p>
               {currentUser && (
-                <p className="mt-1 text-[10px] font-bold uppercase tracking-widest text-slate-500 truncate">ID: {currentUser}</p>
+                <p className="mt-1 text-[10px] font-bold uppercase tracking-widest truncate" style={{ color: 'var(--muted)' }}>ID: {currentUser}</p>
               )}
             </div>
-            <div className="glass-panel rounded-xl p-5 border-l-[3px] border-l-fuchsia-500 relative overflow-hidden group">
+            <div className="glass-panel rounded-xl p-5 border-l-[3px] border-l-amber-500 relative overflow-hidden group" style={{ background: 'var(--bg-primary)', border: '1px solid var(--border)', borderLeftWidth: '3px' }}>
               <div className="absolute right-[-10px] top-[-10px] opacity-5 group-hover:opacity-10 transition-opacity">
                  <Tag size={100} />
               </div>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Attachment Limit</p>
-              <p className="text-sm font-bold text-slate-200">Up to 3 images per ticket</p>
+              <p className="text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color: 'var(--text-secondary)' }}>Attachment Limit</p>
+              <p className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>Up to 3 images per ticket</p>
             </div>
-            <div className="glass-panel rounded-xl p-5 border-l-[3px] border-l-rose-500 relative overflow-hidden group">
+            <div className="glass-panel rounded-xl p-5 border-l-[3px] border-l-orange-600 relative overflow-hidden group" style={{ background: 'var(--bg-primary)', border: '1px solid var(--border)', borderLeftWidth: '3px' }}>
               <div className="absolute right-[-10px] top-[-10px] opacity-5 group-hover:opacity-10 transition-opacity">
                  <Send size={100} />
               </div>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Workflow</p>
-              <p className="text-sm font-bold text-slate-200">Open - In Progress - Resolved - Closed</p>
+              <p className="text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color: 'var(--text-secondary)' }}>Workflow</p>
+              <p className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>Open - In Progress - Resolved - Closed</p>
             </div>
           </div>
         </aside>
@@ -263,15 +264,16 @@ export const CreateTicketPage = () => {
         <section className="space-y-6">
           {!currentUser && (
             <div className="glass-panel border-amber-500/30 bg-amber-500/10 p-6 rounded-2xl backdrop-blur-md">
-              <p className="text-xs font-bold uppercase tracking-wider text-amber-400">Testing Mode User Setup</p>
-              <p className="mt-1 text-sm text-amber-200/80">Login module is not connected yet. Set a temporary user id to test ticket creation.</p>
+              <p className="text-xs font-bold uppercase tracking-wider text-amber-600">Testing Mode User Setup</p>
+              <p className="mt-1 text-sm text-amber-700/80">Login module is not connected yet. Set a temporary user id to test ticket creation.</p>
               <div className="mt-4 flex flex-col gap-3 sm:flex-row">
                 <input
                   type="text"
                   value={testUserInput}
                   onChange={(e) => setTestUserInput(e.target.value)}
                   placeholder="e.g. wd23-student"
-                  className="w-full glass-input rounded-xl px-4 py-3 text-sm font-medium outline-none text-slate-200 placeholder:text-slate-500"
+                  className="w-full glass-input rounded-xl px-4 py-3 text-sm font-medium outline-none transition-all"
+                  style={{ background: 'var(--bg-primary)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}
                 />
                 <button
                   type="button"
@@ -292,29 +294,30 @@ export const CreateTicketPage = () => {
               </div>
             )}
 
-            <div className="glass-panel rounded-3xl p-6 shadow-xl backdrop-blur-md md:p-8 border border-white/10">
-              <div className="mb-6 flex items-center justify-between gap-4 border-b border-white/10 pb-5">
-                <h2 className="text-xs font-bold uppercase tracking-[0.15em] text-slate-100 flex items-center gap-2">
-                  <Tag size={16} className="text-indigo-400" />
+            <div className="glass-panel rounded-3xl p-6 shadow-xl backdrop-blur-md md:p-8 border border-white/10" style={{ background: 'rgba(255, 255, 255, 0.8)', border: '1px solid var(--border)' }}>
+              <div className="mb-6 flex items-center justify-between gap-4 border-b border-white/10 pb-5" style={{ borderColor: 'var(--border)' }}>
+                <h2 className="text-xs font-bold uppercase tracking-[0.15em] flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
+                  <Tag size={16} style={{ color: 'var(--primary)' }} />
                   Issue Details
                 </h2>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 bg-white/5 px-3 py-1 rounded-full border border-white/10">Step 1 of 2</p>
+                <p className="text-[10px] font-bold uppercase tracking-widest bg-white/5 px-3 py-1 rounded-full border" style={{ color: 'var(--text-secondary)', borderColor: 'var(--border)' }}>Step 1 of 2</p>
               </div>
 
               <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                 <div className="space-y-2.5">
-                  <label className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                  <label className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--text-secondary)' }}>
                     Category
                   </label>
                   <select
                     required
                     value={formData.category}
                     onChange={(e) => handleFieldChange('category', e.target.value)}
-                    className="w-full glass-input rounded-xl px-4 py-3.5 text-sm font-medium outline-none text-slate-200 cursor-pointer appearance-none bg-slate-900/50 focus:bg-slate-800/80 transition-all border border-white/10"
+                    className="w-full glass-input rounded-xl px-4 py-3.5 text-sm font-medium outline-none cursor-pointer appearance-none transition-all border"
+                    style={{ background: 'var(--bg-primary)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}
                   >
-                    <option value="" className="bg-slate-900 text-slate-400">Select a category</option>
+                    <option value="" style={{ backgroundColor: 'var(--bg-primary)', color: 'var(--text-secondary)' }}>Select a category</option>
                     {CATEGORIES.map(cat => (
-                      <option key={cat} value={cat} className="bg-slate-900 text-slate-200">{cat}</option>
+                      <option key={cat} value={cat} style={{ backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }}>{cat}</option>
                     ))}
                   </select>
                   {fieldErrors.category && (
@@ -323,17 +326,18 @@ export const CreateTicketPage = () => {
                 </div>
 
                 <div className="space-y-2.5">
-                  <label className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                  <label className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--text-secondary)' }}>
                     Priority
                   </label>
                   <select
                     required
                     value={formData.priority}
                     onChange={(e) => handleFieldChange('priority', e.target.value)}
-                    className="w-full glass-input rounded-xl px-4 py-3.5 text-sm font-medium outline-none text-slate-200 cursor-pointer appearance-none bg-slate-900/50 focus:bg-slate-800/80 transition-all border border-white/10"
+                    className="w-full glass-input rounded-xl px-4 py-3.5 text-sm font-medium outline-none cursor-pointer appearance-none transition-all border"
+                    style={{ background: 'var(--bg-primary)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}
                   >
                     {PRIORITIES.map(prio => (
-                      <option key={prio} value={prio} className="bg-slate-900 text-slate-200">{prio}</option>
+                      <option key={prio} value={prio} style={{ backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }}>{prio}</option>
                     ))}
                   </select>
                   {fieldErrors.priority && (
@@ -342,8 +346,8 @@ export const CreateTicketPage = () => {
                 </div>
 
                 <div className="space-y-2.5 md:col-span-2">
-                  <label className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-slate-400">
-                    <MapPin size={12} className="text-sky-400" />
+                  <label className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--text-secondary)' }}>
+                    <MapPin size={12} style={{ color: 'var(--primary)' }} />
                     Location
                   </label>
                   <input
@@ -353,16 +357,17 @@ export const CreateTicketPage = () => {
                     value={formData.location}
                     onChange={(e) => handleFieldChange('location', e.target.value)}
                     maxLength={LOCATION_MAX_LENGTH}
-                    className="w-full glass-input rounded-xl px-4 py-3.5 text-sm outline-none text-slate-200 placeholder:text-slate-500 font-medium transition-all"
+                    className="w-full glass-input rounded-xl px-4 py-3.5 text-sm outline-none font-medium transition-all border"
+                    style={{ background: 'var(--bg-primary)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}
                   />
                   {fieldErrors.location && (
-                    <p className="text-xs font-semibold text-rose-300">{fieldErrors.location}</p>
+                    <p className="text-xs font-semibold text-rose-500">{fieldErrors.location}</p>
                   )}
                 </div>
 
                 <div className="space-y-2.5 md:col-span-2">
-                  <label className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-slate-400">
-                    <Info size={12} className="text-fuchsia-400" />
+                  <label className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--text-secondary)' }}>
+                    <Info size={12} style={{ color: 'var(--accent-mid)' }} />
                     Description
                   </label>
                   <textarea
@@ -372,19 +377,20 @@ export const CreateTicketPage = () => {
                     value={formData.description}
                     onChange={(e) => handleFieldChange('description', e.target.value)}
                     maxLength={DESCRIPTION_MAX_LENGTH}
-                    className="w-full resize-none glass-input rounded-xl px-4 py-3.5 text-sm outline-none text-slate-200 placeholder:text-slate-500 font-medium transition-all"
+                    className="w-full resize-none glass-input rounded-xl px-4 py-3.5 text-sm outline-none font-medium transition-all border"
+                    style={{ background: 'var(--bg-primary)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}
                   />
                   {fieldErrors.description && (
-                    <p className="text-xs font-semibold text-rose-300">{fieldErrors.description}</p>
+                    <p className="text-xs font-semibold text-rose-500">{fieldErrors.description}</p>
                   )}
-                  <p className="text-right text-[10px] font-bold uppercase tracking-widest text-slate-500 pt-1">
+                  <p className="text-right text-[10px] font-bold uppercase tracking-widest pt-1" style={{ color: 'var(--muted)' }}>
                     {formData.description.length} characters
                   </p>
                 </div>
 
                 <div className="space-y-2.5 md:col-span-2">
-                  <label className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-slate-400">
-                    <Phone size={12} className="text-teal-400" />
+                  <label className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--text-secondary)' }}>
+                    <Phone size={12} style={{ color: 'var(--status-approved)' }} />
                     Preferred Contact
                   </label>
                   <input
@@ -394,22 +400,23 @@ export const CreateTicketPage = () => {
                     value={formData.contact}
                     onChange={(e) => handleFieldChange('contact', e.target.value)}
                     maxLength={CONTACT_MAX_LENGTH}
-                    className="w-full glass-input rounded-xl px-4 py-3.5 text-sm outline-none text-slate-200 placeholder:text-slate-500 font-medium transition-all"
+                    className="w-full glass-input rounded-xl px-4 py-3.5 text-sm outline-none font-medium transition-all border"
+                    style={{ background: 'var(--bg-primary)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}
                   />
                   {fieldErrors.contact && (
-                    <p className="text-xs font-semibold text-rose-300">{fieldErrors.contact}</p>
+                    <p className="text-xs font-semibold text-rose-500">{fieldErrors.contact}</p>
                   )}
                 </div>
               </div>
             </div>
 
-            <div className="glass-panel rounded-3xl p-6 shadow-xl backdrop-blur-md md:p-8 flex flex-col gap-6">
-              <div className="flex items-center justify-between gap-4 border-b border-white/10 pb-5">
-                <h3 className="text-xs font-bold uppercase tracking-[0.15em] text-slate-100 flex items-center gap-2">
-                  <Info size={16} className="text-fuchsia-400" />
+            <div className="glass-panel rounded-3xl p-6 shadow-xl backdrop-blur-md md:p-8 flex flex-col gap-6" style={{ background: 'rgba(255, 255, 255, 0.8)', border: '1px solid var(--border)' }}>
+              <div className="flex items-center justify-between gap-4 border-b border-white/10 pb-5" style={{ borderColor: 'var(--border)' }}>
+                <h3 className="text-xs font-bold uppercase tracking-[0.15em] flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
+                  <Info size={16} style={{ color: 'var(--primary)' }} />
                   Attachments
                 </h3>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 bg-white/5 px-3 py-1 rounded-full border border-white/10">Step 2 of 2</p>
+                <p className="text-[10px] font-bold uppercase tracking-widest bg-white/5 px-3 py-1 rounded-full border" style={{ color: 'var(--text-secondary)', borderColor: 'var(--border)' }}>Step 2 of 2</p>
               </div>
 
               <AttachmentUpload files={files} setFiles={setFiles} />
@@ -426,7 +433,8 @@ export const CreateTicketPage = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full rounded-2xl bg-gradient-to-r from-indigo-500 to-purple-600 px-6 py-4.5 text-xs font-bold uppercase tracking-[0.15em] text-white transition-all shadow-[0_0_20px_rgba(168,85,247,0.3)] hover:scale-[1.02] active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none disabled:scale-100"
+              className="w-full rounded-2xl px-6 py-4.5 text-xs font-bold uppercase tracking-[0.15em] text-white transition-all shadow-lg hover:scale-[1.02] active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none disabled:scale-100"
+              style={{ background: 'linear-gradient(135deg, var(--accent-start), var(--accent-end))', boxShadow: '0 10px 20px rgba(249, 115, 22, 0.2)' }}
             >
               {loading ? 'Submitting...' : (
                 <span className="inline-flex items-center justify-center gap-2">

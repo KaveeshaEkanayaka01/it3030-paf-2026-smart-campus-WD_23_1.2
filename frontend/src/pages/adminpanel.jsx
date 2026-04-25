@@ -272,39 +272,37 @@ export const AdminPanelPage = () => {
   ];
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8">
-      <section className="rounded-3xl border p-6 md:p-8" style={{ borderColor: 'var(--border)', background: 'linear-gradient(135deg, rgba(255,255,255,0.96), rgba(249,250,251,0.94))' }}>
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+    <div className="mx-auto max-w-7xl px-4 py-6">
+      <section className="rounded-3xl border p-4 md:p-6" style={{ borderColor: 'var(--border)', background: 'linear-gradient(135deg, rgba(255,255,255,0.96), rgba(249,250,251,0.94))' }}>
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <p className="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[11px] font-black uppercase tracking-wider" style={{ borderColor: 'rgba(249,115,22,0.28)', color: 'var(--primary)', background: 'rgba(249,115,22,0.08)' }}>
-              <Shield size={12} /> Admin Ticket Control
+            <p className="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[10px] font-black uppercase tracking-wider" style={{ borderColor: 'rgba(249,115,22,0.22)', color: 'var(--primary)', background: 'rgba(249,115,22,0.06)' }}>
+              <Shield size={10} /> Admin Ticket Control
             </p>
-            <h1 className="mt-3 text-3xl font-black md:text-4xl" style={{ color: 'var(--text-primary)' }}>Incident Operations Desk</h1>
-            <p className="mt-2 max-w-2xl text-sm md:text-base" style={{ color: 'var(--text-secondary)' }}>
-              Control assignment, lifecycle states, and critical resolution notes from a single operational workspace.
-            </p>
+            <h1 className="mt-2 text-2xl font-black md:text-3xl" style={{ color: 'var(--text-primary)' }}>Incident Operations Desk</h1>
+            
           </div>
 
           <button
             type="button"
             onClick={refreshSelected}
-            className="inline-flex items-center gap-2 rounded-xl border px-4 py-2 text-sm font-semibold transition-all hover:-translate-y-0.5"
+            className="inline-flex items-center gap-2 rounded-xl border px-3 py-1.5 text-xs font-semibold transition-all hover:-translate-y-0.5"
             style={{ borderColor: 'var(--border)', background: 'white', color: 'var(--text-secondary)' }}
           >
-            <RefreshCcw size={15} /> Refresh
+            <RefreshCcw size={14} /> Refresh
           </button>
         </div>
 
-        <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-4 grid gap-3 grid-cols-2 lg:grid-cols-4">
           {statusCards.map((card) => (
-            <article key={card.label} className="rounded-2xl border p-4" style={{ borderColor: 'var(--border)', background: 'rgba(255,255,255,0.92)' }}>
-              <div className="flex items-center justify-between">
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg" style={{ background: card.bg, color: card.color }}>
-                  {card.icon}
-                </div>
-                <p className="text-2xl font-black" style={{ color: card.color }}>{card.value}</p>
+            <article key={card.label} className="rounded-2xl border p-3 flex items-center gap-3" style={{ borderColor: 'var(--border)', background: 'rgba(255,255,255,0.92)' }}>
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg" style={{ background: card.bg, color: card.color }}>
+                {card.icon}
               </div>
-              <p className="mt-2 text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>{card.label}</p>
+              <div className="min-w-0">
+                <p className="text-[10px] font-semibold uppercase tracking-wider leading-none" style={{ color: 'var(--text-secondary)' }}>{card.label}</p>
+                <p className="mt-1 text-xl font-black leading-none" style={{ color: card.color }}>{card.value}</p>
+              </div>
             </article>
           ))}
         </div>
@@ -357,9 +355,9 @@ export const AdminPanelPage = () => {
                   type="button"
                   onClick={() => setStatusFilter(status)}
                   className={`rounded-full border px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] transition-all ${
-                    statusFilter === status ? 'border-orange-300 bg-[rgba(249,115,22,0.12)] text-(--primary)' : 'text-(--text-secondary)'
+                    statusFilter === status ? 'border-orange-300 bg-[rgba(249,115,22,0.12)] text-primary' : 'text-slate-500'
                   }`}
-                  style={{ borderColor: statusFilter === status ? 'rgba(249,115,22,0.5)' : 'var(--border)', background: 'transparent' }}
+                  style={{ borderColor: statusFilter === status ? 'var(--primary)' : 'var(--border)', background: 'transparent', color: statusFilter === status ? 'var(--primary)' : 'var(--text-secondary)' }}
                 >
                   {status.replace('_', ' ')}
                 </button>
@@ -387,21 +385,21 @@ export const AdminPanelPage = () => {
                   <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                     <div className="min-w-0">
                       <p className="text-[10px] font-black uppercase tracking-[0.24em]" style={{ color: 'var(--text-secondary)' }}>{ticket.category || 'Ticket'}</p>
-                      <h3 className="mt-2 text-sm font-black leading-6 text-(--text-primary) line-clamp-2">{ticket.location || 'No location provided'}</h3>
+                      <p className="mt-2 text-sm font-black leading-6 line-clamp-2" style={{ color: 'var(--text-primary)' }}>{ticket.location || 'No location provided'}</p>
                     </div>
                     <TicketStatusBadge status={ticket.status} />
                   </div>
 
-                  <p className="mt-4 text-sm leading-6 text-(--text-secondary) line-clamp-3">{ticket.description || 'No description provided.'}</p>
+                  <p className="mt-4 text-sm leading-6 line-clamp-3" style={{ color: 'var(--text-secondary)' }}>{ticket.description || 'No description provided.'}</p>
 
-                  <div className="mt-5 grid gap-3 sm:grid-cols-2 text-[11px] uppercase tracking-[0.18em] text-(--text-secondary)">
+                  <div className="mt-5 grid gap-3 sm:grid-cols-2 text-[11px] uppercase tracking-[0.18em]" style={{ color: 'var(--text-secondary)' }}>
                     <div className="rounded-2xl bg-[rgba(15,23,42,0.04)] p-3">
                       Created by
-                      <p className="mt-2 font-semibold text-(--text-primary) truncate">{getCreatedByDisplay(ticket.createdBy)}</p>
+                      <p className="mt-2 font-semibold truncate" style={{ color: 'var(--text-primary)' }}>{getCreatedByDisplay(ticket.createdBy)}</p>
                     </div>
                     <div className="rounded-2xl bg-[rgba(15,23,42,0.04)] p-3">
                       Technician
-                      <p className="mt-2 font-semibold text-(--text-primary) truncate">{ticket.assignedTechnician ? (userDisplayMap[ticket.assignedTechnician] || ticket.assignedTechnician) : 'Unassigned'}</p>
+                      <p className="mt-2 font-semibold text-primary truncate">{ticket.assignedTechnician ? (userDisplayMap[ticket.assignedTechnician] || ticket.assignedTechnician) : 'Unassigned'}</p>
                     </div>
                   </div>
                 </button>
@@ -442,22 +440,22 @@ export const AdminPanelPage = () => {
                   </div>
                 </div>
 
-                <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                  <div className="rounded-3xl border p-5" style={{ borderColor: 'var(--border)', background: 'var(--bg-section)' }}>
+                <div className="mt-6 grid gap-3 md:grid-cols-2 lg:grid-cols-4">
+                  <div className="rounded-3xl border p-4" style={{ borderColor: 'var(--border)', background: 'var(--bg-section)' }}>
                     <p className="text-[10px] font-black uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>Created By</p>
-                    <p className="mt-3 text-sm font-semibold text-(--text-primary) truncate">{getCreatedByDisplay(selectedTicket.createdBy)}</p>
+                    <p className="mt-2 text-sm font-semibold truncate" style={{ color: 'var(--text-primary)' }}>{getCreatedByDisplay(selectedTicket.createdBy)}</p>
                   </div>
-                  <div className="rounded-3xl border p-5" style={{ borderColor: 'var(--border)', background: 'var(--bg-section)' }}>
+                  <div className="rounded-3xl border p-4" style={{ borderColor: 'var(--border)', background: 'var(--bg-section)' }}>
                     <p className="text-[10px] font-black uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>Technician</p>
-                    <p className="mt-3 text-sm font-semibold text-(--primary) truncate">{selectedTicket.assignedTechnician ? (userDisplayMap[selectedTicket.assignedTechnician] || selectedTicket.assignedTechnician) : 'Unassigned'}</p>
+                    <p className="mt-2 text-sm font-semibold truncate" style={{ color: 'var(--primary)' }}>{selectedTicket.assignedTechnician ? (userDisplayMap[selectedTicket.assignedTechnician] || selectedTicket.assignedTechnician) : 'Unassigned'}</p>
                   </div>
-                  <div className="rounded-3xl border p-5" style={{ borderColor: 'var(--border)', background: 'var(--bg-section)' }}>
+                  <div className="rounded-3xl border p-4" style={{ borderColor: 'var(--border)', background: 'var(--bg-section)' }}>
                     <p className="text-[10px] font-black uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>Contact</p>
-                    <p className="mt-3 text-sm font-semibold text-(--text-primary) truncate">{selectedTicket.preferredContact || 'N/A'}</p>
+                    <p className="mt-2 text-sm font-semibold truncate" style={{ color: 'var(--text-primary)' }}>{selectedTicket.preferredContact || 'N/A'}</p>
                   </div>
-                  <div className="rounded-3xl border p-5" style={{ borderColor: 'var(--border)', background: 'var(--bg-section)' }}>
+                  <div className="rounded-3xl border p-4" style={{ borderColor: 'var(--border)', background: 'var(--bg-section)' }}>
                     <p className="text-[10px] font-black uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>Last Updated</p>
-                    <p className="mt-3 text-sm font-semibold text-(--text-primary) truncate">{selectedTicket.updatedAt ? new Date(selectedTicket.updatedAt).toLocaleString() : 'Unknown'}</p>
+                    <p className="mt-2 text-sm font-semibold truncate" style={{ color: 'var(--text-primary)' }}>{selectedTicket.updatedAt ? new Date(selectedTicket.updatedAt).toLocaleString() : 'Unknown'}</p>
                   </div>
                 </div>
 
@@ -500,7 +498,7 @@ export const AdminPanelPage = () => {
                       onClick={handleAssign}
                       disabled={!canManage || saving || !technician.trim() || technicianOptions.length === 0}
                       className="w-full rounded-2xl px-4 py-3 text-xs font-black uppercase tracking-wider text-white transition-all hover:-translate-y-0.5 disabled:opacity-50"
-                      style={{ background: 'linear-gradient(135deg, #10b981, #0f766e)' }}
+                      style={{ background: 'linear-gradient(135deg, var(--status-approved), #0f766e)' }}
                     >
                       {saving ? 'Saving...' : 'Assign Technician'}
                     </button>

@@ -62,7 +62,7 @@ export const MyTicketsPage = () => {
           <button
             onClick={() => navigate('/create-ticket')}
             className="text-white font-bold px-8 py-3.5 rounded-xl hover:scale-105 active:scale-95 transition-all shadow-lg flex items-center gap-3 uppercase tracking-wider text-xs"
-            style={{ background: 'linear-gradient(135deg, var(--accent-start), var(--accent-end))', boxShadow: '0 10px 24px rgba(14, 165, 233, 0.28)' }}
+            style={{ background: 'linear-gradient(135deg, var(--accent-start), var(--accent-end))', boxShadow: '0 10px 24px rgba(249, 115, 22, 0.28)' }}
           >
             <Plus size={20} />
             New Ticket
@@ -72,15 +72,16 @@ export const MyTicketsPage = () => {
 
       {!getCurrentUserId() && (
         <div className="mb-6 glass-panel border-amber-500/30 bg-amber-500/10 p-6 rounded-2xl backdrop-blur-md">
-          <p className="text-xs font-bold uppercase tracking-wider text-amber-400">Testing Mode User Setup</p>
-          <p className="mt-1 text-sm text-amber-200/80">Login module is not connected yet. Set a temporary user id to load tickets.</p>
+          <p className="text-xs font-bold uppercase tracking-wider text-amber-600">Testing Mode User Setup</p>
+          <p className="mt-1 text-sm text-amber-700/80">Login module is not connected yet. Set a temporary user id to load tickets.</p>
           <div className="mt-4 flex flex-col gap-3 sm:flex-row">
             <input
               type="text"
               value={testUserInput}
               onChange={(e) => setTestUserInput(e.target.value)}
               placeholder="e.g. wd23-student"
-              className="w-full glass-input rounded-xl px-4 py-3 text-sm font-medium outline-none text-slate-200"
+              className="w-full glass-input rounded-xl px-4 py-3 text-sm font-medium outline-none transition-all"
+              style={{ background: 'var(--bg-primary)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}
             />
             <button
               type="button"
@@ -101,19 +102,20 @@ export const MyTicketsPage = () => {
             placeholder="Search tickets by category, location, or description..."
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="w-full pl-12 pr-6 py-3.5 glass-input rounded-xl text-sm outline-none transition-all font-medium text-slate-200 placeholder:text-slate-500"
+            className="w-full pl-12 pr-6 py-3.5 glass-input rounded-xl text-sm outline-none transition-all font-medium border"
+            style={{ background: 'var(--bg-primary)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}
           />
         </div>
         <div className="flex gap-2">
-          <button className="p-3.5 glass-panel rounded-xl text-slate-400 hover:glass-panel-strong transition-all">
-            <Filter size={18} />
+          <button className="p-3.5 glass-panel rounded-xl text-slate-400 hover:glass-panel-strong transition-all" style={{ border: '1px solid var(--border)', background: 'var(--bg-primary)' }}>
+            <Filter size={18} style={{ color: 'var(--text-secondary)' }} />
           </button>
-          <div className="h-full w-px bg-white/10 mx-1" />
-          <button className="p-3.5 rounded-xl text-white shadow-lg" style={{ background: 'linear-gradient(135deg, var(--accent-start), var(--accent-end))', boxShadow: '0 8px 18px rgba(14, 165, 233, 0.24)' }}>
+          <div className="h-full w-px mx-1" style={{ background: 'var(--border)' }} />
+          <button className="p-3.5 rounded-xl text-white shadow-lg" style={{ background: 'linear-gradient(135deg, var(--accent-start), var(--accent-end))', boxShadow: '0 8px 18px rgba(249, 115, 22, 0.24)' }}>
             <LayoutGrid size={18} />
           </button>
-          <button className="p-3.5 glass-panel rounded-xl text-slate-400 hover:glass-panel-strong transition-all">
-            <List size={18} />
+          <button className="p-3.5 glass-panel rounded-xl transition-all" style={{ border: '1px solid var(--border)', background: 'var(--bg-primary)' }}>
+            <List size={18} style={{ color: 'var(--text-secondary)' }} />
           </button>
         </div>
       </div>
@@ -152,7 +154,7 @@ export const MyTicketsPage = () => {
             <button
               onClick={() => navigate('/create-ticket')}
               className="mt-8 font-bold uppercase tracking-widest text-xs transition-colors px-6 py-3 rounded-xl"
-              style={{ color: 'var(--accent-mid)', background: 'rgba(14,165,233,0.12)', border: '1px solid rgba(56,189,248,0.3)' }}
+              style={{ color: 'var(--primary)', background: 'rgba(249,115,22,0.12)', border: '1px solid rgba(249,115,22,0.3)' }}
             >
               Report your first incident
             </button>

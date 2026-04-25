@@ -325,7 +325,7 @@ export const TicketDetailsPage = () => {
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-black" />
+        <div className="h-12 w-12 animate-spin rounded-full border-b-2" style={{ borderColor: 'var(--primary)' }} />
       </div>
     );
   }
@@ -379,110 +379,104 @@ export const TicketDetailsPage = () => {
   }
 
   return (
-    <div className="mx-auto max-w-4xl px-3 py-6 relative">
+    <div className="mx-auto max-w-4xl px-3 py-6 relative page-enter">
       {/* Decorative background elements */}
-      <div className="pointer-events-none absolute left-0 top-0 h-[500px] w-[500px] rounded-full bg-[radial-gradient(circle,_rgba(99,102,241,0.15)_0%,_rgba(99,102,241,0)_70%)] opacity-60 blur-3xl" />
+      <div className="pointer-events-none absolute left-0 top-0 h-[500px] w-[500px] rounded-full bg-[radial-gradient(circle,_rgba(249,115,22,0.1)_0%,_rgba(249,115,22,0)_70%)] opacity-60 blur-3xl shadow-none" />
 
       <button
         onClick={() => navigate(-1)}
-        className="group mb-10 inline-flex items-center gap-2 text-slate-400 transition-colors hover:text-white glass-panel px-4 py-2 rounded-xl border border-white/10"
+        className="group mb-6 inline-flex items-center gap-2 transition-colors glass-panel px-3 py-1.5 rounded-lg border"
+        style={{ color: 'var(--text-secondary)', borderColor: 'var(--border)', background: 'var(--bg-primary)' }}
       >
-        <ArrowLeft size={16} className="transition-transform group-hover:-translate-x-1" />
-        <span className="text-[10px] font-bold uppercase tracking-widest">Back to Tickets</span>
+        <ArrowLeft size={14} className="transition-transform group-hover:-translate-x-1" />
+        <span className="text-[9px] font-bold uppercase tracking-widest">Back</span>
       </button>
 
       <div className={cn('grid grid-cols-1 gap-10 relative z-10', hasSidePanel ? 'lg:grid-cols-3' : 'max-w-4xl mx-auto')}>
         <div className={cn('space-y-6', hasSidePanel ? 'lg:col-span-2' : '')}>
-          <div className="glass-panel rounded-3xl p-5 shadow-xl backdrop-blur-md">
-            <div className="mb-6 flex items-center justify-between gap-4 border-b border-white/10 pb-4">
+          <div className="glass-panel rounded-3xl p-5 shadow-xl backdrop-blur-md" style={{ background: 'rgba(255, 255, 255, 0.7)', border: '1px solid var(--border)' }}>
+            <div className="mb-4 flex items-center justify-between gap-4 border-b pb-4" style={{ borderColor: 'var(--border)' }}>
               <div>
-                <h1 className="text-2xl font-extrabold uppercase tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-fuchsia-400">{ticket.category || 'Ticket'}</h1>
-                <p className="mt-1 text-xs font-bold font-mono tracking-wider text-slate-500">#{ticket.id}</p>
+                <h1 className="text-xl font-extrabold uppercase tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-amber-500">{ticket.category || 'Ticket'}</h1>
+                <p className="text-[10px] font-bold font-mono tracking-wider" style={{ color: 'var(--muted)' }}>#{ticket.id}</p>
               </div>
-              <TicketStatusBadge status={ticket.status} />
+              <div className="scale-125 origin-right">
+                <TicketStatusBadge status={ticket.status} />
+              </div>
             </div>
 
-            <div className="mb-6 grid grid-cols-1 gap-4 border-b border-white/10 pb-6 md:grid-cols-3">
-              <div className="glass-panel p-3 rounded-xl text-center md:text-left">
-                <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Created By</p>
-                <div className="mt-1 flex items-center justify-center md:justify-start gap-2 text-xs font-semibold uppercase text-slate-100">
-                  <User size={14} className="text-indigo-400" />
-                  <span className="truncate">{createdByDisplayName}</span>
-                </div>
+            <div className="mb-6 flex flex-wrap gap-3 border-b pb-6" style={{ borderColor: 'var(--border)' }}>
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border text-[10px] font-bold uppercase tracking-wider" style={{ background: 'var(--bg-primary)', borderColor: 'var(--border)', color: 'var(--text-secondary)' }}>
+                <User size={12} style={{ color: 'var(--primary)' }} />
+                <span>By: {createdByDisplayName}</span>
               </div>
-              <div className="glass-panel p-3 rounded-xl text-center md:text-left">
-                <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Date</p>
-                <div className="mt-1 flex items-center justify-center md:justify-start gap-2 text-xs font-semibold uppercase text-slate-100">
-                  <Calendar size={14} className="text-fuchsia-400" />
-                  <span>{ticket.createdAt ? new Date(ticket.createdAt).toLocaleDateString() : 'N/A'}</span>
-                </div>
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border text-[10px] font-bold uppercase tracking-wider" style={{ background: 'var(--bg-primary)', borderColor: 'var(--border)', color: 'var(--text-secondary)' }}>
+                <Calendar size={12} style={{ color: 'var(--accent-mid)' }} />
+                <span>{ticket.createdAt ? new Date(ticket.createdAt).toLocaleDateString() : 'N/A'}</span>
               </div>
-              <div className="glass-panel p-3 rounded-xl text-center md:text-left">
-                <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Location</p>
-                <div className="mt-1 flex items-center justify-center md:justify-start gap-2 text-xs font-semibold uppercase text-slate-100">
-                  <MapPin size={14} className="text-rose-400" />
-                  <span className="truncate">{ticket.location || 'N/A'}</span>
-                </div>
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border text-[10px] font-bold uppercase tracking-wider" style={{ background: 'var(--bg-primary)', borderColor: 'var(--border)', color: 'var(--text-secondary)' }}>
+                <MapPin size={12} style={{ color: 'var(--status-approved)' }} />
+                <span className="max-w-[150px] truncate">{ticket.location || 'N/A'}</span>
               </div>
             </div>
 
             {/* Service-Level Agreement Timers (SLA) */}
-            <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2">
-              <div className="glass-panel-strong p-4 rounded-2xl relative overflow-hidden group">
+            <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div className="glass-panel-strong p-4 rounded-2xl relative overflow-hidden group" style={{ background: 'var(--status-approved-bg)', border: '1px solid var(--status-approved-border)' }}>
                 <div className="absolute -right-4 -top-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                  <Clock size={60} className="text-emerald-500" />
+                  <Clock size={60} style={{ color: 'var(--status-approved)' }} />
                 </div>
                 <div className="flex items-center justify-between relative z-10">
                    <div>
-                      <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Time to Response</p>
-                      <h4 className="text-xl font-black text-emerald-400">{getSlaTiming(ticket.createdAt, ticket.firstRespondedAt)}</h4>
+                      <p className="text-[9px] font-bold uppercase tracking-widest mb-1" style={{ color: 'var(--text-secondary)' }}>Time to Response</p>
+                      <h4 className="text-lg font-black" style={{ color: 'var(--status-approved)' }}>{getSlaTiming(ticket.createdAt, ticket.firstRespondedAt)}</h4>
                    </div>
-                   <div className="bg-emerald-500/10 p-2 rounded-xl border border-emerald-500/20">
-                     <Timer size={16} className="text-emerald-400" />
+                   <div className="p-2 rounded-xl border" style={{ background: 'var(--bg-primary)', borderColor: 'var(--status-approved-border)' }}>
+                     <Timer size={14} style={{ color: 'var(--status-approved)' }} />
                    </div>
                 </div>
-                <p className="text-[9px] uppercase font-bold text-emerald-500/50 mt-2 relative z-10 tracking-wider">
+                <p className="text-[8px] uppercase font-bold mt-1.5 relative z-10 tracking-wider" style={{ color: 'var(--status-approved)', opacity: 0.6 }}>
                   {ticket.firstRespondedAt ? 'Responded' : 'Awaiting Response'}
                 </p>
               </div>
 
-              <div className="glass-panel-strong p-4 rounded-2xl relative overflow-hidden group">
+              <div className="glass-panel-strong p-4 rounded-2xl relative overflow-hidden group" style={{ background: 'rgba(249, 115, 22, 0.06)', border: '1px solid var(--border)' }}>
                 <div className="absolute -right-4 -top-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                  <CheckCircle2 size={60} className="text-indigo-500" />
+                  <CheckCircle2 size={60} style={{ color: 'var(--primary)' }} />
                 </div>
                 <div className="flex items-center justify-between relative z-10">
                    <div>
-                      <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Time to Resolution</p>
-                      <h4 className="text-xl font-black text-indigo-400">{getSlaTiming(ticket.createdAt, ticket.resolvedAt)}</h4>
+                      <p className="text-[9px] font-bold uppercase tracking-widest mb-1" style={{ color: 'var(--text-secondary)' }}>Time to Resolution</p>
+                      <h4 className="text-lg font-black" style={{ color: 'var(--primary)' }}>{getSlaTiming(ticket.createdAt, ticket.resolvedAt)}</h4>
                    </div>
-                   <div className="bg-indigo-500/10 p-2 rounded-xl border border-indigo-500/20">
-                     <CheckCircle2 size={16} className="text-indigo-400" />
+                   <div className="p-2 rounded-xl border" style={{ background: 'var(--bg-primary)', borderColor: 'var(--border)' }}>
+                     <CheckCircle2 size={14} style={{ color: 'var(--primary)' }} />
                    </div>
                 </div>
-                <p className="text-[9px] uppercase font-bold text-indigo-500/50 mt-2 relative z-10 tracking-wider">
+                <p className="text-[8px] uppercase font-bold mt-1.5 relative z-10 tracking-wider" style={{ color: 'var(--primary)', opacity: 0.6 }}>
                   {ticket.resolvedAt ? 'Resolved' : 'Ongoing'}
                 </p>
               </div>
             </div>
 
             <div>
-              <h3 className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-200">
-                <FileText size={16} className="text-purple-400" />
+              <h3 className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--text-primary)' }}>
+                <FileText size={16} style={{ color: 'var(--primary)' }} />
                 Description
               </h3>
-              <p className="glass-panel p-4 rounded-2xl text-sm font-light leading-relaxed text-slate-300">
+              <p className="glass-panel p-4 rounded-2xl text-sm font-light leading-relaxed" style={{ background: 'var(--bg-primary)', border: '1px solid var(--border)', color: 'var(--text-secondary)' }}>
                 {ticket.description || 'No description provided.'}
               </p>
             </div>
 
             <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
-              <div className="glass-panel p-4 rounded-2xl border-l-[3px] border-l-fuchsia-500">
-                <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Preferred Contact</p>
-                <p className="mt-1 text-sm font-semibold text-slate-200">{ticket.preferredContact || 'N/A'}</p>
+              <div className="glass-panel p-4 rounded-2xl border-l-[3px]" style={{ background: 'var(--bg-primary)', border: '1px solid var(--border)', borderLeftColor: 'var(--primary)', borderLeftWidth: '3px' }}>
+                <p className="text-[9px] font-bold uppercase tracking-widest" style={{ color: 'var(--text-secondary)' }}>Preferred Contact</p>
+                <p className="mt-1 text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{ticket.preferredContact || 'N/A'}</p>
               </div>
-              <div className="glass-panel p-4 rounded-2xl border-l-[3px] border-l-indigo-500">
-                <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Resolution Notes</p>
-                <p className="mt-1 text-sm font-semibold text-slate-200">{ticket.resolutionNotes || 'N/A'}</p>
+              <div className="glass-panel p-4 rounded-2xl border-l-[3px]" style={{ background: 'var(--bg-primary)', border: '1px solid var(--border)', borderLeftColor: 'var(--status-approved)', borderLeftWidth: '3px' }}>
+                <p className="text-[9px] font-bold uppercase tracking-widest" style={{ color: 'var(--text-secondary)' }}>Resolution Notes</p>
+                <p className="mt-1 text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{ticket.resolutionNotes || 'N/A'}</p>
               </div>
             </div>
 
@@ -496,27 +490,27 @@ export const TicketDetailsPage = () => {
               </div>
             )}
 
-            <div className="mt-10">
-              <h3 className="mb-5 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-200">
-                <ImageIcon size={16} className="text-purple-400" />
+            <div className="mt-8">
+              <h3 className="mb-4 flex items-center gap-2 text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--text-primary)' }}>
+                <ImageIcon size={14} style={{ color: 'var(--primary)' }} />
                 Attachments ({attachments.length})
               </h3>
 
               {attachments.length === 0 ? (
-                <p className="text-sm font-medium text-slate-500 bg-white/5 p-4 rounded-xl glass-panel">No attachments uploaded for this ticket.</p>
+                <p className="text-[10px] font-medium p-3 rounded-xl glass-panel" style={{ background: 'var(--bg-primary)', border: '1px solid var(--border)', color: 'var(--muted)' }}>No attachments uploaded for this ticket.</p>
               ) : (
-                <div className="space-y-3">
+                <div className="flex flex-wrap gap-2">
                   {attachments.map((attachment) => (
-                    <div key={attachment.id} className="flex items-center justify-between glass-panel px-4 py-3 rounded-xl border border-white/10 hover:glass-panel-strong transition-all">
-                      <span className="truncate text-sm font-semibold text-slate-200">{attachment.fileName}</span>
-                      <span className="ml-3 text-[10px] font-bold uppercase tracking-wider text-slate-400 bg-black/20 px-2 py-1 rounded-lg">{attachment.fileType || 'file'}</span>
+                    <div key={attachment.id} className="flex items-center gap-2 glass-panel px-3 py-1.5 rounded-lg border transition-all hover:glass-panel-strong" style={{ background: 'var(--bg-primary)', border: '1px solid var(--border)' }}>
+                      <span className="truncate text-xs font-semibold" style={{ color: 'var(--text-primary)' }}>{attachment.fileName}</span>
+                      <span className="text-[8px] font-bold uppercase tracking-wider bg-black/5 px-1.5 py-0.5 rounded" style={{ color: 'var(--text-secondary)' }}>{attachment.fileType || 'file'}</span>
                     </div>
                   ))}
                 </div>
               )}
             </div>
 
-            <div className="mt-10 border-t border-white/10 pt-10">
+            <div className="mt-10 border-t pt-10" style={{ borderColor: 'var(--border)' }}>
               <CommentSection
                 comments={comments}
                 onAddComment={handleAddComment}
@@ -532,9 +526,9 @@ export const TicketDetailsPage = () => {
         <div className="space-y-6">
           {canManageTicket && (
             <>
-              <div className="glass-panel-strong rounded-3xl p-5 shadow-2xl backdrop-blur-md">
-                <h3 className="mb-4 flex items-center gap-3 border-b border-white/10 pb-3 text-xs font-bold uppercase tracking-widest text-slate-100">
-                  <Wrench size={18} className="text-indigo-400" />
+              <div className="glass-panel-strong rounded-3xl p-5 shadow-2xl backdrop-blur-md" style={{ background: 'rgba(255, 255, 255, 0.8)', border: '1px solid var(--border)' }}>
+                <h3 className="mb-4 flex items-center gap-3 border-b pb-3 text-xs font-bold uppercase tracking-widest" style={{ borderColor: 'var(--border)', color: 'var(--text-primary)' }}>
+                  <Wrench size={18} style={{ color: 'var(--primary)' }} />
                   Technician Actions
                 </h3>
                 <div className="space-y-3">
@@ -542,10 +536,11 @@ export const TicketDetailsPage = () => {
                     value={selectedStatus}
                     onChange={(e) => setSelectedStatus(e.target.value)}
                     disabled={!canManageTicket || statusUpdating}
-                    className="w-full glass-input rounded-xl px-3 py-2.5 text-xs font-bold uppercase tracking-wider outline-none text-slate-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                    className="w-full glass-input rounded-xl px-3 py-2.5 text-xs font-bold uppercase tracking-wider outline-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed transition-all border"
+                    style={{ background: 'var(--bg-primary)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}
                   >
                     {UPDATE_STATUSES.map((status) => (
-                      <option key={status} value={status} className="bg-slate-900 text-slate-200">{status.replace('_', ' ')}</option>
+                      <option key={status} value={status} style={{ backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }}>{status.replace('_', ' ')}</option>
                     ))}
                   </select>
 
@@ -555,7 +550,8 @@ export const TicketDetailsPage = () => {
                     placeholder="Resolution notes (for RESOLVED/CLOSED)"
                     disabled={!canManageTicket || statusUpdating}
                     rows={2}
-                    className="w-full resize-none glass-input rounded-xl px-3 py-2.5 text-xs outline-none text-slate-200 placeholder:text-slate-500 disabled:opacity-50 transition-all font-medium"
+                    className="w-full resize-none glass-input rounded-xl px-3 py-2.5 text-xs outline-none disabled:opacity-50 transition-all font-medium border"
+                    style={{ background: 'var(--bg-primary)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}
                   />
 
                   {selectedStatus === 'REJECTED' && (
@@ -574,9 +570,10 @@ export const TicketDetailsPage = () => {
                     disabled={!canManageTicket || statusUpdating}
                     onClick={handleUpdateStatus}
                     className={cn(
-                      'w-full rounded-2xl bg-gradient-to-r from-indigo-500 to-purple-600 px-4 py-3 text-xs font-bold uppercase tracking-widest text-white transition-all shadow-[0_0_20px_rgba(168,85,247,0.3)]',
+                      'w-full rounded-2xl px-4 py-3 text-xs font-bold uppercase tracking-widest text-white transition-all shadow-lg',
                       (!canManageTicket || statusUpdating) ? 'opacity-50 cursor-not-allowed shadow-none' : 'hover:scale-[1.02] active:scale-95'
                     )}
+                    style={{ background: 'linear-gradient(135deg, var(--accent-start), var(--accent-end))', boxShadow: (!canManageTicket || statusUpdating) ? 'none' : '0 10px 20px rgba(249, 115, 22, 0.2)' }}
                   >
                     {statusUpdating ? 'Updating...' : 'Update Status'}
                   </button>
@@ -584,9 +581,9 @@ export const TicketDetailsPage = () => {
               </div>
 
               {currentUserRole !== 'TECHNICIAN' && (
-                <div className="glass-panel rounded-3xl p-5 shadow-xl backdrop-blur-md">
-                  <h3 className="mb-4 flex items-center gap-3 border-b border-white/10 pb-3 text-xs font-bold uppercase tracking-widest text-slate-100">
-                    <CheckCircle2 size={18} className="text-emerald-400" />
+                <div className="glass-panel rounded-3xl p-5 shadow-xl backdrop-blur-md" style={{ background: 'rgba(255, 255, 255, 0.8)', border: '1px solid var(--border)' }}>
+                  <h3 className="mb-4 flex items-center gap-3 border-b pb-3 text-xs font-bold uppercase tracking-widest" style={{ borderColor: 'var(--border)', color: 'var(--text-primary)' }}>
+                    <CheckCircle2 size={18} style={{ color: 'var(--status-approved)' }} />
                     Assign Technician
                   </h3>
                   <div className="space-y-3">
@@ -594,11 +591,12 @@ export const TicketDetailsPage = () => {
                       value={technician}
                       onChange={(e) => setTechnician(e.target.value)}
                       disabled={!canManageTicket || assigning}
-                      className="w-full glass-input rounded-xl px-4 py-3.5 text-sm font-medium outline-none text-slate-200 disabled:opacity-50 transition-all focus:glass-panel-strong cursor-pointer"
+                      className="w-full glass-input rounded-xl px-4 py-3.5 text-sm font-medium outline-none disabled:opacity-50 transition-all cursor-pointer border"
+                      style={{ background: 'var(--bg-primary)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}
                     >
-                      <option value="" className="bg-slate-900 text-slate-300">Select technician</option>
+                      <option value="" style={{ backgroundColor: 'var(--bg-primary)', color: 'var(--muted)' }}>Select technician</option>
                       {technicianOptions.map((tech) => (
-                        <option key={tech.id} value={tech.id} className="bg-slate-900 text-slate-200">
+                        <option key={tech.id} value={tech.id} style={{ backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }}>
                           {getTechnicianDisplay(tech)}
                         </option>
                       ))}
@@ -615,9 +613,10 @@ export const TicketDetailsPage = () => {
                       onClick={handleAssignTechnician}
                       disabled={!canManageTicket || assigning || !technician.trim() || technicianOptions.length === 0}
                       className={cn(
-                        'w-full rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 px-4 py-3.5 text-xs font-bold uppercase tracking-widest text-white transition-all shadow-[0_0_20px_rgba(16,185,129,0.2)]',
+                        'w-full rounded-xl px-4 py-3.5 text-xs font-bold uppercase tracking-widest text-white transition-all shadow-lg',
                         (!canManageTicket || assigning || !technician.trim() || technicianOptions.length === 0) ? 'opacity-50 cursor-not-allowed shadow-none' : 'hover:scale-[1.02] active:scale-95'
                       )}
+                      style={{ background: 'linear-gradient(135deg, var(--status-approved), #0f766e)', boxShadow: (!canManageTicket || assigning || !technician.trim() || technicianOptions.length === 0) ? 'none' : '0 10px 20px rgba(16, 185, 129, 0.2)' }}
                     >
                       {assigning ? 'Assigning...' : 'Assign Technician'}
                     </button>
@@ -628,11 +627,11 @@ export const TicketDetailsPage = () => {
           )}
 
           {ticket.assignedTechnician && (
-            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-600 to-purple-800 p-8 text-white shadow-2xl">
+            <div className="relative overflow-hidden rounded-3xl p-8 text-white shadow-2xl" style={{ background: 'linear-gradient(135deg, var(--accent-start), var(--accent-end))' }}>
               <div className="absolute right-0 top-0 h-32 w-32 -translate-y-8 translate-x-8 rounded-full bg-white/10 blur-2xl" />
               <div className="relative z-10 flex items-center justify-between">
                 <div>
-                   <p className="text-[10px] font-bold uppercase tracking-widest text-indigo-200 mb-1">Assigned Technician</p>
+                   <p className="text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color: 'rgba(255, 255, 255, 0.8)' }}>Assigned Technician</p>
                    <p className="text-xl font-extrabold uppercase tracking-tight">{userDisplayMap[ticket.assignedTechnician] || ticket.assignedTechnician}</p>
                 </div>
                 <div className="bg-white/20 p-3 rounded-full backdrop-blur-sm border border-white/30">

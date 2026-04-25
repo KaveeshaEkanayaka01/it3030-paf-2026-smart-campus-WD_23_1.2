@@ -248,8 +248,8 @@ export default function ResourceFormModal({
   }
 
   const inputStyle = {
-    background: 'rgba(15,23,42,0.6)',
-    border: '1px solid rgba(148,163,184,0.25)',
+    background: 'var(--bg-primary)',
+    border: '1px solid var(--border)',
     color: 'var(--text-primary)',
   }
 
@@ -278,7 +278,7 @@ export default function ResourceFormModal({
   return (
     <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm">
       <div className="flex min-h-screen items-center justify-center px-4 py-6">
-        <div className="relative z-10 w-full max-w-2xl rounded-2xl glass-card bg-[rgba(2,6,23,0.95)] p-6 max-h-[90vh] overflow-y-auto">
+        <div className="relative z-10 w-full max-w-2xl rounded-2xl glass-card bg-[rgba(255,255,255,0.98)] p-6 max-h-[90vh] overflow-y-auto shadow-2xl">
           <div className="flex items-center justify-between mb-6">
             <div>
               <h2
@@ -341,7 +341,7 @@ export default function ResourceFormModal({
                   style={getFieldStyle('type')}
                 >
                   {TYPES.map((type) => (
-                    <option key={type} value={type} style={{ backgroundColor: '#0f172a' }}>
+                    <option key={type} value={type}>
                       {type.replaceAll('_', ' ')}
                     </option>
                   ))}
@@ -378,7 +378,7 @@ export default function ResourceFormModal({
                   style={getFieldStyle('status')}
                 >
                   {STATUSES.map((status) => (
-                    <option key={status} value={status} style={{ backgroundColor: '#0f172a' }}>
+                    <option key={status} value={status}>
                       {status.replaceAll('_', ' ')}
                     </option>
                   ))}
@@ -425,8 +425,8 @@ export default function ResourceFormModal({
                   <label
                     className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl cursor-pointer text-sm"
                     style={{
-                      background: 'rgba(15,23,42,0.6)',
-                      border: '1px dashed rgba(148,163,184,0.35)',
+                      background: 'var(--bg-primary)',
+                      border: '1px dashed var(--border)',
                       color: 'var(--text-primary)',
                     }}
                   >
@@ -565,9 +565,9 @@ export default function ResourceFormModal({
                 <div
                   className="px-5 py-3 rounded-xl text-sm font-semibold flex items-center gap-2"
                   style={{
-                    background: 'rgba(14,165,233,0.08)',
-                    color: 'var(--accent-mid)',
-                    border: '1px solid rgba(14,165,233,0.12)',
+                    background: 'var(--status-approved-bg)',
+                    color: 'var(--status-approved)',
+                    border: '1px solid var(--status-approved-border)',
                   }}
                 >
                   <Eye size={16} />

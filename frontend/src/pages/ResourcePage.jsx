@@ -209,8 +209,8 @@ export default function ResourcePage() {
         <div
           className="glass-card p-4 mb-6 flex flex-col lg:flex-row gap-3 items-stretch"
           style={{
-            background: 'rgba(148,163,184,0.18)',
-            border: '1px solid rgba(148,163,184,0.18)',
+            background: 'rgba(255, 255, 255, 0.7)',
+            border: '1px solid var(--border)',
           }}
         >
           <div className="flex-1 relative">
@@ -225,8 +225,8 @@ export default function ResourcePage() {
               placeholder="Search by name, type, location, or description..."
               className="w-full pl-11 pr-4 py-4 rounded-2xl text-sm outline-none"
               style={{
-                background: 'rgba(15, 23, 42, 0.85)',
-                border: '1px solid rgba(148,163,184,0.18)',
+                background: 'var(--bg-primary)',
+                border: '1px solid var(--border)',
                 color: 'var(--text-primary)',
               }}
             />
@@ -237,13 +237,13 @@ export default function ResourcePage() {
             onChange={(e) => setTypeFilter(e.target.value)}
             className="px-4 py-4 rounded-2xl text-sm outline-none min-w-[160px]"
             style={{
-              background: 'rgba(15, 23, 42, 0.85)',
-              border: '1px solid rgba(148,163,184,0.18)',
+              background: 'var(--bg-primary)',
+              border: '1px solid var(--border)',
               color: 'var(--text-primary)',
             }}
           >
             {FILTER_TYPES.map((type) => (
-              <option key={type} value={type} style={{ backgroundColor: '#0f172a' }}>
+              <option key={type} value={type}>
                 {type === 'ALL' ? 'All Types' : type.replaceAll('_', ' ')}
               </option>
             ))}
@@ -254,13 +254,13 @@ export default function ResourcePage() {
             onChange={(e) => setStatusFilter(e.target.value)}
             className="px-4 py-4 rounded-2xl text-sm outline-none min-w-[180px]"
             style={{
-              background: 'rgba(15, 23, 42, 0.85)',
-              border: '1px solid rgba(148,163,184,0.18)',
+              background: 'var(--bg-primary)',
+              border: '1px solid var(--border)',
               color: 'var(--text-primary)',
             }}
           >
             {FILTER_STATUS.map((status) => (
-              <option key={status} value={status} style={{ backgroundColor: '#0f172a' }}>
+              <option key={status} value={status}>
                 {status === 'ALL' ? 'All Statuses' : status.replaceAll('_', ' ')}
               </option>
             ))}
@@ -272,8 +272,8 @@ export default function ResourcePage() {
             placeholder="Filter by location"
             className="px-4 py-4 rounded-2xl text-sm outline-none min-w-[180px]"
             style={{
-              background: 'rgba(15, 23, 42, 0.85)',
-              border: '1px solid rgba(148,163,184,0.18)',
+              background: 'var(--bg-primary)',
+              border: '1px solid var(--border)',
               color: 'var(--text-primary)',
             }}
           />
@@ -286,8 +286,8 @@ export default function ResourcePage() {
             placeholder="Min capacity"
             className="px-4 py-4 rounded-2xl text-sm outline-none min-w-[160px]"
             style={{
-              background: 'rgba(15, 23, 42, 0.85)',
-              border: '1px solid rgba(148,163,184,0.18)',
+              background: 'var(--bg-primary)',
+              border: '1px solid var(--border)',
               color: 'var(--text-primary)',
             }}
           />
@@ -301,12 +301,12 @@ export default function ResourcePage() {
                 background:
                   layout === 'grid'
                     ? 'linear-gradient(135deg, var(--accent-start), var(--accent-end))'
-                    : 'rgba(15, 23, 42, 0.85)',
-                color: '#fff',
-                border: '1px solid rgba(148,163,184,0.18)',
+                    : 'var(--bg-primary)',
+                color: layout === 'grid' ? '#fff' : 'var(--text-secondary)',
+                border: layout === 'grid' ? 'none' : '1px solid var(--border)',
                 boxShadow:
                   layout === 'grid'
-                    ? '0 0 20px rgba(34,211,238,0.25)'
+                    ? '0 8px 20px rgba(249,115,22,0.25)'
                     : 'none',
               }}
             >
@@ -321,12 +321,12 @@ export default function ResourcePage() {
                 background:
                   layout === 'list'
                     ? 'linear-gradient(135deg, var(--accent-start), var(--accent-end))'
-                    : 'rgba(15, 23, 42, 0.85)',
-                color: '#fff',
-                border: '1px solid rgba(148,163,184,0.18)',
+                    : 'var(--bg-primary)',
+                color: layout === 'list' ? '#fff' : 'var(--text-secondary)',
+                border: layout === 'list' ? 'none' : '1px solid var(--border)',
                 boxShadow:
                   layout === 'list'
-                    ? '0 0 20px rgba(34,211,238,0.25)'
+                    ? '0 8px 20px rgba(249,115,22,0.25)'
                     : 'none',
               }}
             >

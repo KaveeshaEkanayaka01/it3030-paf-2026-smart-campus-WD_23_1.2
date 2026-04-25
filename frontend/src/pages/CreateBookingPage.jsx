@@ -155,17 +155,17 @@ export default function CreateBookingPage() {
               disabled={resourcesLoading}
               className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-all duration-200"
               style={{
-                background: 'rgba(15, 23, 42, 0.6)',
-                border: '1px solid rgba(148, 163, 184, 0.25)',
+                background: 'var(--bg-primary)',
+                border: '1px solid var(--border)',
                 color: 'var(--text-primary)',
               }}
-              onFocus={e => e.target.style.borderColor = 'var(--accent-mid)'}
-              onBlur={e => e.target.style.borderColor = 'rgba(148, 163, 184, 0.25)'}
+              onFocus={e => e.target.style.borderColor = 'var(--primary)'}
+              onBlur={e => e.target.style.borderColor = 'var(--border)'}
               required
             >
               <option
                 value=""
-                style={{ backgroundColor: '#0f172a', color: 'var(--text-secondary)' }}
+                style={{ backgroundColor: 'var(--bg-primary)', color: 'var(--text-secondary)' }}
               >
                 {resourcesLoading ? 'Loading resources...' : 'Select a resource...'}
               </option>
@@ -173,7 +173,7 @@ export default function CreateBookingPage() {
                 <option
                   key={r.id || r._id}
                   value={r.id || r._id}
-                  style={{ backgroundColor: '#0f172a', color: 'var(--text-primary)' }}
+                  style={{ backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }}
                 >
                   {r.name}
                 </option>
@@ -193,9 +193,9 @@ export default function CreateBookingPage() {
                 min={today}
                 onChange={e => setForm(prev => ({ ...prev, startTime: e.target.value }))}
                 className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-all duration-200"
-                style={{ background: 'transparent', border: '1px solid rgba(15,23,42,0.06)', color: 'var(--text-primary)' }}
-                onFocus={e => e.target.style.borderColor = 'var(--accent-mid)'}
-                onBlur={e => e.target.style.borderColor = 'rgba(15,23,42,0.06)'}
+                style={{ background: 'var(--bg-primary)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}
+                onFocus={e => e.target.style.borderColor = 'var(--primary)'}
+                onBlur={e => e.target.style.borderColor = 'var(--border)'}
                 required
               />
             </div>
@@ -228,15 +228,15 @@ export default function CreateBookingPage() {
               rows={4}
               placeholder="Describe the purpose of this booking..."
               className="w-full px-4 py-3 rounded-xl text-sm placeholder:text-secondary outline-none resize-none transition-all duration-200"
-              style={{ background: 'transparent', border: '1px solid rgba(15,23,42,0.06)', color: 'var(--text-primary)' }}
-              onFocus={e => e.target.style.borderColor = 'var(--accent-mid)'}
-              onBlur={e => e.target.style.borderColor = 'rgba(15,23,42,0.06)'}
+              style={{ background: 'var(--bg-primary)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}
+              onFocus={e => e.target.style.borderColor = 'var(--primary)'}
+              onBlur={e => e.target.style.borderColor = 'var(--border)'}
               required
             />
           </div>
 
           {/* User info preview */}
-          <div className="p-3 rounded-xl" style={{ background: 'var(--accent-start)', border: '1px solid rgba(15,23,42,0.04)', color: 'white' }}>
+          <div className="p-4 rounded-xl" style={{ background: 'var(--status-approved-bg)', border: '1px solid var(--status-approved-border)', color: 'var(--status-approved)' }}>
             <p className="text-xs">
               Booking as: <span className="font-medium">{currentUser.userName}</span>
             </p>
