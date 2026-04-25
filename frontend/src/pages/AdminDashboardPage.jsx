@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { bookingApi } from '../api/bookingApi';
+import { useAuth } from '../context/AuthContext';
 import { useUser } from '../context/UserContext';
 import ResourcePage from './ResourcePage';
 import { AdminPanelPage } from './adminpanel';
@@ -39,6 +40,7 @@ import {
   AlertTriangle,
   BookOpen,
   Package,
+  LogOut,
 } from 'lucide-react';
 
 const FILTER_OPTIONS = ['ALL', 'PENDING', 'APPROVED', 'REJECTED', 'CANCELLED'];
@@ -56,9 +58,15 @@ export default function AdminDashboardPage() {
   const [rejectModal, setRejectModal] = useState(null); // booking to reject
   const [activePanel, setActivePanel] = useState('overview');
 
+  const { logout } = useAuth();
   const switchPanel = (panel) => {
     setActivePanel(panel);
     if (panel === 'bookings') setFilter('ALL');
+  };
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
   };
 
   const fetchData = useCallback(async () => {
@@ -305,21 +313,21 @@ export default function AdminDashboardPage() {
   ];
 
   return (
-    <div className="min-h-screen px-4 py-8" style={{ background: 'var(--bg-primary)' }}>
-      <div className="relative mx-auto max-w-7xl">
+    <div className="min-h-screen w-full px-4 py-8" style={{ background: 'var(--bg-primary)' }}>
+      <div className="relative mx-auto w-full max-w-full">
         <div className="pointer-events-none absolute -left-24 -top-14 h-64 w-64 rounded-full blur-3xl" style={{ background: 'rgba(249,115,22,0.12)' }} />
         <div className="pointer-events-none absolute right-0 top-28 h-64 w-64 rounded-full blur-3xl" style={{ background: 'rgba(253,186,116,0.16)' }} />
 
-        <div className="grid gap-6 xl:grid-cols-[280px_minmax(0,1fr)]">
-          <aside className="rounded-3xl border p-5 xl:sticky xl:top-24" style={{ borderColor: 'rgba(249,115,22,0.18)', background: 'linear-gradient(180deg, rgba(249,115,22,0.14), rgba(255,255,255,0.96))' }}>
-            <div className="mb-6 space-y-3">
+        <div className="grid gap-6 lg:grid-cols-[280px_minmax(0,1fr)] min-h-[calc(100vh-4rem)]">
+          <aside className="rounded-3xl border p-4 lg:sticky lg:top-16 self-start lg:h-[calc(100vh-4rem)]" style={{ borderColor: 'rgba(249,115,22,0.18)', background: 'linear-gradient(180deg, rgba(249,115,22,0.14), rgba(255,255,255,0.96))' }}>
+            <div className="mb-4 space-y-2">
               <p className="text-xs font-semibold uppercase tracking-[0.24em]" style={{ color: 'var(--primary)' }}>
                 Admin Console
               </p>
-              <h1 className="text-2xl font-black" style={{ color: 'var(--text-primary)' }}>
+              <h1 className="text-xl font-extrabold" style={{ color: 'var(--text-primary)' }}>
                 Admin Dashboard
               </h1>
-              <p className="text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+              <p className="text-sm leading-tight" style={{ color: 'var(--text-secondary)' }}>
                 Manage bookings, tickets, users, and campus resources from one workspace.
               </p>
             </div>
@@ -329,19 +337,31 @@ export default function AdminDashboardPage() {
                 <button
                   key={link.label}
                   onClick={() => switchPanel(link.value)}
-                  className="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold text-left transition-all"
+                  className="flex w-full items-center gap-3 rounded-2xl px-3 py-2 text-sm font-semibold text-left transition-all"
                   style={{
                     background: link.active ? 'rgba(249,115,22,0.12)' : 'transparent',
                     color: link.active ? 'var(--primary)' : 'var(--text-primary)',
                     border: link.active ? '1px solid rgba(249,115,22,0.2)' : '1px solid transparent',
                   }}
                 >
-                  <span className="flex h-9 w-9 items-center justify-center rounded-2xl" style={{ background: link.active ? 'rgba(249,115,22,0.12)' : 'rgba(15,23,42,0.04)', color: link.active ? 'var(--primary)' : 'var(--text-secondary)' }}>
+                  <span className="flex h-8 w-8 items-center justify-center rounded-2xl" style={{ background: link.active ? 'rgba(249,115,22,0.12)' : 'rgba(15,23,42,0.04)', color: link.active ? 'var(--primary)' : 'var(--text-secondary)' }}>
                     {link.icon}
                   </span>
                   <span>{link.label}</span>
                 </button>
               ))}
+            </div>
+
+            <div className="mt-6 rounded-[28px] border bg-white/80 p-3 shadow-sm" style={{ borderColor: 'rgba(249,115,22,0.14)' }}>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.20em] text-slate-500">Quick action</p>
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="mt-3 flex w-full items-center justify-center gap-2 rounded-2xl bg-[#F97316] px-3 py-2 text-sm font-semibold text-white transition hover:bg-[#EA580C]"
+              >
+                <LogOut size={16} />
+                Logout
+              </button>
             </div>
 
           </aside>
@@ -515,7 +535,7 @@ export default function AdminDashboardPage() {
         )}
 
         {activePanel === 'bookings' && (
-          <section className="mt-6 grid gap-6 xl:grid-cols-[1fr_320px]">
+          <section className="mt-6 grid gap-6">
           <div className="rounded-3xl border p-4 md:p-5" style={{ borderColor: 'var(--border)', background: 'rgba(255,255,255,0.94)' }}>
             <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
               <div className="relative w-full lg:max-w-lg">
