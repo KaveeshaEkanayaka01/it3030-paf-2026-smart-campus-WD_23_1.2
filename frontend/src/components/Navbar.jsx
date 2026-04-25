@@ -48,7 +48,8 @@ export default function Navbar() {
   ];
 
   const adminLinks = [
-    { to: '/admin-dashboard', icon: <LayoutDashboard size={16} />, label: 'Dashboard' },
+    { to: '/admin-dashboard', icon: <LayoutDashboard size={16} />, label: 'Overview' },
+    { to: '/admin-dashboard?tab=bookings', icon: <BookOpen size={16} />, label: 'Bookings' },
     { to: '/resources', icon: <Package size={16} />, label: 'Resources' },
     { to: '/admin', icon: <Shield size={16} />, label: 'Tickets' },
     { to: '/users', icon: <Users size={16} />, label: 'Users' },
@@ -103,7 +104,13 @@ export default function Navbar() {
           {/* 🔥 Center Links (fits in one row) */}
           <div className="flex items-center justify-center gap-1 flex-1">
             {links.map((link) => {
-              const active = location.pathname === link.to;
+              const dashboardTab = new URLSearchParams(location.search).get('tab');
+              const active =
+                link.to === '/admin-dashboard'
+                  ? location.pathname === '/admin-dashboard' && dashboardTab !== 'bookings'
+                  : link.to === '/admin-dashboard?tab=bookings'
+                    ? location.pathname === '/admin-dashboard' && dashboardTab === 'bookings'
+                    : location.pathname === link.to;
 
               return (
                 <Link

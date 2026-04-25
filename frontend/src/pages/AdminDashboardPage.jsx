@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { bookingApi } from '../api/bookingApi';
 import { useUser } from '../context/UserContext';
 import StatusBadge from '../components/StatusBadge';
@@ -7,13 +8,38 @@ import toast from 'react-hot-toast';
 import { format } from 'date-fns';
 import { buildBookingReferenceMap } from '../utils/bookingReference';
 import {
-  LayoutDashboard, CheckCircle, XCircle, Ban, RefreshCw,
-  Search, ChevronDown, ChevronUp, Users, Clock, CheckSquare, AlertCircle, Trash2
+  LayoutDashboard,
+  CheckCircle,
+  XCircle,
+  Ban,
+  RefreshCw,
+  Search,
+  ChevronDown,
+  ChevronUp,
+  Users,
+  Clock,
+  CheckSquare,
+  AlertCircle,
+  Trash2,
+  ArrowRight,
+  ShieldCheck,
+  ClipboardList,
+  UserCog,
+  TrendingUp,
+  CalendarRange,
+  BarChart3,
+  Activity,
+  Building2,
+  UserCheck,
+  Timer,
+  AlertTriangle,
 } from 'lucide-react';
 
 const FILTER_OPTIONS = ['ALL', 'PENDING', 'APPROVED', 'REJECTED', 'CANCELLED'];
 
 export default function AdminDashboardPage() {
+  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { currentUser } = useUser();
   const [bookings, setBookings] = useState([]);
   const [stats, setStats] = useState({});
@@ -23,6 +49,17 @@ export default function AdminDashboardPage() {
   const [sortField, setSortField] = useState('createdAt');
   const [sortDir, setSortDir] = useState('desc');
   const [rejectModal, setRejectModal] = useState(null); // booking to reject
+  const activeTab = searchParams.get('tab') === 'bookings' ? 'bookings' : 'overview';
+
+  const setActiveTab = (tab) => {
+    const next = new URLSearchParams(searchParams);
+    if (tab === 'bookings') {
+      next.set('tab', 'bookings');
+    } else {
+      next.delete('tab');
+    }
+    setSearchParams(next);
+  };
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -114,9 +151,9 @@ export default function AdminDashboardPage() {
     .filter(b => filter === 'ALL' || b.status === filter)
     .filter(b =>
       search === '' ||
-      b.resourceName.toLowerCase().includes(search.toLowerCase()) ||
-      b.userName.toLowerCase().includes(search.toLowerCase()) ||
-      b.purpose.toLowerCase().includes(search.toLowerCase())
+      String(b.resourceName || '').toLowerCase().includes(search.toLowerCase()) ||
+      String(b.userName || '').toLowerCase().includes(search.toLowerCase()) ||
+      String(b.purpose || '').toLowerCase().includes(search.toLowerCase())
     )
     .sort((a, b) => {
       let va = a[sortField], vb = b[sortField];
@@ -127,6 +164,91 @@ export default function AdminDashboardPage() {
     });
 
   const bookingReferences = buildBookingReferenceMap(bookings);
+  const pendingBookings = bookings.filter((booking) => booking.status === 'PENDING');
+  const approvedCount = stats.APPROVED || 0;
+  const rejectedCount = stats.REJECTED || 0;
+  const cancelledCount = stats.CANCELLED || 0;
+  const totalCount = stats.TOTAL || 0;
+
+  const uniqueUsers = new Set(bookings.map((booking) => booking.userId).filter(Boolean)).size;
+  const uniqueResources = new Set(bookings.map((booking) => booking.resourceId).filter(Boolean)).size;
+
+  const averageDurationHours = (() => {
+    if (bookings.length === 0) return 0;
+    const totalMs = bookings.reduce((sum, booking) => {
+      const start = new Date(booking.startTime).getTime();
+      const end = new Date(booking.endTime).getTime();
+      if (Number.isNaN(start) || Number.isNaN(end) || end <= start) return sum;
+      return sum + (end - start);
+    }, 0);
+    return totalMs / bookings.length / (1000 * 60 * 60);
+  })();
+
+  const activeNow = (() => {
+    const now = Date.now();
+    return bookings.filter((booking) => {
+      if (booking.status !== 'APPROVED') return false;
+      const start = new Date(booking.startTime).getTime();
+      const end = new Date(booking.endTime).getTime();
+      if (Number.isNaN(start) || Number.isNaN(end)) return false;
+      return now >= start && now <= end;
+    }).length;
+  })();
+
+  const rejectionRate = totalCount ? Math.round((rejectedCount / totalCount) * 100) : 0;
+  const cancellationRate = totalCount ? Math.round((cancelledCount / totalCount) * 100) : 0;
+  const approvalRate = totalCount ? Math.round((approvedCount / totalCount) * 100) : 0;
+  const pendingRate = totalCount ? Math.round(((stats.PENDING || 0) / totalCount) * 100) : 0;
+
+  const peakHour = (() => {
+    const bucket = new Array(24).fill(0);
+    bookings.forEach((booking) => {
+      const hour = new Date(booking.startTime).getHours();
+      if (!Number.isNaN(hour)) bucket[hour] += 1;
+    });
+    let maxHour = 0;
+    for (let i = 1; i < bucket.length; i += 1) {
+      if (bucket[i] > bucket[maxHour]) maxHour = i;
+    }
+    return { hour: maxHour, volume: bucket[maxHour] };
+  })();
+
+  const topResources = (() => {
+    const map = new Map();
+    bookings.forEach((booking) => {
+      const key = booking.resourceName || booking.resourceId || 'Unknown Resource';
+      map.set(key, (map.get(key) || 0) + 1);
+    });
+    return [...map.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([resource, count]) => ({ resource, count }));
+  })();
+
+  const last7Days = (() => {
+    const data = [];
+    const now = new Date();
+    for (let i = 6; i >= 0; i -= 1) {
+      const d = new Date(now);
+      d.setDate(now.getDate() - i);
+      data.push({
+        date: d,
+        label: format(d, 'EEE'),
+        total: 0,
+      });
+    }
+    bookings.forEach((booking) => {
+      const created = new Date(booking.createdAt || booking.startTime);
+      if (Number.isNaN(created.getTime())) return;
+      const dayKey = format(created, 'yyyy-MM-dd');
+      const idx = data.findIndex((item) => format(item.date, 'yyyy-MM-dd') === dayKey);
+      if (idx >= 0) data[idx].total += 1;
+    });
+    return data;
+  })();
+
+  const weeklyPeak = Math.max(...last7Days.map((item) => item.total), 1);
+  const riskLevel = pendingRate >= 30 || rejectionRate >= 20 ? 'High' : pendingRate >= 15 || rejectionRate >= 10 ? 'Moderate' : 'Healthy';
 
   const statCards = [
     { label: 'Total', value: stats.TOTAL || 0, icon: <Users size={20} />, color: 'var(--primary)', bg: 'rgba(249,115,22,0.08)' },
@@ -149,191 +271,379 @@ export default function AdminDashboardPage() {
     userSelect: 'none',
   };
 
+  const managementSections = [
+    {
+      title: 'Booking Governance',
+      detail: 'Moderate approval flow, cancellations, and policy outcomes for all booking requests.',
+      icon: <ShieldCheck size={18} />,
+      cta: 'Open Bookings',
+      onClick: () => setActiveTab('bookings'),
+    },
+    {
+      title: 'Ticket Operations',
+      detail: 'Assign technicians, update lifecycle stages, and control resolution quality.',
+      icon: <ClipboardList size={18} />,
+      cta: 'Open Ticket Admin',
+      onClick: () => navigate('/admin'),
+    },
+    {
+      title: 'Access Management',
+      detail: 'Manage account roles and enforce least-privilege access patterns.',
+      icon: <UserCog size={18} />,
+      cta: 'Open User Roles',
+      onClick: () => navigate('/users'),
+    },
+  ];
+
   return (
-    <div className="min-h-screen py-10 px-4 page-enter">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, var(--primary), var(--primary-hover))' }}>
-              <LayoutDashboard size={20} className="text-white" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>Admin Dashboard</h1>
-              <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Review and manage all booking requests</p>
-            </div>
-          </div>
-          <button onClick={fetchData} className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-colors hover:bg-[var(--bg-section)]" style={{ color: 'var(--primary)' }}>
-            <RefreshCw size={16} /> Refresh
-          </button>
-        </div>
+    <div className="min-h-screen px-4 py-8" style={{ background: 'var(--bg-primary)' }}>
+      <div className="relative mx-auto max-w-7xl">
+        <div className="pointer-events-none absolute -left-24 -top-14 h-64 w-64 rounded-full blur-3xl" style={{ background: 'rgba(249,115,22,0.12)' }} />
+        <div className="pointer-events-none absolute right-0 top-28 h-64 w-64 rounded-full blur-3xl" style={{ background: 'rgba(253,186,116,0.16)' }} />
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
-          {statCards.map(s => (
-            <div key={s.label} className="glass-card p-4 flex items-center gap-4">
-              <div className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0" style={{ background: s.bg }}>
-                <span style={{ color: s.color }}>{s.icon}</span>
-              </div>
-              <div>
-                <p className="text-3xl font-bold" style={{ color: s.color }}>{s.value}</p>
-                <p className="text-xs mt-0.5" style={{ color: 'var(--text-secondary)' }}>{s.label}</p>
-              </div>
-            </div>
-          ))}
-        </div>
+        
 
-        {/* Filter + Search */}
-        <div className="glass-card p-4 mb-6 flex flex-col sm:flex-row gap-3">
-          <div className="flex-1 relative">
-            <Search size={16} className="absolute left-3 top-3" style={{ color: 'var(--muted)' }} />
-            <input
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              placeholder="Search by resource, user, or purpose..."
-              className="w-full pl-9 pr-4 py-2.5 rounded-xl text-sm outline-none"
-              style={{ background: 'transparent', border: '1px solid rgba(15,23,42,0.06)', color: 'var(--text-primary)' }}
-            />
-          </div>
-          <div className="flex gap-2 flex-wrap">
-            {FILTER_OPTIONS.map(f => (
-              <button
-                key={f}
-                onClick={() => setFilter(f)}
-                className="px-3 py-2 rounded-xl text-xs font-semibold transition-all duration-200"
-                style={{
-                  background: filter === f ? (f === 'PENDING' ? 'var(--status-pending-bg)' : f === 'APPROVED' ? 'var(--status-approved-bg)' : f === 'REJECTED' ? 'var(--status-rejected-bg)' : 'var(--status-cancelled-bg)') : 'transparent',
-                  color: filter === f ? (f === 'ALL' ? 'var(--accent-mid)' : f === 'PENDING' ? 'var(--status-pending)' : f === 'APPROVED' ? 'var(--status-approved)' : f === 'REJECTED' ? 'var(--status-rejected)' : 'var(--status-cancelled)') : 'var(--muted)',
-                  border: filter === f ? '1px solid rgba(15,23,42,0.06)' : '1px solid rgba(15,23,42,0.04)',
-                }}
-              >
-                {f} {f !== 'ALL' && `(${bookings.filter(b => b.status === f).length})`}
-              </button>
-            ))}
-          </div>
-        </div>
+        {activeTab === 'overview' && (
+          <>
+            <section className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+              <article className="rounded-2xl border p-4" style={{ borderColor: 'var(--border)', background: 'rgba(255,255,255,0.95)' }}>
+                <p className="inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>
+                  <Activity size={12} style={{ color: 'var(--primary)' }} /> Active Right Now
+                </p>
+                <p className="mt-2 text-3xl font-black" style={{ color: 'var(--primary)' }}>{activeNow}</p>
+                <p className="mt-1 text-xs" style={{ color: 'var(--text-secondary)' }}>Approved bookings currently in progress</p>
+              </article>
 
-        {/* Table */}
-        {loading ? (
-          <div className="flex items-center justify-center py-20">
-            <div className="w-8 h-8 border-2 border-[var(--primary)] border-t-transparent rounded-full animate-spin" />
-          </div>
-        ) : (
-          <div className="glass-card overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                    <tr style={{ background: 'transparent' }}>
-                    <th style={thStyle} onClick={() => handleSort('id')}><span className="flex items-center gap-1">Booking Ref<SortIcon field="id" /></span></th>
-                    <th style={thStyle} onClick={() => handleSort('resourceName')}><span className="flex items-center gap-1">Resource<SortIcon field="resourceName" /></span></th>
-                    <th style={thStyle} onClick={() => handleSort('userName')}><span className="flex items-center gap-1">User<SortIcon field="userName" /></span></th>
-                    <th style={thStyle} onClick={() => handleSort('startTime')}><span className="flex items-center gap-1">Time Slot<SortIcon field="startTime" /></span></th>
-                    <th style={thStyle}>Purpose</th>
-                    <th style={thStyle} onClick={() => handleSort('status')}><span className="flex items-center gap-1">Status<SortIcon field="status" /></span></th>
-                    <th style={{ ...thStyle, textAlign: 'right' }}>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filtered.length === 0 ? (
-                    <tr>
-                      <td colSpan={7} className="py-16 text-center text-slate-400">
-                        No bookings match your criteria.
-                      </td>
-                    </tr>
-                  ) : filtered.map((b, i) => (
-                    <tr
-                      key={b.id}
-                      className="transition-colors"
-                        style={{
-                        borderBottom: '1px solid rgba(15,23,42,0.04)',
-                        background: i % 2 === 0 ? 'transparent' : 'var(--bg-section)',
-                      }}
-                      onMouseEnter={e => e.currentTarget.style.background = 'rgba(249,115,22,0.04)'}
-                      onMouseLeave={e => e.currentTarget.style.background = i % 2 === 0 ? 'transparent' : 'var(--bg-section)'}
-                    >
-                      <td style={{ padding: '14px 16px', color: 'var(--text-secondary)' }} className="text-xs font-mono">{bookingReferences[b.id]}</td>
-                      <td style={{ padding: '14px 16px' }}>
-                        <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{b.resourceName}</p>
-                        <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>{b.resourceId}</p>
-                      </td>
-                      <td style={{ padding: '14px 16px' }}>
-                        <p className="text-sm" style={{ color: 'var(--text-primary)' }}>{b.userName}</p>
-                        <p className="text-xs font-mono" style={{ color: 'var(--text-secondary)' }}>{b.userId}</p>
-                      </td>
-                      <td style={{ padding: '14px 16px' }}>
-                        <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>{format(new Date(b.startTime), 'MMM d, yyyy')}</p>
-                        <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
-                          {format(new Date(b.startTime), 'hh:mm a')} – {format(new Date(b.endTime), 'hh:mm a')}
-                        </p>
-                      </td>
-                      <td style={{ padding: '14px 16px', maxWidth: 180 }}>
-                        <p className="text-xs truncate" style={{ color: 'var(--text-secondary)' }}>{b.purpose}</p>
-                        {b.status === 'REJECTED' && b.rejectionReason && (
-                          <p className="text-xs mt-1" style={{ color: 'var(--status-rejected)' }} title={b.rejectionReason}>
-                            ✗ {b.rejectionReason.substring(0, 40)}{b.rejectionReason.length > 40 ? '...' : ''}
-                          </p>
-                        )}
-                      </td>
-                      <td style={{ padding: '14px 16px' }}><StatusBadge status={b.status} size="sm" /></td>
-                      <td style={{ padding: '14px 16px', textAlign: 'right' }}>
-                        <div className="flex items-center justify-end gap-2">
-                          {b.status === 'PENDING' && (
-                            <>
-                              <button
-                                onClick={() => handleApprove(b.id)}
-                                title="Approve"
-                                className="p-1.5 rounded-lg transition-all hover:scale-110"
-                                style={{ background: 'var(--status-approved-bg)', color: 'var(--status-approved)', border: '1px solid var(--status-approved-border)' }}
-                              >
-                                <CheckCircle size={15} />
-                              </button>
-                              <button
-                                onClick={() => setRejectModal(b)}
-                                title="Reject"
-                                className="p-1.5 rounded-lg transition-all hover:scale-110"
-                                style={{ background: 'var(--status-rejected-bg)', color: 'var(--status-rejected)', border: '1px solid var(--status-rejected-border)' }}
-                              >
-                                <XCircle size={15} />
-                              </button>
-                            </>
-                          )}
-                          {(b.status === 'PENDING' || b.status === 'APPROVED') && (
-                            <button
-                              onClick={() => handleCancel(b.id)}
-                              title="Cancel"
-                              className="p-1.5 rounded-lg transition-all hover:scale-110"
-                              style={{ background: 'var(--status-cancelled-bg)', color: 'var(--status-cancelled)', border: '1px solid var(--status-cancelled-border)' }}
-                            >
-                              <Ban size={15} />
-                            </button>
-                          )}
-                          {(b.status === 'REJECTED' || b.status === 'CANCELLED') && (
-                            <button
-                              onClick={() => handleDelete(b.id)}
-                              title="Delete from DB"
-                              className="p-1.5 rounded-lg transition-all hover:scale-110"
-                              style={{ background: 'rgba(239,68,68,0.12)', color: '#ef4444', border: '1px solid rgba(239,68,68,0.35)' }}
-                            >
-                              <Trash2 size={15} />
-                            </button>
-                          )}
+              <article className="rounded-2xl border p-4" style={{ borderColor: 'var(--border)', background: 'rgba(255,255,255,0.95)' }}>
+                <p className="inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>
+                  <Building2 size={12} style={{ color: 'var(--primary)' }} /> Resource Footprint
+                </p>
+                <p className="mt-2 text-3xl font-black" style={{ color: 'var(--text-primary)' }}>{uniqueResources}</p>
+                <p className="mt-1 text-xs" style={{ color: 'var(--text-secondary)' }}>Distinct resources used in current dataset</p>
+              </article>
+
+              <article className="rounded-2xl border p-4" style={{ borderColor: 'var(--border)', background: 'rgba(255,255,255,0.95)' }}>
+                <p className="inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>
+                  <UserCheck size={12} style={{ color: 'var(--primary)' }} /> User Adoption
+                </p>
+                <p className="mt-2 text-3xl font-black" style={{ color: 'var(--text-primary)' }}>{uniqueUsers}</p>
+                <p className="mt-1 text-xs" style={{ color: 'var(--text-secondary)' }}>Unique requesters across all bookings</p>
+              </article>
+
+              <article className="rounded-2xl border p-4" style={{ borderColor: 'var(--border)', background: 'rgba(255,255,255,0.95)' }}>
+                <p className="inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>
+                  <Timer size={12} style={{ color: 'var(--primary)' }} /> Avg Duration
+                </p>
+                <p className="mt-2 text-3xl font-black" style={{ color: 'var(--text-primary)' }}>{averageDurationHours.toFixed(1)}h</p>
+                <p className="mt-1 text-xs" style={{ color: 'var(--text-secondary)' }}>Average time per booking allocation</p>
+              </article>
+            </section>
+
+            <section className="mt-6 grid gap-4 xl:grid-cols-[1.2fr_0.8fr]">
+              <article className="rounded-2xl border p-5" style={{ borderColor: 'var(--border)', background: 'rgba(255,255,255,0.95)' }}>
+                <p className="inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-wider" style={{ color: 'var(--primary)' }}>
+                  <BarChart3 size={12} /> Site Performance Analysis
+                </p>
+
+                <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                  <div className="rounded-xl border p-3" style={{ borderColor: 'var(--border)', background: 'var(--bg-section)' }}>
+                    <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>Approval Rate</p>
+                    <p className="mt-1 text-2xl font-black" style={{ color: 'var(--status-approved)' }}>{approvalRate}%</p>
+                  </div>
+                  <div className="rounded-xl border p-3" style={{ borderColor: 'var(--border)', background: 'var(--bg-section)' }}>
+                    <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>Pending Pressure</p>
+                    <p className="mt-1 text-2xl font-black" style={{ color: 'var(--status-pending)' }}>{pendingRate}%</p>
+                  </div>
+                  <div className="rounded-xl border p-3" style={{ borderColor: 'var(--border)', background: 'var(--bg-section)' }}>
+                    <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>Rejection Rate</p>
+                    <p className="mt-1 text-2xl font-black" style={{ color: 'var(--status-rejected)' }}>{rejectionRate}%</p>
+                  </div>
+                  <div className="rounded-xl border p-3" style={{ borderColor: 'var(--border)', background: 'var(--bg-section)' }}>
+                    <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>Cancellation Rate</p>
+                    <p className="mt-1 text-2xl font-black" style={{ color: 'var(--text-secondary)' }}>{cancellationRate}%</p>
+                  </div>
+                </div>
+
+                <div className="mt-4 rounded-xl border p-4" style={{ borderColor: 'var(--border)', background: 'var(--bg-section)' }}>
+                  <div className="mb-3 flex items-center justify-between">
+                    <p className="text-xs font-black uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>7-Day Request Trend</p>
+                    <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>Peak: {weeklyPeak}</p>
+                  </div>
+                  <div className="flex items-end gap-2">
+                    {last7Days.map((day) => (
+                      <div key={day.label} className="flex-1 text-center">
+                        <div className="mx-auto flex h-28 w-full items-end rounded-md" style={{ background: 'rgba(249,115,22,0.08)' }}>
+                          <div
+                            className="w-full rounded-md"
+                            style={{
+                              height: `${Math.max(8, Math.round((day.total / weeklyPeak) * 100))}%`,
+                              background: 'linear-gradient(180deg, rgba(249,115,22,0.95), rgba(234,88,12,0.8))',
+                            }}
+                          />
                         </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                        <p className="mt-2 text-[10px] font-semibold" style={{ color: 'var(--text-secondary)' }}>{day.label}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </article>
+
+              <article className="space-y-4">
+                <div className="rounded-2xl border p-5" style={{ borderColor: 'var(--border)', background: 'rgba(255,255,255,0.95)' }}>
+                  <p className="inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-wider" style={{ color: 'var(--primary)' }}>
+                    <AlertTriangle size={12} /> Risk Signals
+                  </p>
+                  <p className="mt-3 text-2xl font-black" style={{ color: riskLevel === 'High' ? 'var(--status-rejected)' : riskLevel === 'Moderate' ? 'var(--status-pending)' : 'var(--status-approved)' }}>
+                    {riskLevel}
+                  </p>
+                  <p className="mt-1 text-xs" style={{ color: 'var(--text-secondary)' }}>
+                    Based on pending queue pressure and rejection behavior.
+                  </p>
+                  <div className="mt-4 rounded-xl border p-3" style={{ borderColor: 'var(--border)', background: 'var(--bg-section)' }}>
+                    <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>Peak Start Hour</p>
+                    <p className="mt-1 text-lg font-black" style={{ color: 'var(--text-primary)' }}>
+                      {String(peakHour.hour).padStart(2, '0')}:00 ({peakHour.volume} requests)
+                    </p>
+                  </div>
+                </div>
+
+                <div className="rounded-2xl border p-5" style={{ borderColor: 'var(--border)', background: 'rgba(255,255,255,0.95)' }}>
+                  <p className="inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-wider" style={{ color: 'var(--primary)' }}>
+                    <CalendarRange size={12} /> Top Resource Demand
+                  </p>
+                  <div className="mt-3 space-y-2">
+                    {topResources.map((resource) => (
+                      <div key={resource.resource} className="rounded-xl border p-3" style={{ borderColor: 'var(--border)', background: 'var(--bg-section)' }}>
+                        <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{resource.resource}</p>
+                        <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>{resource.count} bookings</p>
+                      </div>
+                    ))}
+                    {topResources.length === 0 && (
+                      <p className="rounded-xl border p-3 text-xs" style={{ borderColor: 'var(--border)', background: 'var(--bg-section)', color: 'var(--text-secondary)' }}>
+                        No booking demand data available.
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </article>
+            </section>
+
+            <section className="mt-6 grid gap-4 md:grid-cols-3">
+              {managementSections.map((section) => (
+                <article key={section.title} className="rounded-2xl border p-5" style={{ borderColor: 'var(--border)', background: 'rgba(255,255,255,0.92)' }}>
+                  <div className="mb-3 inline-flex h-9 w-9 items-center justify-center rounded-lg" style={{ background: 'rgba(249,115,22,0.1)', color: 'var(--primary)' }}>
+                    {section.icon}
+                  </div>
+                  <h2 className="text-base font-black" style={{ color: 'var(--text-primary)' }}>{section.title}</h2>
+                  <p className="mt-2 min-h-14 text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{section.detail}</p>
+                  <button
+                    onClick={section.onClick}
+                    className="mt-3 inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-xs font-semibold uppercase tracking-wider transition-all hover:-translate-y-0.5"
+                    style={{ borderColor: 'var(--border)', background: 'var(--bg-section)', color: 'var(--text-primary)' }}
+                  >
+                    {section.cta} <ArrowRight size={12} />
+                  </button>
+                </article>
+              ))}
+            </section>
+          </>
+        )}
+
+        {activeTab === 'bookings' && (
+          <section className="mt-6 grid gap-6 xl:grid-cols-[1fr_320px]">
+          <div className="rounded-3xl border p-4 md:p-5" style={{ borderColor: 'var(--border)', background: 'rgba(255,255,255,0.94)' }}>
+            <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+              <div className="relative w-full lg:max-w-lg">
+                <Search size={16} className="absolute left-3 top-3" style={{ color: 'var(--muted)' }} />
+                <input
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
+                  placeholder="Search by resource, user, or purpose..."
+                  className="w-full rounded-xl border py-2.5 pl-9 pr-4 text-sm outline-none"
+                  style={{ borderColor: 'var(--border)', background: 'white', color: 'var(--text-primary)' }}
+                />
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                {FILTER_OPTIONS.map(f => (
+                  <button
+                    key={f}
+                    onClick={() => setFilter(f)}
+                    className="rounded-xl px-3 py-2 text-xs font-semibold transition-all"
+                    style={{
+                      background: filter === f ? 'rgba(249,115,22,0.1)' : 'transparent',
+                      color: filter === f ? 'var(--primary)' : 'var(--text-secondary)',
+                      border: filter === f ? '1px solid rgba(249,115,22,0.28)' : '1px solid var(--border)',
+                    }}
+                  >
+                    {f} {f !== 'ALL' && `(${bookings.filter(b => b.status === f).length})`}
+                  </button>
+                ))}
+              </div>
             </div>
-            {filtered.length > 0 && (
-              <div className="px-4 py-3" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-                <p className="text-xs text-slate-500">Showing {filtered.length} of {bookings.length} bookings</p>
+
+            {loading ? (
+              <div className="flex items-center justify-center py-20">
+                <div className="h-8 w-8 animate-spin rounded-full border-2 border-[var(--primary)] border-t-transparent" />
+              </div>
+            ) : (
+              <div className="overflow-hidden rounded-2xl border" style={{ borderColor: 'var(--border)' }}>
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr style={{ background: 'var(--bg-section)' }}>
+                        <th style={thStyle} onClick={() => handleSort('id')}><span className="flex items-center gap-1">Booking Ref<SortIcon field="id" /></span></th>
+                        <th style={thStyle} onClick={() => handleSort('resourceName')}><span className="flex items-center gap-1">Resource<SortIcon field="resourceName" /></span></th>
+                        <th style={thStyle} onClick={() => handleSort('userName')}><span className="flex items-center gap-1">User<SortIcon field="userName" /></span></th>
+                        <th style={thStyle} onClick={() => handleSort('startTime')}><span className="flex items-center gap-1">Time Slot<SortIcon field="startTime" /></span></th>
+                        <th style={thStyle}>Purpose</th>
+                        <th style={thStyle} onClick={() => handleSort('status')}><span className="flex items-center gap-1">Status<SortIcon field="status" /></span></th>
+                        <th style={{ ...thStyle, textAlign: 'right' }}>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filtered.length === 0 ? (
+                        <tr>
+                          <td colSpan={7} className="py-16 text-center text-sm" style={{ color: 'var(--text-secondary)' }}>
+                            No bookings match your criteria.
+                          </td>
+                        </tr>
+                      ) : filtered.map((b, i) => (
+                        <tr
+                          key={b.id}
+                          className="transition-colors"
+                          style={{
+                            borderBottom: '1px solid rgba(15,23,42,0.05)',
+                            background: i % 2 === 0 ? 'white' : 'var(--bg-section)',
+                          }}
+                          onMouseEnter={e => e.currentTarget.style.background = 'rgba(249,115,22,0.06)'}
+                          onMouseLeave={e => e.currentTarget.style.background = i % 2 === 0 ? 'white' : 'var(--bg-section)'}
+                        >
+                          <td style={{ padding: '14px 16px', color: 'var(--text-secondary)' }} className="text-xs font-mono">{bookingReferences[b.id]}</td>
+                          <td style={{ padding: '14px 16px' }}>
+                            <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{b.resourceName}</p>
+                            <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>{b.resourceId}</p>
+                          </td>
+                          <td style={{ padding: '14px 16px' }}>
+                            <p className="text-sm" style={{ color: 'var(--text-primary)' }}>{b.userName}</p>
+                            <p className="text-xs font-mono" style={{ color: 'var(--text-secondary)' }}>{b.userId}</p>
+                          </td>
+                          <td style={{ padding: '14px 16px' }}>
+                            <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>{format(new Date(b.startTime), 'MMM d, yyyy')}</p>
+                            <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+                              {format(new Date(b.startTime), 'hh:mm a')} - {format(new Date(b.endTime), 'hh:mm a')}
+                            </p>
+                          </td>
+                          <td style={{ padding: '14px 16px', maxWidth: 180 }}>
+                            <p className="truncate text-xs" style={{ color: 'var(--text-secondary)' }}>{b.purpose}</p>
+                            {b.status === 'REJECTED' && b.rejectionReason && (
+                              <p className="mt-1 text-xs" style={{ color: 'var(--status-rejected)' }} title={b.rejectionReason}>
+                                {b.rejectionReason.substring(0, 40)}{b.rejectionReason.length > 40 ? '...' : ''}
+                              </p>
+                            )}
+                          </td>
+                          <td style={{ padding: '14px 16px' }}><StatusBadge status={b.status} size="sm" /></td>
+                          <td style={{ padding: '14px 16px', textAlign: 'right' }}>
+                            <div className="flex items-center justify-end gap-2">
+                              {b.status === 'PENDING' && (
+                                <>
+                                  <button
+                                    onClick={() => handleApprove(b.id)}
+                                    title="Approve"
+                                    className="rounded-lg p-1.5 transition-all hover:scale-110"
+                                    style={{ background: 'var(--status-approved-bg)', color: 'var(--status-approved)', border: '1px solid var(--status-approved-border)' }}
+                                  >
+                                    <CheckCircle size={15} />
+                                  </button>
+                                  <button
+                                    onClick={() => setRejectModal(b)}
+                                    title="Reject"
+                                    className="rounded-lg p-1.5 transition-all hover:scale-110"
+                                    style={{ background: 'var(--status-rejected-bg)', color: 'var(--status-rejected)', border: '1px solid var(--status-rejected-border)' }}
+                                  >
+                                    <XCircle size={15} />
+                                  </button>
+                                </>
+                              )}
+                              {(b.status === 'PENDING' || b.status === 'APPROVED') && (
+                                <button
+                                  onClick={() => handleCancel(b.id)}
+                                  title="Cancel"
+                                  className="rounded-lg p-1.5 transition-all hover:scale-110"
+                                  style={{ background: 'var(--status-cancelled-bg)', color: 'var(--status-cancelled)', border: '1px solid var(--status-cancelled-border)' }}
+                                >
+                                  <Ban size={15} />
+                                </button>
+                              )}
+                              {(b.status === 'REJECTED' || b.status === 'CANCELLED') && (
+                                <button
+                                  onClick={() => handleDelete(b.id)}
+                                  title="Delete from DB"
+                                  className="rounded-lg p-1.5 transition-all hover:scale-110"
+                                  style={{ background: 'rgba(239,68,68,0.12)', color: '#ef4444', border: '1px solid rgba(239,68,68,0.35)' }}
+                                >
+                                  <Trash2 size={15} />
+                                </button>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {filtered.length > 0 && (
+                  <div className="border-t px-4 py-3" style={{ borderColor: 'var(--border)' }}>
+                    <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>Showing {filtered.length} of {bookings.length} bookings</p>
+                  </div>
+                )}
               </div>
             )}
           </div>
+
+          <aside className="space-y-4">
+            <article className="rounded-2xl border p-5" style={{ borderColor: 'var(--border)', background: 'rgba(255,255,255,0.94)' }}>
+              <p className="inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-wider" style={{ color: 'var(--primary)' }}>
+                <TrendingUp size={12} /> Queue Snapshot
+              </p>
+              <div className="mt-4 space-y-3">
+                <div className="rounded-xl border p-3" style={{ borderColor: 'var(--border)', background: 'var(--bg-section)' }}>
+                  <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>Pending Requests</p>
+                  <p className="mt-1 text-2xl font-black" style={{ color: 'var(--primary)' }}>{pendingBookings.length}</p>
+                </div>
+                <div className="rounded-xl border p-3" style={{ borderColor: 'var(--border)', background: 'var(--bg-section)' }}>
+                  <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>Approval Rate</p>
+                  <p className="mt-1 text-2xl font-black" style={{ color: 'var(--status-approved)' }}>
+                    {stats.TOTAL ? `${Math.round(((stats.APPROVED || 0) / stats.TOTAL) * 100)}%` : '0%'}
+                  </p>
+                </div>
+              </div>
+            </article>
+
+            <article className="rounded-2xl border p-5" style={{ borderColor: 'var(--border)', background: 'rgba(255,255,255,0.94)' }}>
+              <p className="inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-wider" style={{ color: 'var(--primary)' }}>
+                <CalendarRange size={12} /> Pending Review List
+              </p>
+              <div className="mt-4 space-y-2">
+                {pendingBookings.slice(0, 5).map((booking) => (
+                  <div key={booking.id} className="rounded-xl border p-3" style={{ borderColor: 'var(--border)', background: 'var(--bg-section)' }}>
+                    <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{booking.resourceName}</p>
+                    <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>{booking.userName}</p>
+                  </div>
+                ))}
+                {pendingBookings.length === 0 && (
+                  <p className="rounded-xl border p-3 text-xs" style={{ borderColor: 'var(--border)', background: 'var(--bg-section)', color: 'var(--text-secondary)' }}>
+                    No pending requests in queue.
+                  </p>
+                )}
+              </div>
+            </article>
+          </aside>
+          </section>
         )}
       </div>
 
-      {/* Rejection Modal */}
       {rejectModal && (
         <RejectionModal
           booking={rejectModal}
