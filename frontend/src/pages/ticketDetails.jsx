@@ -379,7 +379,7 @@ export const TicketDetailsPage = () => {
   }
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-12 relative">
+    <div className="mx-auto max-w-4xl px-3 py-6 relative">
       {/* Decorative background elements */}
       <div className="pointer-events-none absolute left-0 top-0 h-[500px] w-[500px] rounded-full bg-[radial-gradient(circle,_rgba(99,102,241,0.15)_0%,_rgba(99,102,241,0)_70%)] opacity-60 blur-3xl" />
 
@@ -392,34 +392,34 @@ export const TicketDetailsPage = () => {
       </button>
 
       <div className={cn('grid grid-cols-1 gap-10 relative z-10', hasSidePanel ? 'lg:grid-cols-3' : 'max-w-4xl mx-auto')}>
-        <div className={cn('space-y-8', hasSidePanel ? 'lg:col-span-2' : '')}>
-          <div className="glass-panel rounded-3xl p-8 shadow-xl backdrop-blur-md">
-            <div className="mb-8 flex items-center justify-between gap-4 border-b border-white/10 pb-6">
+        <div className={cn('space-y-6', hasSidePanel ? 'lg:col-span-2' : '')}>
+          <div className="glass-panel rounded-3xl p-5 shadow-xl backdrop-blur-md">
+            <div className="mb-6 flex items-center justify-between gap-4 border-b border-white/10 pb-4">
               <div>
-                <h1 className="text-3xl font-extrabold uppercase tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-fuchsia-400">{ticket.category || 'Ticket'}</h1>
-                <p className="mt-2 text-xs font-bold font-mono tracking-wider text-slate-500">#{ticket.id}</p>
+                <h1 className="text-2xl font-extrabold uppercase tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-fuchsia-400">{ticket.category || 'Ticket'}</h1>
+                <p className="mt-1 text-xs font-bold font-mono tracking-wider text-slate-500">#{ticket.id}</p>
               </div>
               <TicketStatusBadge status={ticket.status} />
             </div>
 
-            <div className="mb-8 grid grid-cols-1 gap-6 border-b border-white/10 pb-8 md:grid-cols-3">
-              <div className="glass-panel p-4 rounded-xl text-center md:text-left">
+            <div className="mb-6 grid grid-cols-1 gap-4 border-b border-white/10 pb-6 md:grid-cols-3">
+              <div className="glass-panel p-3 rounded-xl text-center md:text-left">
                 <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Created By</p>
-                <div className="mt-2 flex items-center justify-center md:justify-start gap-2 text-xs font-semibold uppercase text-slate-100">
+                <div className="mt-1 flex items-center justify-center md:justify-start gap-2 text-xs font-semibold uppercase text-slate-100">
                   <User size={14} className="text-indigo-400" />
                   <span className="truncate">{createdByDisplayName}</span>
                 </div>
               </div>
-              <div className="glass-panel p-4 rounded-xl text-center md:text-left">
+              <div className="glass-panel p-3 rounded-xl text-center md:text-left">
                 <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Date</p>
-                <div className="mt-2 flex items-center justify-center md:justify-start gap-2 text-xs font-semibold uppercase text-slate-100">
+                <div className="mt-1 flex items-center justify-center md:justify-start gap-2 text-xs font-semibold uppercase text-slate-100">
                   <Calendar size={14} className="text-fuchsia-400" />
                   <span>{ticket.createdAt ? new Date(ticket.createdAt).toLocaleDateString() : 'N/A'}</span>
                 </div>
               </div>
-              <div className="glass-panel p-4 rounded-xl text-center md:text-left">
+              <div className="glass-panel p-3 rounded-xl text-center md:text-left">
                 <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Location</p>
-                <div className="mt-2 flex items-center justify-center md:justify-start gap-2 text-xs font-semibold uppercase text-slate-100">
+                <div className="mt-1 flex items-center justify-center md:justify-start gap-2 text-xs font-semibold uppercase text-slate-100">
                   <MapPin size={14} className="text-rose-400" />
                   <span className="truncate">{ticket.location || 'N/A'}</span>
                 </div>
@@ -427,62 +427,62 @@ export const TicketDetailsPage = () => {
             </div>
 
             {/* Service-Level Agreement Timers (SLA) */}
-            <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2">
-              <div className="glass-panel-strong p-6 rounded-2xl relative overflow-hidden group">
+            <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div className="glass-panel-strong p-4 rounded-2xl relative overflow-hidden group">
                 <div className="absolute -right-4 -top-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                  <Clock size={80} className="text-emerald-500" />
+                  <Clock size={60} className="text-emerald-500" />
                 </div>
                 <div className="flex items-center justify-between relative z-10">
                    <div>
                       <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Time to Response</p>
-                      <h4 className="text-2xl font-black text-emerald-400">{getSlaTiming(ticket.createdAt, ticket.firstRespondedAt)}</h4>
+                      <h4 className="text-xl font-black text-emerald-400">{getSlaTiming(ticket.createdAt, ticket.firstRespondedAt)}</h4>
                    </div>
-                   <div className="bg-emerald-500/10 p-3 rounded-xl border border-emerald-500/20">
-                     <Timer size={20} className="text-emerald-400" />
+                   <div className="bg-emerald-500/10 p-2 rounded-xl border border-emerald-500/20">
+                     <Timer size={16} className="text-emerald-400" />
                    </div>
                 </div>
-                <p className="text-[9px] uppercase font-bold text-emerald-500/50 mt-3 relative z-10 tracking-wider">
+                <p className="text-[9px] uppercase font-bold text-emerald-500/50 mt-2 relative z-10 tracking-wider">
                   {ticket.firstRespondedAt ? 'Responded' : 'Awaiting Response'}
                 </p>
               </div>
 
-              <div className="glass-panel-strong p-6 rounded-2xl relative overflow-hidden group">
+              <div className="glass-panel-strong p-4 rounded-2xl relative overflow-hidden group">
                 <div className="absolute -right-4 -top-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                  <CheckCircle2 size={80} className="text-indigo-500" />
+                  <CheckCircle2 size={60} className="text-indigo-500" />
                 </div>
                 <div className="flex items-center justify-between relative z-10">
                    <div>
                       <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Time to Resolution</p>
-                      <h4 className="text-2xl font-black text-indigo-400">{getSlaTiming(ticket.createdAt, ticket.resolvedAt)}</h4>
+                      <h4 className="text-xl font-black text-indigo-400">{getSlaTiming(ticket.createdAt, ticket.resolvedAt)}</h4>
                    </div>
-                   <div className="bg-indigo-500/10 p-3 rounded-xl border border-indigo-500/20">
-                     <CheckCircle2 size={20} className="text-indigo-400" />
+                   <div className="bg-indigo-500/10 p-2 rounded-xl border border-indigo-500/20">
+                     <CheckCircle2 size={16} className="text-indigo-400" />
                    </div>
                 </div>
-                <p className="text-[9px] uppercase font-bold text-indigo-500/50 mt-3 relative z-10 tracking-wider">
+                <p className="text-[9px] uppercase font-bold text-indigo-500/50 mt-2 relative z-10 tracking-wider">
                   {ticket.resolvedAt ? 'Resolved' : 'Ongoing'}
                 </p>
               </div>
             </div>
 
             <div>
-              <h3 className="mb-4 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-200">
+              <h3 className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-200">
                 <FileText size={16} className="text-purple-400" />
                 Description
               </h3>
-              <p className="glass-panel p-6 rounded-2xl text-sm font-light leading-relaxed text-slate-300">
+              <p className="glass-panel p-4 rounded-2xl text-sm font-light leading-relaxed text-slate-300">
                 {ticket.description || 'No description provided.'}
               </p>
             </div>
 
-            <div className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-2">
-              <div className="glass-panel p-5 rounded-2xl border-l-[3px] border-l-fuchsia-500">
+            <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div className="glass-panel p-4 rounded-2xl border-l-[3px] border-l-fuchsia-500">
                 <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Preferred Contact</p>
-                <p className="mt-2 text-sm font-semibold text-slate-200">{ticket.preferredContact || 'N/A'}</p>
+                <p className="mt-1 text-sm font-semibold text-slate-200">{ticket.preferredContact || 'N/A'}</p>
               </div>
-              <div className="glass-panel p-5 rounded-2xl border-l-[3px] border-l-indigo-500">
+              <div className="glass-panel p-4 rounded-2xl border-l-[3px] border-l-indigo-500">
                 <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Resolution Notes</p>
-                <p className="mt-2 text-sm font-semibold text-slate-200">{ticket.resolutionNotes || 'N/A'}</p>
+                <p className="mt-1 text-sm font-semibold text-slate-200">{ticket.resolutionNotes || 'N/A'}</p>
               </div>
             </div>
 
@@ -529,20 +529,20 @@ export const TicketDetailsPage = () => {
           </div>
         </div>
 
-        <div className="space-y-8">
+        <div className="space-y-6">
           {canManageTicket && (
             <>
-              <div className="glass-panel-strong rounded-3xl p-8 shadow-2xl backdrop-blur-md">
-                <h3 className="mb-6 flex items-center gap-3 border-b border-white/10 pb-5 text-xs font-bold uppercase tracking-widest text-slate-100">
+              <div className="glass-panel-strong rounded-3xl p-5 shadow-2xl backdrop-blur-md">
+                <h3 className="mb-4 flex items-center gap-3 border-b border-white/10 pb-3 text-xs font-bold uppercase tracking-widest text-slate-100">
                   <Wrench size={18} className="text-indigo-400" />
                   Technician Actions
                 </h3>
-                <div className="space-y-4">
+                <div className="space-y-3">
                   <select
                     value={selectedStatus}
                     onChange={(e) => setSelectedStatus(e.target.value)}
                     disabled={!canManageTicket || statusUpdating}
-                    className="w-full glass-input rounded-xl px-4 py-3.5 text-xs font-bold uppercase tracking-wider outline-none text-slate-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                    className="w-full glass-input rounded-xl px-3 py-2.5 text-xs font-bold uppercase tracking-wider outline-none text-slate-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                   >
                     {UPDATE_STATUSES.map((status) => (
                       <option key={status} value={status} className="bg-slate-900 text-slate-200">{status.replace('_', ' ')}</option>
@@ -554,8 +554,8 @@ export const TicketDetailsPage = () => {
                     onChange={(e) => setResolutionNotes(e.target.value)}
                     placeholder="Resolution notes (for RESOLVED/CLOSED)"
                     disabled={!canManageTicket || statusUpdating}
-                    rows={3}
-                    className="w-full resize-none glass-input rounded-xl px-4 py-3.5 text-xs outline-none text-slate-200 placeholder:text-slate-500 disabled:opacity-50 transition-all font-medium"
+                    rows={2}
+                    className="w-full resize-none glass-input rounded-xl px-3 py-2.5 text-xs outline-none text-slate-200 placeholder:text-slate-500 disabled:opacity-50 transition-all font-medium"
                   />
 
                   {selectedStatus === 'REJECTED' && (
@@ -564,8 +564,8 @@ export const TicketDetailsPage = () => {
                       onChange={(e) => setRejectionReason(e.target.value)}
                       placeholder="Rejection reason (required)"
                       disabled={!canManageTicket || statusUpdating}
-                      rows={3}
-                      className="w-full resize-none bg-rose-500/10 border border-rose-500/30 rounded-xl px-4 py-3.5 text-xs outline-none text-rose-200 placeholder:text-rose-500/50 disabled:opacity-50 transition-all"
+                      rows={2}
+                      className="w-full resize-none bg-rose-500/10 border border-rose-500/30 rounded-xl px-3 py-2.5 text-xs outline-none text-rose-200 placeholder:text-rose-500/50 disabled:opacity-50 transition-all"
                     />
                   )}
 
@@ -574,7 +574,7 @@ export const TicketDetailsPage = () => {
                     disabled={!canManageTicket || statusUpdating}
                     onClick={handleUpdateStatus}
                     className={cn(
-                      'w-full rounded-2xl bg-gradient-to-r from-indigo-500 to-purple-600 px-4 py-4 text-xs font-bold uppercase tracking-widest text-white transition-all shadow-[0_0_20px_rgba(168,85,247,0.3)]',
+                      'w-full rounded-2xl bg-gradient-to-r from-indigo-500 to-purple-600 px-4 py-3 text-xs font-bold uppercase tracking-widest text-white transition-all shadow-[0_0_20px_rgba(168,85,247,0.3)]',
                       (!canManageTicket || statusUpdating) ? 'opacity-50 cursor-not-allowed shadow-none' : 'hover:scale-[1.02] active:scale-95'
                     )}
                   >
@@ -583,45 +583,47 @@ export const TicketDetailsPage = () => {
                 </div>
               </div>
 
-              <div className="glass-panel rounded-3xl p-8 shadow-xl backdrop-blur-md">
-                <h3 className="mb-6 flex items-center gap-3 border-b border-white/10 pb-5 text-xs font-bold uppercase tracking-widest text-slate-100">
-                  <CheckCircle2 size={18} className="text-emerald-400" />
-                  Assign Technician
-                </h3>
-                <div className="space-y-4">
-                  <select
-                    value={technician}
-                    onChange={(e) => setTechnician(e.target.value)}
-                    disabled={!canManageTicket || assigning}
-                    className="w-full glass-input rounded-xl px-4 py-3.5 text-sm font-medium outline-none text-slate-200 disabled:opacity-50 transition-all focus:glass-panel-strong cursor-pointer"
-                  >
-                    <option value="" className="bg-slate-900 text-slate-300">Select technician</option>
-                    {technicianOptions.map((tech) => (
-                      <option key={tech.id} value={tech.id} className="bg-slate-900 text-slate-200">
-                        {getTechnicianDisplay(tech)}
-                      </option>
-                    ))}
-                  </select>
+              {currentUserRole !== 'TECHNICIAN' && (
+                <div className="glass-panel rounded-3xl p-5 shadow-xl backdrop-blur-md">
+                  <h3 className="mb-4 flex items-center gap-3 border-b border-white/10 pb-3 text-xs font-bold uppercase tracking-widest text-slate-100">
+                    <CheckCircle2 size={18} className="text-emerald-400" />
+                    Assign Technician
+                  </h3>
+                  <div className="space-y-3">
+                    <select
+                      value={technician}
+                      onChange={(e) => setTechnician(e.target.value)}
+                      disabled={!canManageTicket || assigning}
+                      className="w-full glass-input rounded-xl px-4 py-3.5 text-sm font-medium outline-none text-slate-200 disabled:opacity-50 transition-all focus:glass-panel-strong cursor-pointer"
+                    >
+                      <option value="" className="bg-slate-900 text-slate-300">Select technician</option>
+                      {technicianOptions.map((tech) => (
+                        <option key={tech.id} value={tech.id} className="bg-slate-900 text-slate-200">
+                          {getTechnicianDisplay(tech)}
+                        </option>
+                      ))}
+                    </select>
 
-                  {technicianOptions.length === 0 && (
-                    <p className="text-xs font-semibold text-amber-300">
-                      No technicians found in database. Add users with ROLE_TECHNICIAN.
-                    </p>
-                  )}
-
-                  <button
-                    type="button"
-                    onClick={handleAssignTechnician}
-                    disabled={!canManageTicket || assigning || !technician.trim() || technicianOptions.length === 0}
-                    className={cn(
-                      'w-full rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 px-4 py-3.5 text-xs font-bold uppercase tracking-widest text-white transition-all shadow-[0_0_20px_rgba(16,185,129,0.2)]',
-                      (!canManageTicket || assigning || !technician.trim() || technicianOptions.length === 0) ? 'opacity-50 cursor-not-allowed shadow-none' : 'hover:scale-[1.02] active:scale-95'
+                    {technicianOptions.length === 0 && (
+                      <p className="text-xs font-semibold text-amber-300">
+                        No technicians found in database. Add users with ROLE_TECHNICIAN.
+                      </p>
                     )}
-                  >
-                    {assigning ? 'Assigning...' : 'Assign Technician'}
-                  </button>
+
+                    <button
+                      type="button"
+                      onClick={handleAssignTechnician}
+                      disabled={!canManageTicket || assigning || !technician.trim() || technicianOptions.length === 0}
+                      className={cn(
+                        'w-full rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 px-4 py-3.5 text-xs font-bold uppercase tracking-widest text-white transition-all shadow-[0_0_20px_rgba(16,185,129,0.2)]',
+                        (!canManageTicket || assigning || !technician.trim() || technicianOptions.length === 0) ? 'opacity-50 cursor-not-allowed shadow-none' : 'hover:scale-[1.02] active:scale-95'
+                      )}
+                    >
+                      {assigning ? 'Assigning...' : 'Assign Technician'}
+                    </button>
+                  </div>
                 </div>
-              </div>
+              )}
             </>
           )}
 
