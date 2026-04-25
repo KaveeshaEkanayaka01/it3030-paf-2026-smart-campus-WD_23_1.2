@@ -7,6 +7,147 @@ import toast from 'react-hot-toast';
 import { PlusCircle, Calendar, Clock, MapPin, FileText, ChevronRight } from 'lucide-react';
 import { toUserBookingReference } from '../utils/bookingReference';
 
+const MIN_PURPOSE_LENGTH = 10;
+const MAX_PURPOSE_LENGTH = 300;
+const MAX_BOOKING_DURATION_HOURS = 8;
+const MIN_ADVANCE_MINUTES = 15;
+const MIN_BOOKING_DURATION_MINUTES = 30;
+const MAX_BOOKING_WINDOW_DAYS = 90;
+const BUSINESS_HOUR_START = 7;
+const BUSINESS_HOUR_END = 22;
+
+function toDate(value) {
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
+function getDurationHours(start, end) {
+  if (!start || !end) return 0;
+  return (end.getTime() - start.getTime()) / (1000 * 60 * 60);
+}
+
+function getDurationMinutes(start, end) {
+  if (!start || !end) return 0;
+  return (end.getTime() - start.getTime()) / (1000 * 60);
+}
+
+function isWithinBusinessHours(start, end) {
+  if (!start || !end) return false;
+
+  const startMinutes = start.getHours() * 60 + start.getMinutes();
+  const endMinutes = end.getHours() * 60 + end.getMinutes();
+  const openMinutes = BUSINESS_HOUR_START * 60;
+  const closeMinutes = BUSINESS_HOUR_END * 60;
+
+  return startMinutes >= openMinutes && endMinutes <= closeMinutes;
+}
+
+function hasTimeOverlap(startA, endA, startB, endB) {
+  return startA < endB && startB < endA;
+}
+
+function getFirstErrorMessage(errors) {
+  return Object.values(errors).find(Boolean);
+}
+
+// Validation rules keep booking requests consistent before API submission.
+function validateBookingForm(form, resources) {
+  const errors = {};
+  const now = new Date();
+  const minStart = new Date(now.getTime() + MIN_ADVANCE_MINUTES * 60 * 1000);
+  const maxStart = new Date(now.getTime() + MAX_BOOKING_WINDOW_DAYS * 24 * 60 * 60 * 1000);
+  const start = toDate(form.startTime);
+  const end = toDate(form.endTime);
+  const purpose = String(form.purpose || '').trim();
+  const selectedResource = resources.find((resource) => (resource.id || resource._id) === form.resourceId);
+
+  if (!form.resourceId) {
+    errors.resourceId = 'Please select a resource.';
+  } else if (!selectedResource) {
+    errors.resourceId = 'Selected resource is no longer available. Please reselect.';
+  } else if (String(selectedResource.status || '').toUpperCase() === 'OUT_OF_SERVICE') {
+    errors.resourceId = 'This resource is currently out of service.';
+  }
+
+  if (!form.startTime) {
+    errors.startTime = 'Start time is required.';
+  } else if (!start) {
+    errors.startTime = 'Please provide a valid start time.';
+  } else if (start < minStart) {
+    errors.startTime = `Bookings must be made at least ${MIN_ADVANCE_MINUTES} minutes in advance.`;
+  } else if (start > maxStart) {
+    errors.startTime = `Bookings can only be created up to ${MAX_BOOKING_WINDOW_DAYS} days ahead.`;
+  }
+
+  if (!form.endTime) {
+    errors.endTime = 'End time is required.';
+  } else if (!end) {
+    errors.endTime = 'Please provide a valid end time.';
+  }
+
+  if (start && end && end <= start) {
+    errors.endTime = 'End time must be after start time.';
+  }
+
+  if (start && end) {
+    const durationMinutes = getDurationMinutes(start, end);
+    const durationHours = getDurationHours(start, end);
+
+    if (durationMinutes < MIN_BOOKING_DURATION_MINUTES) {
+      errors.endTime = `Booking must be at least ${MIN_BOOKING_DURATION_MINUTES} minutes.`;
+    }
+
+    if (durationHours > MAX_BOOKING_DURATION_HOURS) {
+      errors.endTime = `Booking duration cannot exceed ${MAX_BOOKING_DURATION_HOURS} hours.`;
+    }
+
+    if (!isWithinBusinessHours(start, end)) {
+      errors.endTime = `Bookings must be within ${BUSINESS_HOUR_START}:00 to ${BUSINESS_HOUR_END}:00.`;
+    }
+  }
+
+  if (!purpose) {
+    errors.purpose = 'Purpose is required.';
+  } else if (purpose.length < MIN_PURPOSE_LENGTH) {
+    errors.purpose = `Purpose must be at least ${MIN_PURPOSE_LENGTH} characters.`;
+  } else if (purpose.length > MAX_PURPOSE_LENGTH) {
+    errors.purpose = `Purpose must be less than ${MAX_PURPOSE_LENGTH + 1} characters.`;
+  }
+
+  return errors;
+}
+
+async function validateResourceAvailability(form) {
+  const start = toDate(form.startTime);
+  const end = toDate(form.endTime);
+  if (!form.resourceId || !start || !end) {
+    return '';
+  }
+
+  try {
+    const res = await bookingApi.getByResource(form.resourceId);
+    const existingBookings = Array.isArray(res.data) ? res.data : [];
+    const conflicting = existingBookings.some((booking) => {
+      const status = String(booking.status || '').toUpperCase();
+      if (['REJECTED', 'CANCELLED'].includes(status)) {
+        return false;
+      }
+
+      const existingStart = toDate(booking.startTime);
+      const existingEnd = toDate(booking.endTime);
+      if (!existingStart || !existingEnd) {
+        return false;
+      }
+
+      return hasTimeOverlap(start, end, existingStart, existingEnd);
+    });
+
+    return conflicting ? 'Selected time overlaps with an existing booking for this resource.' : '';
+  } catch {
+    return 'Could not verify resource availability. Please try again.';
+  }
+}
+
 export default function CreateBookingPage() {
   const { currentUser } = useUser();
   const navigate = useNavigate();
@@ -25,6 +166,7 @@ export default function CreateBookingPage() {
   const [resources, setResources] = useState([]);
   const [resourcesLoading, setResourcesLoading] = useState(true);
   const [nextBookingSequence, setNextBookingSequence] = useState(1);
+  const [errors, setErrors] = useState({});
 
   const selectedResourceId = location?.state?.selectedResourceId;
   const selectedResourceName = location?.state?.selectedResourceName;
@@ -96,14 +238,39 @@ export default function CreateBookingPage() {
       resourceId: (selected?.id || selected?._id) || '',
       resourceName: selected?.name || '',
     }));
+    setErrors(prev => ({ ...prev, resourceId: '' }));
+  };
+
+  const handleStartTimeChange = (value) => {
+    setForm(prev => ({ ...prev, startTime: value }));
+    setErrors(prev => ({ ...prev, startTime: '', endTime: '' }));
+  };
+
+  const handleEndTimeChange = (value) => {
+    setForm(prev => ({ ...prev, endTime: value }));
+    setErrors(prev => ({ ...prev, endTime: '' }));
+  };
+
+  const handlePurposeChange = (value) => {
+    setForm(prev => ({ ...prev, purpose: value }));
+    setErrors(prev => ({ ...prev, purpose: '' }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.resourceId) { toast.error('Please select a resource.'); return; }
-    if (!form.startTime || !form.endTime) { toast.error('Please set start and end time.'); return; }
-    if (new Date(form.startTime) >= new Date(form.endTime)) {
-      toast.error('End time must be after start time.');
+    const validationErrors = validateBookingForm(form, resources);
+    setErrors(validationErrors);
+
+    if (Object.keys(validationErrors).length > 0) {
+      toast.error(getFirstErrorMessage(validationErrors) || 'Please fix form errors.');
+      return;
+    }
+
+    const availabilityError = await validateResourceAvailability(form);
+    if (availabilityError) {
+      const mergedErrors = { ...validationErrors, endTime: availabilityError };
+      setErrors(mergedErrors);
+      toast.error(availabilityError);
       return;
     }
 
@@ -111,6 +278,7 @@ export default function CreateBookingPage() {
     try {
       await bookingApi.create({
         ...form,
+        purpose: form.purpose.trim(),
         userId: currentUser.userId,
         userName: currentUser.userName,
         startTime: form.startTime + ':00',
@@ -179,6 +347,11 @@ export default function CreateBookingPage() {
                 </option>
               ))}
             </select>
+            {errors.resourceId ? (
+              <p className="text-xs mt-1.5" style={{ color: 'var(--status-rejected)' }}>
+                {errors.resourceId}
+              </p>
+            ) : null}
           </div>
 
           {/* Date & Time */}
@@ -191,13 +364,18 @@ export default function CreateBookingPage() {
                 type="datetime-local"
                 value={form.startTime}
                 min={today}
-                onChange={e => setForm(prev => ({ ...prev, startTime: e.target.value }))}
+                onChange={e => handleStartTimeChange(e.target.value)}
                 className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-all duration-200"
                 style={{ background: 'var(--bg-primary)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}
                 onFocus={e => e.target.style.borderColor = 'var(--primary)'}
                 onBlur={e => e.target.style.borderColor = 'var(--border)'}
                 required
               />
+              {errors.startTime ? (
+                <p className="text-xs mt-1.5" style={{ color: 'var(--status-rejected)' }}>
+                  {errors.startTime}
+                </p>
+              ) : null}
             </div>
             <div>
               <label className="block text-sm font-semibold text-slate-300 mb-2 flex items-center gap-2">
@@ -207,13 +385,18 @@ export default function CreateBookingPage() {
                 type="datetime-local"
                 value={form.endTime}
                 min={form.startTime || today}
-                onChange={e => setForm(prev => ({ ...prev, endTime: e.target.value }))}
+                onChange={e => handleEndTimeChange(e.target.value)}
                 className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-all duration-200"
                 style={{ background: 'transparent', border: '1px solid rgba(15,23,42,0.06)', color: 'var(--text-primary)' }}
                 onFocus={e => e.target.style.borderColor = 'var(--accent-mid)'}
                 onBlur={e => e.target.style.borderColor = 'rgba(15,23,42,0.06)'}
                 required
               />
+              {errors.endTime ? (
+                <p className="text-xs mt-1.5" style={{ color: 'var(--status-rejected)' }}>
+                  {errors.endTime}
+                </p>
+              ) : null}
             </div>
           </div>
 
@@ -224,7 +407,7 @@ export default function CreateBookingPage() {
             </label>
             <textarea
               value={form.purpose}
-              onChange={e => setForm(prev => ({ ...prev, purpose: e.target.value }))}
+              onChange={e => handlePurposeChange(e.target.value)}
               rows={4}
               placeholder="Describe the purpose of this booking..."
               className="w-full px-4 py-3 rounded-xl text-sm placeholder:text-secondary outline-none resize-none transition-all duration-200"
@@ -233,6 +416,20 @@ export default function CreateBookingPage() {
               onBlur={e => e.target.style.borderColor = 'var(--border)'}
               required
             />
+            <div className="flex items-center justify-between mt-1.5">
+              {errors.purpose ? (
+                <p className="text-xs" style={{ color: 'var(--status-rejected)' }}>
+                  {errors.purpose}
+                </p>
+              ) : (
+                <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+                  Min {MIN_PURPOSE_LENGTH} chars, max {MAX_PURPOSE_LENGTH}, clear purpose.
+                </p>
+              )}
+              <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+                {form.purpose.length}/{MAX_PURPOSE_LENGTH}
+              </p>
+            </div>
           </div>
 
           {/* User info preview */}

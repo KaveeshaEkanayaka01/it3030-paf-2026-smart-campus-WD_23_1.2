@@ -36,7 +36,6 @@ export default function Navbar() {
     navigate(isAdmin ? '/admin-dashboard' : '/dashboard');
   };
 
-  // 🔥 Shortened labels so everything fits perfectly
   const userLinks = [
     { to: '/dashboard', icon: <LayoutDashboard size={16} />, label: 'Dashboard' },
     { to: '/create', icon: <PlusCircle size={16} />, label: 'Booking' },
@@ -71,112 +70,119 @@ export default function Navbar() {
     return userLinks;
   }, [isAdmin, isTechnician]);
 
+  const dashboardTab = new URLSearchParams(location.search).get('tab');
+
+  const isLinkActive = (path) => {
+    if (path === '/admin-dashboard') {
+      return location.pathname === '/admin-dashboard' && dashboardTab !== 'bookings';
+    }
+
+    if (path === '/admin-dashboard?tab=bookings') {
+      return location.pathname === '/admin-dashboard' && dashboardTab === 'bookings';
+    }
+
+    return location.pathname === path;
+  };
+
+  const userLabel = currentUser?.userName || currentUser?.email || 'Account';
+  const roleLabel = isAdmin ? 'Admin' : isTechnician ? 'Technician' : 'User';
+
   return (
     <nav
       className="sticky top-0 z-50"
       style={{
-        background: 'rgba(255,255,255,0.88)',
-        backdropFilter: 'blur(12px)',
-        borderBottom: '1px solid var(--border)',
+        background: 'rgba(255,255,255,0.9)',
+        backdropFilter: 'blur(16px)',
+        borderBottom: '1px solid rgba(148, 163, 184, 0.22)',
       }}
     >
-      <div className="max-w-7xl mx-auto px-4">
-        <div className="flex items-center justify-between h-16 gap-3">
-
-          {/* Logo */}
+      <div className="max-w-7xl mx-auto px-4 py-3">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <Link
             to={isAdmin ? '/admin-dashboard' : '/dashboard'}
-            className="flex items-center gap-2 shrink-0"
+            className="flex items-center justify-between gap-3 shrink-0"
           >
-            <div
-              className="w-8 h-8 rounded-xl flex items-center justify-center"
-              style={{
-                background: 'linear-gradient(135deg, var(--accent-start), var(--accent-end))',
-              }}
-            >
-              <CalendarDays size={16} className="text-white" />
+            <div className="flex items-center gap-2">
+              <div
+                className="w-9 h-9 rounded-xl flex items-center justify-center shadow-sm"
+                style={{
+                  background: 'linear-gradient(135deg, var(--accent-start), var(--accent-end))',
+                }}
+              >
+                <CalendarDays size={16} className="text-white" />
+              </div>
+              <div>
+                <p className="font-bold text-sm leading-tight" style={{ color: 'var(--text-primary)' }}>
+                  SmartCampus
+                </p>
+                <p className="text-[11px] leading-tight" style={{ color: 'var(--text-secondary)' }}>
+                  {roleLabel} workspace
+                </p>
+              </div>
             </div>
-            <span className="font-bold text-sm whitespace-nowrap" style={{ color: 'var(--text-primary)' }}>
-              SmartCampus
-            </span>
           </Link>
 
-          {/* 🔥 Center Links (fits in one row) */}
-          <div className="flex items-center justify-center gap-1 flex-1">
+          <div
+            className="flex items-center gap-1 p-1 rounded-2xl overflow-x-auto custom-scrollbar lg:flex-1 lg:justify-center"
+            style={{
+              background: 'rgba(255,255,255,0.78)',
+              border: '1px solid rgba(148, 163, 184, 0.22)',
+            }}
+          >
             {links.map((link) => {
-              const dashboardTab = new URLSearchParams(location.search).get('tab');
-              const active =
-                link.to === '/admin-dashboard'
-                  ? location.pathname === '/admin-dashboard' && dashboardTab !== 'bookings'
-                  : link.to === '/admin-dashboard?tab=bookings'
-                    ? location.pathname === '/admin-dashboard' && dashboardTab === 'bookings'
-                    : location.pathname === link.to;
+              const active = isLinkActive(link.to);
 
               return (
                 <Link
                   key={link.to}
                   to={link.to}
-                  className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs font-medium transition-all"
+                  className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold transition-all whitespace-nowrap"
                   style={{
-                    background: active ? 'rgba(249,115,22,0.1)' : 'transparent',
-                    color: active ? 'var(--primary)' : 'var(--text-secondary)',
+                    background: active ? 'linear-gradient(135deg, rgba(249,115,22,0.18), rgba(251,146,60,0.08))' : 'transparent',
+                    color: active ? 'var(--primary-hover)' : 'var(--text-secondary)',
                     border: active
-                      ? '1px solid rgba(249,115,22,0.2)'
+                      ? '1px solid rgba(249,115,22,0.28)'
                       : '1px solid transparent',
                   }}
                 >
                   {link.icon}
-                  {link.label}
+                  <span className="hidden sm:inline">{link.label}</span>
                 </Link>
               );
             })}
           </div>
 
-          {/* Right side */}
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center justify-between gap-2 shrink-0 lg:justify-end">
             <NotificationBell />
 
             <button
               onClick={goToDashboard}
-              className="flex items-center gap-2 px-2 py-1 rounded-lg transition-all"
+              className="flex items-center gap-2 px-3 py-2 rounded-xl transition-all"
               style={{
-                background: 'rgba(255,255,255,0.95)',
-                border: '1px solid var(--border)',
-                color: 'var(--text-secondary)',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = 'var(--surface-hover)';
-                e.currentTarget.style.borderColor = 'rgba(249,115,22,0.22)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'rgba(255,255,255,0.95)';
-                e.currentTarget.style.borderColor = 'var(--border)';
+                background: 'rgba(255,255,255,0.86)',
+                border: '1px solid rgba(148, 163, 184, 0.28)',
+                color: 'var(--text-primary)',
               }}
             >
               <User size={14} />
-              <span className="text-xs hidden sm:inline">
-                {currentUser?.userName}
+              <span className="text-xs hidden sm:inline max-w-36 truncate">
+                {userLabel}
               </span>
             </button>
 
             <button
               onClick={handleLogout}
-              className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs transition-all"
+              className="flex items-center gap-1 px-3 py-2 rounded-xl text-xs font-semibold transition-all"
               style={{
-                background: 'rgba(249,115,22,0.1)',
-                color: 'var(--primary)',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = 'rgba(249,115,22,0.16)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'rgba(249,115,22,0.1)';
+                background: 'linear-gradient(135deg, rgba(249,115,22,0.16), rgba(234,88,12,0.12))',
+                color: 'var(--primary-hover)',
+                border: '1px solid rgba(249,115,22,0.22)',
               }}
             >
               <LogOut size={14} />
+              <span className="hidden md:inline">Logout</span>
             </button>
           </div>
-
         </div>
       </div>
     </nav>
