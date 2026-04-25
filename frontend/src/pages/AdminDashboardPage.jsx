@@ -1,7 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { bookingApi } from '../api/bookingApi';
 import { useUser } from '../context/UserContext';
+import ResourcePage from './ResourcePage';
+import { AdminPanelPage } from './adminpanel';
+import UserManagement from './UserManagement';
+import ResourceCalendarPage from './ResourceCalendarPage';
 import StatusBadge from '../components/StatusBadge';
 import RejectionModal from '../components/RejectionModal';
 import toast from 'react-hot-toast';
@@ -33,13 +37,14 @@ import {
   UserCheck,
   Timer,
   AlertTriangle,
+  BookOpen,
+  Package,
 } from 'lucide-react';
 
 const FILTER_OPTIONS = ['ALL', 'PENDING', 'APPROVED', 'REJECTED', 'CANCELLED'];
 
 export default function AdminDashboardPage() {
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
   const { currentUser } = useUser();
   const [bookings, setBookings] = useState([]);
   const [stats, setStats] = useState({});
@@ -49,16 +54,11 @@ export default function AdminDashboardPage() {
   const [sortField, setSortField] = useState('createdAt');
   const [sortDir, setSortDir] = useState('desc');
   const [rejectModal, setRejectModal] = useState(null); // booking to reject
-  const activeTab = searchParams.get('tab') === 'bookings' ? 'bookings' : 'overview';
+  const [activePanel, setActivePanel] = useState('overview');
 
-  const setActiveTab = (tab) => {
-    const next = new URLSearchParams(searchParams);
-    if (tab === 'bookings') {
-      next.set('tab', 'bookings');
-    } else {
-      next.delete('tab');
-    }
-    setSearchParams(next);
+  const switchPanel = (panel) => {
+    setActivePanel(panel);
+    if (panel === 'bookings') setFilter('ALL');
   };
 
   const fetchData = useCallback(async () => {
@@ -200,6 +200,15 @@ export default function AdminDashboardPage() {
   const approvalRate = totalCount ? Math.round((approvedCount / totalCount) * 100) : 0;
   const pendingRate = totalCount ? Math.round(((stats.PENDING || 0) / totalCount) * 100) : 0;
 
+  const sidebarLinks = [
+    { label: 'Overview', icon: <LayoutDashboard size={16} />, value: 'overview', active: activePanel === 'overview' },
+    { label: 'Bookings', icon: <BookOpen size={16} />, value: 'bookings', active: activePanel === 'bookings' },
+    { label: 'Resources', icon: <Package size={16} />, value: 'resources', active: activePanel === 'resources' },
+    { label: 'Tickets', icon: <ClipboardList size={16} />, value: 'tickets', active: activePanel === 'tickets' },
+    { label: 'Users', icon: <Users size={16} />, value: 'users', active: activePanel === 'users' },
+    { label: 'Calendar', icon: <CalendarRange size={16} />, value: 'calendar', active: activePanel === 'calendar' },
+  ];
+
   const peakHour = (() => {
     const bucket = new Array(24).fill(0);
     bookings.forEach((booking) => {
@@ -277,21 +286,21 @@ export default function AdminDashboardPage() {
       detail: 'Moderate approval flow, cancellations, and policy outcomes for all booking requests.',
       icon: <ShieldCheck size={18} />,
       cta: 'Open Bookings',
-      onClick: () => setActiveTab('bookings'),
+      onClick: () => switchPanel('bookings'),
     },
     {
       title: 'Ticket Operations',
       detail: 'Assign technicians, update lifecycle stages, and control resolution quality.',
       icon: <ClipboardList size={18} />,
       cta: 'Open Ticket Admin',
-      onClick: () => navigate('/admin'),
+      onClick: () => switchPanel('tickets'),
     },
     {
       title: 'Access Management',
       detail: 'Manage account roles and enforce least-privilege access patterns.',
       icon: <UserCog size={18} />,
       cta: 'Open User Roles',
-      onClick: () => navigate('/users'),
+      onClick: () => switchPanel('users'),
     },
   ];
 
@@ -301,11 +310,46 @@ export default function AdminDashboardPage() {
         <div className="pointer-events-none absolute -left-24 -top-14 h-64 w-64 rounded-full blur-3xl" style={{ background: 'rgba(249,115,22,0.12)' }} />
         <div className="pointer-events-none absolute right-0 top-28 h-64 w-64 rounded-full blur-3xl" style={{ background: 'rgba(253,186,116,0.16)' }} />
 
-        
+        <div className="grid gap-6 xl:grid-cols-[280px_minmax(0,1fr)]">
+          <aside className="rounded-3xl border p-5 xl:sticky xl:top-24" style={{ borderColor: 'rgba(249,115,22,0.18)', background: 'linear-gradient(180deg, rgba(249,115,22,0.14), rgba(255,255,255,0.96))' }}>
+            <div className="mb-6 space-y-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.24em]" style={{ color: 'var(--primary)' }}>
+                Admin Console
+              </p>
+              <h1 className="text-2xl font-black" style={{ color: 'var(--text-primary)' }}>
+                Admin Dashboard
+              </h1>
+              <p className="text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+                Manage bookings, tickets, users, and campus resources from one workspace.
+              </p>
+            </div>
 
-        {activeTab === 'overview' && (
-          <>
-            <section className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            <div className="space-y-2">
+              {sidebarLinks.map((link) => (
+                <button
+                  key={link.label}
+                  onClick={() => switchPanel(link.value)}
+                  className="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold text-left transition-all"
+                  style={{
+                    background: link.active ? 'rgba(249,115,22,0.12)' : 'transparent',
+                    color: link.active ? 'var(--primary)' : 'var(--text-primary)',
+                    border: link.active ? '1px solid rgba(249,115,22,0.2)' : '1px solid transparent',
+                  }}
+                >
+                  <span className="flex h-9 w-9 items-center justify-center rounded-2xl" style={{ background: link.active ? 'rgba(249,115,22,0.12)' : 'rgba(15,23,42,0.04)', color: link.active ? 'var(--primary)' : 'var(--text-secondary)' }}>
+                    {link.icon}
+                  </span>
+                  <span>{link.label}</span>
+                </button>
+              ))}
+            </div>
+
+          </aside>
+
+          <main>
+            {activePanel === 'overview' && (
+              <>
+                <section className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
               <article className="rounded-2xl border p-4" style={{ borderColor: 'var(--border)', background: 'rgba(255,255,255,0.95)' }}>
                 <p className="inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>
                   <Activity size={12} style={{ color: 'var(--primary)' }} /> Active Right Now
@@ -449,7 +493,28 @@ export default function AdminDashboardPage() {
           </>
         )}
 
-        {activeTab === 'bookings' && (
+        {activePanel === 'resources' && (
+          <section className="mt-6">
+            <ResourcePage />
+          </section>
+        )}
+        {activePanel === 'tickets' && (
+          <section className="mt-6">
+            <AdminPanelPage />
+          </section>
+        )}
+        {activePanel === 'users' && (
+          <section className="mt-6">
+            <UserManagement />
+          </section>
+        )}
+        {activePanel === 'calendar' && (
+          <section className="mt-6">
+            <ResourceCalendarPage />
+          </section>
+        )}
+
+        {activePanel === 'bookings' && (
           <section className="mt-6 grid gap-6 xl:grid-cols-[1fr_320px]">
           <div className="rounded-3xl border p-4 md:p-5" style={{ borderColor: 'var(--border)', background: 'rgba(255,255,255,0.94)' }}>
             <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
@@ -484,7 +549,7 @@ export default function AdminDashboardPage() {
 
             {loading ? (
               <div className="flex items-center justify-center py-20">
-                <div className="h-8 w-8 animate-spin rounded-full border-2 border-[var(--primary)] border-t-transparent" />
+                <div className="h-8 w-8 animate-spin rounded-full border-2 border-t-transparent" style={{ borderColor: 'var(--primary)' }} />
               </div>
             ) : (
               <div className="overflow-hidden rounded-2xl border" style={{ borderColor: 'var(--border)' }}>
@@ -602,46 +667,10 @@ export default function AdminDashboardPage() {
             )}
           </div>
 
-          <aside className="space-y-4">
-            <article className="rounded-2xl border p-5" style={{ borderColor: 'var(--border)', background: 'rgba(255,255,255,0.94)' }}>
-              <p className="inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-wider" style={{ color: 'var(--primary)' }}>
-                <TrendingUp size={12} /> Queue Snapshot
-              </p>
-              <div className="mt-4 space-y-3">
-                <div className="rounded-xl border p-3" style={{ borderColor: 'var(--border)', background: 'var(--bg-section)' }}>
-                  <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>Pending Requests</p>
-                  <p className="mt-1 text-2xl font-black" style={{ color: 'var(--primary)' }}>{pendingBookings.length}</p>
-                </div>
-                <div className="rounded-xl border p-3" style={{ borderColor: 'var(--border)', background: 'var(--bg-section)' }}>
-                  <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>Approval Rate</p>
-                  <p className="mt-1 text-2xl font-black" style={{ color: 'var(--status-approved)' }}>
-                    {stats.TOTAL ? `${Math.round(((stats.APPROVED || 0) / stats.TOTAL) * 100)}%` : '0%'}
-                  </p>
-                </div>
-              </div>
-            </article>
-
-            <article className="rounded-2xl border p-5" style={{ borderColor: 'var(--border)', background: 'rgba(255,255,255,0.94)' }}>
-              <p className="inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-wider" style={{ color: 'var(--primary)' }}>
-                <CalendarRange size={12} /> Pending Review List
-              </p>
-              <div className="mt-4 space-y-2">
-                {pendingBookings.slice(0, 5).map((booking) => (
-                  <div key={booking.id} className="rounded-xl border p-3" style={{ borderColor: 'var(--border)', background: 'var(--bg-section)' }}>
-                    <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{booking.resourceName}</p>
-                    <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>{booking.userName}</p>
-                  </div>
-                ))}
-                {pendingBookings.length === 0 && (
-                  <p className="rounded-xl border p-3 text-xs" style={{ borderColor: 'var(--border)', background: 'var(--bg-section)', color: 'var(--text-secondary)' }}>
-                    No pending requests in queue.
-                  </p>
-                )}
-              </div>
-            </article>
-          </aside>
           </section>
         )}
+          </main>
+        </div>
       </div>
 
       {rejectModal && (

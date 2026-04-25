@@ -43,6 +43,14 @@ export default function AppRoutes() {
 
       {/* Protected Routes with Navbar */}
       <Route
+        path="/admin-dashboard"
+        element={
+          <ProtectedRoute requiredRole="ROLE_ADMIN">
+            <AdminDashboardPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
         path="/*"
         element={
           <ProtectedRoute>
@@ -73,14 +81,6 @@ export default function AppRoutes() {
                   <Route path="/create" element={<CreateBookingPage />} />
                   <Route path="/create-booking" element={<CreateBookingPage />} />
                   <Route path="/my-bookings" element={<MyBookingsPage />} />
-                  <Route
-                    path="/admin-dashboard"
-                    element={
-                      <ProtectedRoute requiredRole="ROLE_ADMIN">
-                        <AdminDashboardPage />
-                      </ProtectedRoute>
-                    }
-                  />
                   <Route path="/calendar" element={<ResourceCalendarPage />} />
 
                   {/* Resource Route */}

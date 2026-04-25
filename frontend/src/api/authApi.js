@@ -9,4 +9,5 @@ export const authApi = {
   getUserById: (id) => api.get(`/users/${id}`),
   updateUserRole: (userId, role, action) =>
     api.put(`/users/${userId}/role`, { role, action }),
+  deleteUser: (userId) => api.delete(`/users/${userId}`),
 };

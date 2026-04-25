@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
+import { useAuth } from '../context/AuthContext';
 import { authApi } from '../api/authApi';
-import { Users, Shield, Wrench, User as UserIcon, RefreshCw, Search, Settings2, UserCheck } from 'lucide-react';
+import { Users, Shield, Wrench, User as UserIcon, RefreshCw, Search, Settings2, UserCheck, Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function UserManagement() {
@@ -8,6 +9,8 @@ export default function UserManagement() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState('ALL');
+
+  const { user: currentUser, isAdmin } = useAuth();
 
   const loadUsers = async () => {
     setLoading(true);
@@ -31,6 +34,29 @@ export default function UserManagement() {
       loadUsers(); // Refresh list
     } catch (err) {
       toast.error(err.response?.data?.message || "Role update failed");
+    }
+  };
+
+  const handleDeleteUser = async (userId) => {
+    if (!isAdmin()) {
+      toast.error('Only admins can delete users.');
+      return;
+    }
+
+    if (currentUser?.id === userId) {
+      toast.error('You cannot delete your own account.');
+      return;
+    }
+
+    const confirmDelete = window.confirm('Delete this user permanently? This action cannot be undone.');
+    if (!confirmDelete) return;
+
+    try {
+      await authApi.deleteUser(userId);
+      toast.success('User deleted successfully');
+      loadUsers();
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to delete user');
     }
   };
 
@@ -197,6 +223,21 @@ export default function UserManagement() {
                           onClick={() => handleRoleToggle(user.id, 'ROLE_USER', user.roles?.includes('ROLE_USER'))}
                           label="User"
                         />
+                        {isAdmin() && (
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteUser(user.id)}
+                            disabled={currentUser?.id === user.id}
+                            className="inline-flex items-center gap-1 rounded-xl border px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider transition-all disabled:cursor-not-allowed disabled:opacity-50"
+                            style={{
+                              borderColor: 'rgba(239,68,68,0.3)',
+                              background: currentUser?.id === user.id ? 'rgba(248,113,113,0.12)' : 'rgba(239,68,68,0.08)',
+                              color: 'var(--status-rejected)',
+                            }}
+                          >
+                            <Trash2 size={12} /> Delete
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>

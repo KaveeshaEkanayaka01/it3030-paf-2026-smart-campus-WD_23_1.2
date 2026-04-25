@@ -39,6 +39,7 @@ export const AdminPanelPage = () => {
   const [selectedStatus, setSelectedStatus] = useState('IN_PROGRESS');
   const [resolutionNotes, setResolutionNotes] = useState('');
   const [rejectionReason, setRejectionReason] = useState('');
+  const [statusFilter, setStatusFilter] = useState('ALL');
   const [userDisplayMap, setUserDisplayMap] = useState({});
   const { user } = useAuth();
 
@@ -239,12 +240,16 @@ export const AdminPanelPage = () => {
 
   const filteredTickets = tickets.filter((ticket) => {
     const needle = search.toLowerCase();
+    const statusMatches = statusFilter === 'ALL' || String(ticket.status || '').toUpperCase() === statusFilter;
     return (
-      String(ticket.category || '').toLowerCase().includes(needle) ||
-      String(ticket.location || '').toLowerCase().includes(needle) ||
-      String(ticket.description || '').toLowerCase().includes(needle) ||
-      String(ticket.createdBy || '').toLowerCase().includes(needle) ||
-      String(getCreatedByDisplay(ticket.createdBy)).toLowerCase().includes(needle)
+      statusMatches &&
+      (
+        String(ticket.category || '').toLowerCase().includes(needle) ||
+        String(ticket.location || '').toLowerCase().includes(needle) ||
+        String(ticket.description || '').toLowerCase().includes(needle) ||
+        String(ticket.createdBy || '').toLowerCase().includes(needle) ||
+        String(getCreatedByDisplay(ticket.createdBy)).toLowerCase().includes(needle)
+      )
     );
   });
 
@@ -313,18 +318,53 @@ export const AdminPanelPage = () => {
 
       <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[360px_1fr]">
         <div className="flex h-[75vh] flex-col rounded-3xl border p-5" style={{ borderColor: 'var(--border)', background: 'rgba(255,255,255,0.94)' }}>
-          <div className="mb-5 flex items-center gap-3 border-b pb-4" style={{ borderColor: 'var(--border)' }}>
-            <div className="rounded-lg p-2" style={{ background: 'var(--bg-section)' }}>
-              <Search size={18} style={{ color: 'var(--text-secondary)' }} />
+          <div className="mb-5 border-b pb-4" style={{ borderColor: 'var(--border)' }}>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+              <div className="flex items-center gap-3 rounded-3xl bg-[rgba(15,23,42,0.04)] px-4 py-3">
+                <Search size={18} style={{ color: 'var(--text-secondary)' }} />
+                <input
+                  type="text"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Search tickets by keyword, location, or user"
+                  className="w-full bg-transparent text-sm outline-none"
+                  style={{ color: 'var(--text-primary)' }}
+                />
+              </div>
+              <div className="ml-auto flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => setSelectedTicketId('')}
+                  className="rounded-full border px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] transition-all hover:border-orange-300"
+                  style={{ borderColor: 'var(--border)', color: 'var(--text-secondary)' }}
+                >
+                  Clear selection
+                </button>
+                <button
+                  type="button"
+                  onClick={refreshSelected}
+                  className="rounded-full bg-[rgba(249,115,22,0.12)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] transition-all hover:bg-[rgba(249,115,22,0.18)]"
+                  style={{ color: 'var(--primary)' }}
+                >
+                  Refresh list
+                </button>
+              </div>
             </div>
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search tickets"
-              className="w-full bg-transparent text-sm outline-none"
-              style={{ color: 'var(--text-primary)' }}
-            />
+            <div className="mt-4 flex flex-wrap gap-2">
+              {['ALL', 'OPEN', 'IN_PROGRESS', 'RESOLVED', 'REJECTED'].map((status) => (
+                <button
+                  key={status}
+                  type="button"
+                  onClick={() => setStatusFilter(status)}
+                  className={`rounded-full border px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] transition-all ${
+                    statusFilter === status ? 'border-orange-300 bg-[rgba(249,115,22,0.12)] text-(--primary)' : 'text-(--text-secondary)'
+                  }`}
+                  style={{ borderColor: statusFilter === status ? 'rgba(249,115,22,0.5)' : 'var(--border)', background: 'transparent' }}
+                >
+                  {status.replace('_', ' ')}
+                </button>
+              ))}
+            </div>
           </div>
 
           {loading ? (
@@ -340,34 +380,35 @@ export const AdminPanelPage = () => {
                   key={ticket.id}
                   type="button"
                   onClick={() => setSelectedTicketId(ticket.id)}
-                  className={`w-full text-left transition-all duration-300 p-5 rounded-2xl ${
-                    selectedTicketId === ticket.id
-                    ? 'border shadow-sm'
-                    : 'border'
+                  className={`group w-full text-left transition-all duration-300 rounded-3xl border p-5 shadow-sm hover:-translate-y-0.5 ${
+                    selectedTicketId === ticket.id ? 'border-orange-300 bg-[rgba(249,115,22,0.08)]' : 'border-[rgba(15,23,42,0.08)] bg-white'
                   }`}
-                  style={
-                    selectedTicketId === ticket.id
-                      ? { borderColor: 'rgba(249,115,22,0.32)', background: 'rgba(249,115,22,0.09)' }
-                      : { borderColor: 'var(--border)', background: 'var(--bg-section)' }
-                  }
                 >
-                  <div className="mb-3 flex items-start justify-between gap-3">
-                    <div>
-                      <p className="text-[10px] font-black uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>{ticket.category || 'Ticket'}</p>
-                      <h3 className="mt-1.5 line-clamp-1 text-sm font-black" style={{ color: 'var(--text-primary)' }}>{ticket.location || 'No location'}</h3>
+                  <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                    <div className="min-w-0">
+                      <p className="text-[10px] font-black uppercase tracking-[0.24em]" style={{ color: 'var(--text-secondary)' }}>{ticket.category || 'Ticket'}</p>
+                      <h3 className="mt-2 text-sm font-black leading-6 text-(--text-primary) line-clamp-2">{ticket.location || 'No location provided'}</h3>
                     </div>
                     <TicketStatusBadge status={ticket.status} />
                   </div>
-                  <p className="line-clamp-2 text-xs leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{ticket.description || 'No description provided.'}</p>
-                  <div className="mt-4 flex items-center justify-between border-t pt-3 text-[10px] font-semibold uppercase tracking-wider" style={{ borderColor: 'var(--border)', color: 'var(--text-secondary)' }}>
-                    <span className="flex items-center gap-1"><Shield size={10} /> {getCreatedByDisplay(ticket.createdBy)}</span>
-                    <span className="truncate max-w-[120px]">{ticket.assignedTechnician ? (userDisplayMap[ticket.assignedTechnician] || ticket.assignedTechnician) : 'Unassigned'}</span>
+
+                  <p className="mt-4 text-sm leading-6 text-(--text-secondary) line-clamp-3">{ticket.description || 'No description provided.'}</p>
+
+                  <div className="mt-5 grid gap-3 sm:grid-cols-2 text-[11px] uppercase tracking-[0.18em] text-(--text-secondary)">
+                    <div className="rounded-2xl bg-[rgba(15,23,42,0.04)] p-3">
+                      Created by
+                      <p className="mt-2 font-semibold text-(--text-primary) truncate">{getCreatedByDisplay(ticket.createdBy)}</p>
+                    </div>
+                    <div className="rounded-2xl bg-[rgba(15,23,42,0.04)] p-3">
+                      Technician
+                      <p className="mt-2 font-semibold text-(--text-primary) truncate">{ticket.assignedTechnician ? (userDisplayMap[ticket.assignedTechnician] || ticket.assignedTechnician) : 'Unassigned'}</p>
+                    </div>
                   </div>
                 </button>
               ))}
               {filteredTickets.length === 0 && (
-                <div className="rounded-2xl border border-dashed p-8 text-center" style={{ borderColor: 'var(--border)', background: 'var(--bg-section)' }}>
-                   <p className="text-sm font-semibold" style={{ color: 'var(--text-secondary)' }}>No tickets match your search.</p>
+                <div className="rounded-3xl border border-dashed p-8 text-center" style={{ borderColor: 'var(--border)', background: 'var(--bg-section)' }}>
+                  <p className="text-sm font-semibold" style={{ color: 'var(--text-secondary)' }}>No tickets match your search.</p>
                 </div>
               )}
             </div>
@@ -388,37 +429,41 @@ export const AdminPanelPage = () => {
                 <div className="flex flex-col gap-5 border-b pb-6 md:flex-row md:items-start md:justify-between" style={{ borderColor: 'var(--border)' }}>
                   <div>
                     <p className="mb-1 text-[11px] font-black uppercase tracking-wider" style={{ color: 'var(--primary)' }}>Selected Ticket</p>
-                    <h2 className="text-2xl font-black uppercase tracking-tight" style={{ color: 'var(--text-primary)' }}>
+                    <h2 className="text-3xl font-black tracking-tight" style={{ color: 'var(--text-primary)' }}>
                       {selectedTicket.category || 'Ticket'}
                     </h2>
-                    <p className="mt-2 text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>{selectedTicket.location || 'No location provided'}</p>
+                    <p className="mt-3 text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>{selectedTicket.location || 'No location provided'}</p>
                   </div>
-                  <TicketStatusBadge status={selectedTicket.status} />
+                  <div className="flex flex-col items-start gap-3 sm:items-end">
+                    <TicketStatusBadge status={selectedTicket.status} />
+                    <span className="rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em]" style={{ borderColor: 'var(--border)', color: 'var(--text-secondary)', background: 'var(--bg-section)' }}>
+                      {selectedTicket.priority ? selectedTicket.priority.replace('_', ' ') : 'Priority N/A'}
+                    </span>
+                  </div>
                 </div>
 
                 <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                  <div className="rounded-xl border p-4" style={{ borderColor: 'var(--border)', background: 'var(--bg-section)' }}>
+                  <div className="rounded-3xl border p-5" style={{ borderColor: 'var(--border)', background: 'var(--bg-section)' }}>
                     <p className="text-[10px] font-black uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>Created By</p>
-                    <p className="mt-2 truncate text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{getCreatedByDisplay(selectedTicket.createdBy)}</p>
+                    <p className="mt-3 text-sm font-semibold text-(--text-primary) truncate">{getCreatedByDisplay(selectedTicket.createdBy)}</p>
                   </div>
-                  <div className="rounded-xl border p-4" style={{ borderColor: 'var(--border)', background: 'var(--bg-section)' }}>
-                    <p className="text-[10px] font-black uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>Priority</p>
-                    <div className="mt-2">
-                      <PriorityBadge priority={selectedTicket.priority} className="text-[11px]" />
-                    </div>
-                  </div>
-                  <div className="rounded-xl border p-4" style={{ borderColor: 'var(--border)', background: 'var(--bg-section)' }}>
-                    <p className="text-[10px] font-black uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>Preferred Contact</p>
-                    <p className="mt-2 truncate text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{selectedTicket.preferredContact || 'N/A'}</p>
-                  </div>
-                  <div className="rounded-xl border p-4" style={{ borderColor: 'var(--border)', background: 'var(--bg-section)' }}>
+                  <div className="rounded-3xl border p-5" style={{ borderColor: 'var(--border)', background: 'var(--bg-section)' }}>
                     <p className="text-[10px] font-black uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>Technician</p>
-                    <p className="mt-2 truncate text-sm font-semibold" style={{ color: 'var(--primary)' }}>{selectedTicket.assignedTechnician ? (userDisplayMap[selectedTicket.assignedTechnician] || selectedTicket.assignedTechnician) : 'Unassigned'}</p>
+                    <p className="mt-3 text-sm font-semibold text-(--primary) truncate">{selectedTicket.assignedTechnician ? (userDisplayMap[selectedTicket.assignedTechnician] || selectedTicket.assignedTechnician) : 'Unassigned'}</p>
+                  </div>
+                  <div className="rounded-3xl border p-5" style={{ borderColor: 'var(--border)', background: 'var(--bg-section)' }}>
+                    <p className="text-[10px] font-black uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>Contact</p>
+                    <p className="mt-3 text-sm font-semibold text-(--text-primary) truncate">{selectedTicket.preferredContact || 'N/A'}</p>
+                  </div>
+                  <div className="rounded-3xl border p-5" style={{ borderColor: 'var(--border)', background: 'var(--bg-section)' }}>
+                    <p className="text-[10px] font-black uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>Last Updated</p>
+                    <p className="mt-3 text-sm font-semibold text-(--text-primary) truncate">{selectedTicket.updatedAt ? new Date(selectedTicket.updatedAt).toLocaleString() : 'Unknown'}</p>
                   </div>
                 </div>
 
-                <div className="mt-6 rounded-2xl border p-5" style={{ borderColor: 'var(--border)', background: 'var(--bg-section)' }}>
-                   <p className="text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{selectedTicket.description || 'No description provided.'}</p>
+                <div className="mt-6 rounded-3xl border p-6" style={{ borderColor: 'var(--border)', background: 'var(--bg-section)' }}>
+                  <p className="text-[11px] font-black uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>Issue Summary</p>
+                  <p className="mt-4 text-sm leading-7" style={{ color: 'var(--text-secondary)' }}>{selectedTicket.description || 'No description provided.'}</p>
                 </div>
               </div>
 
@@ -433,7 +478,7 @@ export const AdminPanelPage = () => {
                       value={technician}
                       onChange={(e) => setTechnician(e.target.value)}
                       disabled={!canManage || saving}
-                      className="w-full cursor-pointer rounded-xl border px-4 py-3 text-sm outline-none transition-all disabled:opacity-50"
+                      className="w-full cursor-pointer rounded-2xl border px-4 py-3 text-sm outline-none transition-all disabled:opacity-50"
                       style={{ borderColor: 'var(--border)', background: 'white', color: 'var(--text-primary)' }}
                     >
                       <option value="">Select technician</option>
@@ -454,7 +499,7 @@ export const AdminPanelPage = () => {
                       type="button"
                       onClick={handleAssign}
                       disabled={!canManage || saving || !technician.trim() || technicianOptions.length === 0}
-                      className="w-full rounded-xl px-4 py-3 text-xs font-black uppercase tracking-wider text-white transition-all hover:-translate-y-0.5 disabled:opacity-50"
+                      className="w-full rounded-2xl px-4 py-3 text-xs font-black uppercase tracking-wider text-white transition-all hover:-translate-y-0.5 disabled:opacity-50"
                       style={{ background: 'linear-gradient(135deg, #10b981, #0f766e)' }}
                     >
                       {saving ? 'Saving...' : 'Assign Technician'}
@@ -468,15 +513,15 @@ export const AdminPanelPage = () => {
                     Update Status
                   </h3>
                   <div className="space-y-4">
-                    <p className="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-[11px] font-semibold" style={{ color: 'var(--text-secondary)', background: 'var(--bg-section)' }}>
+                    <p className="inline-flex items-center gap-2 rounded-2xl px-3 py-2 text-[11px] font-semibold" style={{ color: 'var(--text-secondary)', background: 'var(--bg-section)' }}>
                       <AlertTriangle size={12} style={{ color: 'var(--status-pending)' }} />
-                      Allows: {getAllowedStatusOptions(selectedTicket.status, currentRole).join(', ') || 'none'}
+                      Allowed transitions: {getAllowedStatusOptions(selectedTicket.status, currentRole).join(', ') || 'none'}
                     </p>
                     <select
                       value={selectedStatus}
                       onChange={(e) => setSelectedStatus(e.target.value)}
                       disabled={!canManage || saving}
-                      className="w-full cursor-pointer rounded-xl border px-4 py-3 text-xs font-black uppercase tracking-wider outline-none disabled:opacity-50"
+                      className="w-full cursor-pointer rounded-2xl border px-4 py-3 text-sm font-black uppercase tracking-wider outline-none disabled:opacity-50"
                       style={{ borderColor: 'var(--border)', background: 'white', color: 'var(--text-primary)' }}
                     >
                       {getAllowedStatusOptions(selectedTicket.status, currentRole).map((status) => (
@@ -491,7 +536,7 @@ export const AdminPanelPage = () => {
                       placeholder="Resolution notes"
                       disabled={!canManage || saving}
                       rows={3}
-                      className="w-full resize-none rounded-xl border px-4 py-3 text-sm outline-none disabled:opacity-50"
+                      className="w-full resize-none rounded-2xl border px-4 py-3 text-sm outline-none disabled:opacity-50"
                       style={{ borderColor: 'var(--border)', background: 'white', color: 'var(--text-primary)' }}
                     />
                     {selectedStatus === 'REJECTED' && (
@@ -501,7 +546,7 @@ export const AdminPanelPage = () => {
                         placeholder="Rejection reason"
                         disabled={!canManage || saving}
                         rows={3}
-                        className="w-full resize-none rounded-xl border px-4 py-3 text-sm outline-none disabled:opacity-50"
+                        className="w-full resize-none rounded-2xl border px-4 py-3 text-sm outline-none disabled:opacity-50"
                         style={{ borderColor: 'rgba(239,68,68,0.38)', background: 'rgba(239,68,68,0.08)', color: '#dc2626' }}
                       />
                     )}
@@ -509,7 +554,7 @@ export const AdminPanelPage = () => {
                       type="button"
                       onClick={handleStatusUpdate}
                       disabled={!canManage || saving || !selectedStatus}
-                      className="w-full rounded-xl px-4 py-3 text-xs font-black uppercase tracking-wider text-white transition-all hover:-translate-y-0.5 disabled:opacity-50"
+                      className="w-full rounded-2xl px-4 py-3 text-xs font-black uppercase tracking-wider text-white transition-all hover:-translate-y-0.5 disabled:opacity-50"
                       style={{ background: 'linear-gradient(135deg, var(--primary), var(--primary-hover))' }}
                     >
                       {saving ? 'Updating...' : 'Update Status'}
@@ -530,7 +575,7 @@ export const AdminPanelPage = () => {
                   type="button"
                   onClick={handleDeleteTicket}
                   disabled={currentRole !== 'ADMIN' || saving}
-                  className="w-full rounded-xl px-8 py-3 text-xs font-black uppercase tracking-wider text-white transition-all hover:-translate-y-0.5 disabled:opacity-50 sm:w-auto"
+                  className="w-full rounded-2xl px-8 py-3 text-xs font-black uppercase tracking-wider text-white transition-all hover:-translate-y-0.5 disabled:opacity-50 sm:w-auto"
                   style={{ background: 'linear-gradient(135deg, #ef4444, #dc2626)' }}
                 >
                   {saving ? 'Deleting...' : 'Delete Ticket'}
