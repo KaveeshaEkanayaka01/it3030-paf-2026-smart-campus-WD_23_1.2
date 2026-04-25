@@ -348,21 +348,6 @@ export const AdminPanelPage = () => {
                 </button>
               </div>
             </div>
-            <div className="mt-4 flex flex-wrap gap-2">
-              {['ALL', 'OPEN', 'IN_PROGRESS', 'RESOLVED', 'REJECTED'].map((status) => (
-                <button
-                  key={status}
-                  type="button"
-                  onClick={() => setStatusFilter(status)}
-                  className={`rounded-full border px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] transition-all ${
-                    statusFilter === status ? 'border-orange-300 bg-[rgba(249,115,22,0.12)] text-primary' : 'text-slate-500'
-                  }`}
-                  style={{ borderColor: statusFilter === status ? 'var(--primary)' : 'var(--border)', background: 'transparent', color: statusFilter === status ? 'var(--primary)' : 'var(--text-secondary)' }}
-                >
-                  {status.replace('_', ' ')}
-                </button>
-              ))}
-            </div>
           </div>
 
           {loading ? (

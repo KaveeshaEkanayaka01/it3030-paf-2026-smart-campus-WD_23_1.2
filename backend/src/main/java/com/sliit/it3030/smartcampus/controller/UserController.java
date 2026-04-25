@@ -12,6 +12,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/users")
@@ -68,5 +69,20 @@ public class UserController {
             @Valid @RequestBody RoleUpdateRequest request) {
 
         return ResponseEntity.ok(userService.updateUserRole(id, request));
+    }
+
+    /**
+     * DELETE /api/users/{id}
+     * Delete user permanently - ADMIN only
+     */
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public ResponseEntity<?> deleteUser(@PathVariable String id) {
+        try {
+            userService.deleteUser(id);
+            return ResponseEntity.noContent().build();
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(Map.of("message", "Internal Error: " + e.getMessage()));
+        }
     }
 }

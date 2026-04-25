@@ -92,4 +92,16 @@ public class UserService {
         User savedUser = userRepository.save(user);
         return authService.mapToUserInfoDto(savedUser);
     }
+
+    /**
+     * Delete user permanently
+     * ADMIN only
+     */
+    public void deleteUser(String userId) {
+        if (!userRepository.existsById(userId)) {
+            throw new ResourceNotFoundException("User", userId);
+        }
+        userRepository.deleteById(userId);
+        log.info("Permanently deleted user: {}", userId);
+    }
 }

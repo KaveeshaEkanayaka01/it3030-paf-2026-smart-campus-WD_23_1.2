@@ -96,54 +96,65 @@ export default function UserManagement() {
   );
 
   return (
-    <div className="min-h-screen px-4 py-8" style={{ background: 'var(--bg-primary)' }}>
-      <div className="mx-auto max-w-7xl">
-        <section className="rounded-3xl border p-6 md:p-8" style={{ borderColor: 'var(--border)', background: 'linear-gradient(135deg, rgba(255,255,255,0.96), rgba(249,250,251,0.94))' }}>
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-            <div>
-              <p className="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[11px] font-black uppercase tracking-wider" style={{ borderColor: 'rgba(249,115,22,0.28)', color: 'var(--primary)', background: 'rgba(249,115,22,0.08)' }}>
-                <Settings2 size={12} /> Access Governance
-              </p>
-              <h1 className="mt-3 text-3xl font-black md:text-4xl" style={{ color: 'var(--text-primary)' }}>User & Role Administration</h1>
-              <p className="mt-2 max-w-2xl text-sm md:text-base" style={{ color: 'var(--text-secondary)' }}>
-                Manage system accounts, role assignments, and privilege boundaries for secure operations.
-              </p>
-            </div>
-            <button
-              onClick={loadUsers}
-              className="inline-flex items-center gap-2 rounded-xl border px-4 py-2 text-sm font-semibold transition-all hover:-translate-y-0.5"
-              style={{ borderColor: 'var(--border)', background: 'white', color: 'var(--text-secondary)' }}
-            >
-              <RefreshCw size={14} /> Refresh
-            </button>
+    <div className="mx-auto max-w-7xl px-4 py-8 relative page-enter">
+      <div className="pointer-events-none absolute right-0 top-0 h-[500px] w-[500px] rounded-full bg-[radial-gradient(circle,_rgba(249,115,22,0.1)_0%,_rgba(249,115,22,0)_70%)] opacity-60 blur-3xl shadow-none" />
+
+      <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between relative z-10">
+        <div>
+          <p className="inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest mb-3" style={{ borderColor: 'var(--border)', background: 'var(--bg-primary)', color: 'var(--text-secondary)' }}>
+            <Settings2 size={12} style={{ color: 'var(--primary)' }} />
+            Access Governance
+          </p>
+          <h1 className="text-3xl font-black uppercase tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-amber-500">User Administration</h1>
+          <p className="mt-1 text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>
+            Manage system accounts, role assignments, and privilege boundaries.
+          </p>
+        </div>
+
+        <button
+          onClick={loadUsers}
+          className="flex items-center gap-2 glass-panel px-5 py-3 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all hover:-translate-y-0.5 border"
+          style={{ color: 'var(--text-primary)', borderColor: 'var(--border)', background: 'var(--bg-primary)' }}
+        >
+          <RefreshCw size={14} style={{ color: 'var(--primary)' }} />
+          Refresh Registry
+        </button>
+      </div>
+
+          <div className="grid gap-4 sm:grid-cols-3">
+            <article className="glass-panel-strong rounded-3xl p-5 shadow-xl backdrop-blur-md relative overflow-hidden group" style={{ background: 'rgba(255, 255, 255, 0.8)', border: '1px solid var(--border)' }}>
+               <div className="absolute -right-4 -top-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                 <Users size={80} style={{ color: 'var(--primary)' }} />
+               </div>
+               <p className="text-[9px] font-bold uppercase tracking-widest relative z-10" style={{ color: 'var(--text-secondary)' }}>Total Accounts</p>
+               <p className="mt-1 text-3xl font-black relative z-10" style={{ color: 'var(--primary)' }}>{users.length}</p>
+            </article>
+            <article className="glass-panel-strong rounded-3xl p-5 shadow-xl backdrop-blur-md relative overflow-hidden group" style={{ background: 'rgba(255, 255, 255, 0.8)', border: '1px solid var(--border)' }}>
+               <div className="absolute -right-4 -top-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                 <Shield size={80} style={{ color: 'var(--status-approved)' }} />
+               </div>
+               <p className="text-[9px] font-bold uppercase tracking-widest relative z-10" style={{ color: 'var(--text-secondary)' }}>Administrators</p>
+               <p className="mt-1 text-3xl font-black relative z-10" style={{ color: 'var(--status-approved)' }}>{roleCounts.admin}</p>
+            </article>
+            <article className="glass-panel-strong rounded-3xl p-5 shadow-xl backdrop-blur-md relative overflow-hidden group" style={{ background: 'rgba(255, 255, 255, 0.8)', border: '1px solid var(--border)' }}>
+               <div className="absolute -right-4 -top-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                 <Wrench size={80} style={{ color: 'var(--status-pending)' }} />
+               </div>
+               <p className="text-[9px] font-bold uppercase tracking-widest relative z-10" style={{ color: 'var(--text-secondary)' }}>Technicians</p>
+               <p className="mt-1 text-3xl font-black relative z-10" style={{ color: 'var(--status-pending)' }}>{roleCounts.technician}</p>
+            </article>
           </div>
 
-          <div className="mt-5 grid gap-3 sm:grid-cols-3">
-            <article className="rounded-2xl border p-4" style={{ borderColor: 'var(--border)', background: 'rgba(255,255,255,0.92)' }}>
-              <p className="text-xs font-black uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>Total Accounts</p>
-              <p className="mt-2 text-3xl font-black" style={{ color: 'var(--primary)' }}>{users.length}</p>
-            </article>
-            <article className="rounded-2xl border p-4" style={{ borderColor: 'var(--border)', background: 'rgba(255,255,255,0.92)' }}>
-              <p className="text-xs font-black uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>Administrators</p>
-              <p className="mt-2 text-3xl font-black" style={{ color: 'var(--status-approved)' }}>{roleCounts.admin}</p>
-            </article>
-            <article className="rounded-2xl border p-4" style={{ borderColor: 'var(--border)', background: 'rgba(255,255,255,0.92)' }}>
-              <p className="text-xs font-black uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>Technicians</p>
-              <p className="mt-2 text-3xl font-black" style={{ color: 'var(--status-pending)' }}>{roleCounts.technician}</p>
-            </article>
-          </div>
-        </section>
-
-        <section className="mt-6 rounded-3xl border p-5" style={{ borderColor: 'var(--border)', background: 'rgba(255,255,255,0.94)' }}>
+        <section className="mt-6 rounded-3xl border p-5 shadow-xl backdrop-blur-md" style={{ borderColor: 'var(--border)', background: 'rgba(255, 255, 255, 0.7)' }}>
           <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
             <div className="relative w-full lg:max-w-lg">
-              <Search size={16} className="absolute left-3 top-3" style={{ color: 'var(--text-secondary)' }} />
+              <Search size={16} className="absolute left-4 top-3" style={{ color: 'var(--muted)' }} />
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search by name, email, or username..."
-                className="w-full rounded-xl border py-2.5 pl-9 pr-3 text-sm outline-none"
-                style={{ borderColor: 'var(--border)', background: 'white', color: 'var(--text-primary)' }}
+                placeholder="Search accounts..."
+                className="w-full rounded-xl border py-2.5 pl-11 pr-4 text-sm outline-none transition-all focus:border-orange-500"
+                style={{ borderColor: 'var(--border)', background: 'var(--bg-primary)', color: 'var(--text-primary)' }}
               />
             </div>
 
@@ -152,11 +163,11 @@ export default function UserManagement() {
                 <button
                   key={item.value}
                   onClick={() => setRoleFilter(item.value)}
-                  className="rounded-xl px-3 py-2 text-xs font-semibold transition-all"
+                  className="rounded-xl px-4 py-2 text-xs font-bold transition-all uppercase tracking-widest border"
                   style={{
-                    background: roleFilter === item.value ? 'rgba(249,115,22,0.1)' : 'transparent',
+                    background: roleFilter === item.value ? 'rgba(249,115,22,0.1)' : 'var(--bg-primary)',
                     color: roleFilter === item.value ? 'var(--primary)' : 'var(--text-secondary)',
-                    border: roleFilter === item.value ? '1px solid rgba(249,115,22,0.28)' : '1px solid var(--border)',
+                    borderColor: roleFilter === item.value ? 'var(--primary)' : 'var(--border)',
                   }}
                 >
                   {item.label}
@@ -228,14 +239,15 @@ export default function UserManagement() {
                             type="button"
                             onClick={() => handleDeleteUser(user.id)}
                             disabled={currentUser?.id === user.id}
-                            className="inline-flex items-center gap-1 rounded-xl border px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider transition-all disabled:cursor-not-allowed disabled:opacity-50"
+                            className="inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-[10px] font-black uppercase tracking-widest transition-all hover:scale-105 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 shadow-sm"
                             style={{
-                              borderColor: 'rgba(239,68,68,0.3)',
-                              background: currentUser?.id === user.id ? 'rgba(248,113,113,0.12)' : 'rgba(239,68,68,0.08)',
+                              borderColor: 'var(--status-rejected-border)',
+                              background: 'var(--status-rejected-bg)',
                               color: 'var(--status-rejected)',
                             }}
                           >
-                            <Trash2 size={12} /> Delete
+                            <Trash2 size={12} />
+                            Delete
                           </button>
                         )}
                       </div>
@@ -251,7 +263,6 @@ export default function UserManagement() {
             </table>
           </div>
         </section>
-      </div>
     </div>
   );
 }

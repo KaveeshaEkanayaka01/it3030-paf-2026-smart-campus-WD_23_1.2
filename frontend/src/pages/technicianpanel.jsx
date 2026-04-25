@@ -192,18 +192,18 @@ export const TechnicianPanelPage = () => {
   const assignedToMe = filteredTickets;
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-10 relative page-enter">
-      <div className="pointer-events-none absolute right-0 top-0 h-[400px] w-[400px] rounded-full bg-[radial-gradient(circle,_rgba(14,165,233,0.18)_0%,_rgba(14,165,233,0)_70%)] opacity-60 blur-3xl" />
+    <div className="mx-auto max-w-7xl px-4 py-8 relative page-enter">
+      <div className="pointer-events-none absolute right-0 top-0 h-[400px] w-[400px] rounded-full bg-[radial-gradient(circle,_rgba(249,115,22,0.1)_0%,_rgba(249,115,22,0)_70%)] opacity-60 blur-3xl shadow-none" />
       
       <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between relative z-10">
         <div>
-          <p className="inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest mb-4" style={{ borderColor: 'rgba(56,189,248,0.35)', background: 'rgba(14,165,233,0.12)', color: 'var(--accent-mid)' }}>
-            <Wrench size={12} style={{ color: 'var(--accent-mid)' }} />
+          <p className="inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest mb-3" style={{ borderColor: 'var(--border)', background: 'var(--bg-primary)', color: 'var(--text-secondary)' }}>
+            <Wrench size={12} style={{ color: 'var(--primary)' }} />
             Technician Workspace
           </p>
-          <h1 className="mt-2 text-4xl font-extrabold uppercase tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-teal-400">Action Queue</h1>
-          <p className="mt-2 max-w-2xl text-sm text-slate-300 font-medium">
-            Focused board for your assigned work and available tickets you can claim.
+          <h1 className="text-3xl font-black uppercase tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-amber-500">Action Queue</h1>
+          <p className="mt-1 text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>
+            Focused board for your assigned work and available tickets.
           </p>
         </div>
 
@@ -211,10 +211,11 @@ export const TechnicianPanelPage = () => {
           <button
             type="button"
             onClick={loadTickets}
-            className="flex items-center gap-2 glass-panel px-5 py-3.5 rounded-xl text-xs font-bold uppercase tracking-widest text-slate-300 hover:glass-panel-strong transition-all hover:-translate-y-0.5"
+            className="flex items-center gap-2 glass-panel px-5 py-3 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all hover:-translate-y-0.5 border"
+            style={{ color: 'var(--text-primary)', borderColor: 'var(--border)', background: 'var(--bg-primary)' }}
           >
-            <RefreshCcw size={16} style={{ color: 'var(--accent-mid)' }} />
-            Refresh
+            <RefreshCcw size={14} style={{ color: 'var(--primary)' }} />
+            Refresh Queue
           </button>
         </div>
       </div>
@@ -225,30 +226,31 @@ export const TechnicianPanelPage = () => {
         </div>
       )}
 
-      <div className="mb-8 grid grid-cols-1 gap-5 md:grid-cols-2">
-        <div className="glass-panel-strong rounded-2xl p-6 shadow-lg border-t-[3px] border-t-indigo-500 relative overflow-hidden group">
+      <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div className="glass-panel-strong rounded-3xl p-5 shadow-xl backdrop-blur-md relative overflow-hidden group" style={{ background: 'rgba(255, 255, 255, 0.8)', border: '1px solid var(--border)' }}>
           <div className="absolute -right-4 -top-4 opacity-5 group-hover:opacity-10 transition-opacity">
-            <UserCheck size={80} />
+            <UserCheck size={80} style={{ color: 'var(--primary)' }} />
           </div>
-          <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 relative z-10">Logged in Technician</p>
-          <p className="mt-2 text-lg font-bold text-slate-200 relative z-10 truncate">{user?.name || getCreatedByDisplay(activeIdentity)}</p>
+          <p className="text-[9px] font-bold uppercase tracking-widest relative z-10" style={{ color: 'var(--text-secondary)' }}>Logged in Technician</p>
+          <p className="mt-1 text-base font-bold relative z-10 truncate" style={{ color: 'var(--text-primary)' }}>{user?.name || getCreatedByDisplay(activeIdentity)}</p>
         </div>
-        <div className="glass-panel-strong rounded-2xl p-6 shadow-lg border-t-[3px] border-t-emerald-500 relative overflow-hidden group">
+        <div className="glass-panel-strong rounded-3xl p-5 shadow-xl backdrop-blur-md relative overflow-hidden group" style={{ background: 'rgba(255, 255, 255, 0.8)', border: '1px solid var(--border)' }}>
           <div className="absolute -right-4 -top-4 opacity-5 group-hover:opacity-10 transition-opacity">
-            <ClipboardList size={80} />
+            <ClipboardList size={80} style={{ color: 'var(--status-approved)' }} />
           </div>
-          <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 relative z-10">Assigned to me</p>
-          <p className="mt-2 text-3xl font-black text-emerald-400 relative z-10">{assignedToMe.length}</p>
+          <p className="text-[9px] font-bold uppercase tracking-widest relative z-10" style={{ color: 'var(--text-secondary)' }}>Assigned to me</p>
+          <p className="mt-1 text-3xl font-black relative z-10" style={{ color: 'var(--status-approved)' }}>{assignedToMe.length}</p>
         </div>
       </div>
 
-      <div className="mb-8 glass-panel rounded-2xl p-4 shadow-lg backdrop-blur-md">
+      <div className="mb-6 glass-panel rounded-2xl p-3 shadow-lg backdrop-blur-md" style={{ background: 'rgba(255, 255, 255, 0.5)', border: '1px solid var(--border)' }}>
         <input
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search by category, location, description, or creator"
-          className="w-full glass-input rounded-xl px-5 py-4 text-sm outline-none text-slate-200 placeholder:text-slate-500 font-medium"
+          placeholder="Filter by category, location, or creator..."
+          className="w-full glass-input rounded-xl px-5 py-3 text-sm outline-none font-medium border"
+          style={{ background: 'var(--bg-primary)', borderColor: 'var(--border)', color: 'var(--text-primary)' }}
         />
       </div>
 
@@ -259,14 +261,14 @@ export const TechnicianPanelPage = () => {
           ))}
         </div>
       ) : filteredTickets.length === 0 ? (
-        <div className="glass-panel border-dashed border-white/20 p-12 text-center rounded-2xl">
-          <div className="w-16 h-16 mx-auto bg-white/5 rounded-full flex items-center justify-center mb-4">
-             <CheckCircle2 size={24} className="text-slate-500" />
+        <div className="glass-panel p-12 text-center rounded-3xl border-dashed" style={{ background: 'var(--bg-primary)', borderColor: 'var(--border)', borderStyle: 'dashed' }}>
+          <div className="w-16 h-16 mx-auto rounded-full flex items-center justify-center mb-4" style={{ background: 'rgba(249, 115, 22, 0.05)' }}>
+             <CheckCircle2 size={24} style={{ color: 'var(--muted)' }} />
           </div>
-          <p className="text-sm font-semibold text-slate-400">No assigned or unassigned tickets matched your search.</p>
+          <p className="text-sm font-semibold uppercase tracking-widest" style={{ color: 'var(--muted)' }}>Queue is clear</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
           {filteredTickets.map((ticket) => {
             const mine = isAssignedToCurrentTechnician(ticket);
             const canAdvance = mine && getAllowedStatusOptions(ticket.status).length > 0;
@@ -274,38 +276,50 @@ export const TechnicianPanelPage = () => {
             const isSaving = savingTicketId === ticket.id;
 
             return (
-              <div key={ticket.id} className="glass-panel p-6 shadow-xl rounded-2xl flex flex-col group hover:glass-panel-strong transition-all duration-300">
-                <div className="mb-5 flex items-start justify-between gap-4">
+              <div key={ticket.id} className="glass-panel p-5 shadow-lg rounded-3xl flex flex-col group hover:scale-[1.01] transition-all duration-300 relative overflow-hidden" style={{ background: 'rgba(255, 255, 255, 0.7)', border: '1px solid var(--border)' }}>
+                {mine && (
+                  <div className="absolute top-0 right-0 h-1.5 w-full" style={{ background: 'linear-gradient(90deg, var(--accent-start), var(--accent-end))' }} />
+                )}
+                
+                <div className="mb-4 flex items-start justify-between gap-3">
                   <div>
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">{ticket.category || 'Ticket'}</p>
-                    <h3 className="mt-1 text-lg font-bold uppercase tracking-tight text-slate-100 group-hover:text-violet-300 transition-colors">{ticket.location || 'No location'}</h3>
+                    <div className="flex items-center gap-1.5 mb-1">
+                       <span className="text-[9px] font-bold uppercase tracking-widest opacity-60" style={{ color: 'var(--text-secondary)' }}>{ticket.category || 'Ticket'}</span>
+                       {mine && (
+                         <span className="flex items-center gap-1 text-[8px] font-black uppercase tracking-tighter px-1.5 py-0.5 rounded-full" style={{ background: 'var(--status-approved-bg)', color: 'var(--status-approved)', border: '1px solid var(--status-approved-border)' }}>
+                           <ShieldCheck size={8} /> Your Ticket
+                         </span>
+                       )}
+                    </div>
+                    <h3 className="text-base font-extrabold uppercase tracking-tight truncate group-hover:text-orange-500 transition-colors" style={{ color: 'var(--text-primary)' }}>{ticket.location || 'No location'}</h3>
                   </div>
                   <TicketStatusBadge status={ticket.status} />
                 </div>
 
-                <p className="line-clamp-2 text-sm text-slate-300 font-light leading-relaxed flex-grow">{ticket.description || 'No description provided.'}</p>
+                <p className="line-clamp-2 text-xs font-medium leading-relaxed flex-grow opacity-80" style={{ color: 'var(--text-secondary)' }}>{ticket.description || 'No description provided.'}</p>
 
-                <div className="mt-6 grid grid-cols-2 gap-4 text-[10px] font-semibold uppercase tracking-wider text-slate-400 border-t border-white/10 pt-5">
-                  <div className="glass-panel bg-black/20 p-3 rounded-xl border border-white/5">
-                    <p>Created By</p>
-                    <p className="mt-1 text-slate-200 truncate">{getCreatedByDisplay(ticket.createdBy)}</p>
+                <div className="mt-5 grid grid-cols-2 gap-3 text-[9px] font-bold uppercase tracking-wider border-t pt-4" style={{ borderColor: 'var(--border)' }}>
+                  <div>
+                    <p style={{ color: 'var(--muted)' }}>From</p>
+                    <p className="mt-0.5 truncate" style={{ color: 'var(--text-primary)' }}>{getCreatedByDisplay(ticket.createdBy)}</p>
                   </div>
-                  <div className="glass-panel bg-black/20 p-3 rounded-xl border border-white/5">
-                    <p>Technician</p>
-                    <p className="mt-1 text-slate-200 truncate">{ticket.assignedTechnician ? (userDisplayMap[ticket.assignedTechnician] || ticket.assignedTechnician) : 'Unassigned'}</p>
+                  <div className="text-right">
+                    <p style={{ color: 'var(--muted)' }}>Assigned To</p>
+                    <p className="mt-0.5 truncate" style={{ color: 'var(--text-primary)' }}>{ticket.assignedTechnician ? (userDisplayMap[ticket.assignedTechnician] || 'Technician') : 'Unassigned'}</p>
                   </div>
                 </div>
 
-                <div className="mt-6 flex flex-wrap gap-3">
+                <div className="mt-5 flex flex-wrap gap-2 pt-2">
                   {!mine && !ticket.assignedTechnician && (
                     <button
                       type="button"
                       disabled={!canManage || isSaving}
                       onClick={() => handleClaim(ticket)}
-                      className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 px-4 py-2.5 text-[10px] font-bold uppercase tracking-widest text-white transition-all shadow-lg hover:scale-105 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 disabled:scale-100"
+                      className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-white transition-all shadow-md active:scale-95 disabled:opacity-50"
+                      style={{ background: 'linear-gradient(135deg, var(--status-approved), #059669)' }}
                     >
-                      <UserCheck size={14} />
-                      {isSaving ? 'Claiming...' : 'Claim Ticket'}
+                      <UserCheck size={12} />
+                      {isSaving ? '...' : 'Claim'}
                     </button>
                   )}
 
@@ -314,36 +328,24 @@ export const TechnicianPanelPage = () => {
                       type="button"
                       disabled={!canManage || isSaving}
                       onClick={() => handleNextStatus(ticket)}
-                      className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-indigo-500 px-4 py-2.5 text-[10px] font-bold uppercase tracking-widest text-white transition-all shadow-lg hover:scale-105 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 disabled:scale-100"
+                      className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-white transition-all shadow-md active:scale-95 disabled:opacity-50"
+                      style={{ background: 'linear-gradient(135deg, var(--accent-start), var(--accent-end))' }}
                     >
-                      <Wrench size={14} />
-                      {isSaving ? 'Updating...' : `Move to ${nextStatus.replace('_', ' ')}`}
+                      <RefreshCcw size={12} />
+                      {isSaving ? '...' : nextStatus.replace('_', ' ')}
                     </button>
                   )}
 
                   <button
                     type="button"
                     onClick={() => navigate(`/tickets/${ticket.id}`)}
-                    className="inline-flex items-center gap-2 rounded-xl glass-panel px-4 py-2.5 text-[10px] font-bold uppercase tracking-widest text-slate-300 transition-all hover:bg-white/10 hover:text-white"
+                    className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl glass-panel px-3 py-2 text-[10px] font-bold uppercase tracking-widest transition-all hover:glass-panel-strong border"
+                    style={{ color: 'var(--text-secondary)', borderColor: 'var(--border)', background: 'var(--bg-primary)' }}
                   >
-                    <ClipboardList size={14} />
-                    View Details
+                    <ClipboardList size={12} />
+                    View
                   </button>
                 </div>
-
-                {mine && (
-                  <p className="mt-4 inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 px-3 py-1.5 rounded-lg border border-emerald-500/20 w-fit">
-                    <ShieldCheck size={14} />
-                    Assigned to you
-                  </p>
-                )}
-
-                {ticket.status === 'CLOSED' && (
-                  <p className="mt-4 inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400 bg-white/5 px-3 py-1.5 rounded-lg border border-white/10 w-fit">
-                    <CheckCircle2 size={14} />
-                    Ticket completed
-                  </p>
-                )}
               </div>
             );
           })}
