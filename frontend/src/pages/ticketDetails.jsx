@@ -11,7 +11,8 @@ import {
   MessageCircleWarning,
   Wrench,
   Timer,
-  Clock
+  Clock,
+  X
 } from 'lucide-react';
 import { getCurrentUserId, getCurrentUserRole, ticketService } from '../api/ticketService';
 import { authApi } from '../api/authApi';
@@ -42,6 +43,7 @@ export const TicketDetailsPage = () => {
   const [technicianOptions, setTechnicianOptions] = useState([]);
   const [userDisplayMap, setUserDisplayMap] = useState({});
   const [assigning, setAssigning] = useState(false);
+  const [selectedModalImage, setSelectedModalImage] = useState(null);
   const currentUserId = user?.id || '';
   const currentUserRole = useMemo(() => {
     const roles = Array.isArray(user?.roles) ? user.roles : [];
@@ -422,6 +424,7 @@ export const TicketDetailsPage = () => {
             </div>
 
             {/* Service-Level Agreement Timers (SLA) */}
+            
             <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2">
               <div className="glass-panel-strong p-4 rounded-2xl relative overflow-hidden group" style={{ background: 'var(--status-approved-bg)', border: '1px solid var(--status-approved-border)' }}>
                 <div className="absolute -right-4 -top-4 opacity-5 group-hover:opacity-10 transition-opacity">
@@ -500,30 +503,31 @@ export const TicketDetailsPage = () => {
               {attachments.length === 0 ? (
                 <p className="text-[10px] font-medium p-3 rounded-xl glass-panel" style={{ background: 'var(--bg-primary)', border: '1px solid var(--border)', color: 'var(--muted)' }}>No attachments uploaded for this ticket.</p>
               ) : (
-                <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+                <div className="flex flex-wrap gap-2">
                   {attachments.map((attachment) => (
-                    <div 
-                      key={attachment.id} 
-                      className="group/item relative flex flex-col gap-2 overflow-hidden rounded-2xl border transition-all hover:shadow-xl" 
-                      style={{ background: 'var(--bg-primary)', borderColor: 'var(--border)' }}
+                    <button
+                      key={attachment.id}
+                      type="button"
+                      onClick={() => setSelectedModalImage(attachment)}
+                      className="group flex items-center gap-2 glass-panel px-3 py-1.5 rounded-lg border transition-all hover:glass-panel-strong hover:scale-105 active:scale-95"
+                      style={{ background: 'var(--bg-primary)', border: '1px solid var(--border)' }}
                     >
-                      <div className="aspect-square w-full overflow-hidden bg-slate-100">
+                      <div className="h-6 w-6 overflow-hidden rounded bg-slate-100 flex items-center justify-center border" style={{ borderColor: 'var(--border)' }}>
                         <img 
                           src={`${API_BASE_URL}/uploads/${attachment.fileName}`} 
-                          alt={attachment.fileName}
-                          className="h-full w-full object-cover transition-transform duration-500 group-hover/item:scale-110"
+                          alt=""
+                          className="h-full w-full object-cover"
                           onError={(e) => {
-                            e.target.onerror = null;
-                            e.target.src = 'https://placehold.co/400x400?text=Image+Unavailable';
+                            e.target.style.display = 'none';
                           }}
                         />
+                        <ImageIcon size={10} className="text-cyan-500 absolute" />
                       </div>
-                      <div className="p-2 pt-0">
-                         <p className="truncate text-[9px] font-bold uppercase tracking-tight text-slate-500" title={attachment.fileName}>
-                           {attachment.fileName}
-                         </p>
-                      </div>
-                    </div>
+                      <span className="truncate text-xs font-semibold max-w-[120px]" style={{ color: 'var(--text-primary)' }}>{attachment.fileName}</span>
+                      <span className="text-[8px] font-bold uppercase tracking-wider bg-black/5 px-1.5 py-0.5 rounded" style={{ color: 'var(--text-secondary)' }}>
+                        {attachment.fileType || 'IMG'}
+                      </span>
+                    </button>
                   ))}
                 </div>
               )}
@@ -661,6 +665,37 @@ export const TicketDetailsPage = () => {
           )}
         </div>
       </div>
+
+      {/* Image Preview Modal */}
+      {selectedModalImage && (
+        <div 
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-10 animate-in fade-in zoom-in duration-200"
+          style={{ background: 'rgba(15, 23, 42, 0.9)', backdropFilter: 'blur(8px)' }}
+          onClick={() => setSelectedModalImage(null)}
+        >
+          <div className="relative max-h-full max-w-5xl overflow-hidden rounded-3xl shadow-2xl border" style={{ borderColor: 'rgba(255,255,255,0.1)' }} onClick={e => e.stopPropagation()}>
+            <button 
+              onClick={() => setSelectedModalImage(null)}
+              className="absolute right-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-md transition-all hover:bg-black/60 hover:scale-110"
+            >
+              <X size={20} />
+            </button>
+            <img 
+              src={`${API_BASE_URL}/uploads/${selectedModalImage.fileName}`} 
+              alt={selectedModalImage.fileName}
+              className="max-h-[85vh] w-auto object-contain"
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.src = 'https://placehold.co/800x600?text=Image+Unavailable';
+              }}
+            />
+            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6 pt-12">
+               <p className="text-sm font-bold text-white uppercase tracking-widest">{selectedModalImage.fileName}</p>
+               <p className="mt-1 text-[10px] font-medium text-white/60">Ticket Attachment</p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

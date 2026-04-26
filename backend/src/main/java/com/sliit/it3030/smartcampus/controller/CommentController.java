@@ -22,7 +22,7 @@ public class CommentController {
 
     /**
      * POST /api/tickets/{ticketId}/comments
-     * Add comment to a ticket
+     *  
      */
     @PostMapping("/{ticketId}/comments")
     public ResponseEntity<CommentResponse> addComment(
@@ -36,7 +36,7 @@ public class CommentController {
 
     /**
      * GET /api/tickets/{ticketId}/comments
-     * Get all comments for a ticket
+     *  
      */
     @GetMapping("/{ticketId}/comments")
     public ResponseEntity<List<CommentResponse>> getComments(
@@ -50,7 +50,7 @@ public class CommentController {
 
     /**
      * PUT /api/comments/{commentId}
-     * Edit a comment (owner only)
+     *  
      */
     @PutMapping("/comments/{commentId}")
     public ResponseEntity<CommentResponse> updateComment(
@@ -64,7 +64,7 @@ public class CommentController {
 
     /**
      * DELETE /api/comments/{commentId}
-     * Delete comment (owner or ADMIN)
+     * 
      */
     @DeleteMapping("/comments/{commentId}")
     public ResponseEntity<Void> deleteComment(
