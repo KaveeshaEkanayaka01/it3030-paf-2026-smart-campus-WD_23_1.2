@@ -2,14 +2,14 @@ package com.sliit.it3030.smartcampus.service;
 
 import com.sliit.it3030.smartcampus.dto.resource.ResourceCreateRequest;
 import com.sliit.it3030.smartcampus.dto.resource.ResourceUpdateRequest;
+import com.sliit.it3030.smartcampus.exception.BadRequestException;
+import com.sliit.it3030.smartcampus.exception.ResourceNotFoundException;
 import com.sliit.it3030.smartcampus.model.Resource;
 import com.sliit.it3030.smartcampus.model.ResourceStatus;
 import com.sliit.it3030.smartcampus.model.ResourceType;
 import com.sliit.it3030.smartcampus.repository.ResourceRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Locale;
@@ -27,6 +27,7 @@ public class ResourceService {
 
     private static final int GLOBAL_MIN_TIME = toMinutes("06:00");
     private static final int GLOBAL_MAX_TIME = toMinutes("22:00");
+
     private static final int MIN_DURATION_MINUTES = 30;
     private static final int MAX_DURATION_MINUTES = 12 * 60;
 
@@ -36,17 +37,24 @@ public class ResourceService {
             ResourceType.MEETING_ROOM, new TimeWindow("08:00", "17:00"),
             ResourceType.EQUIPMENT, new TimeWindow("06:00", "22:00"));
 
+    // ================= CREATE =================
     public Resource createResource(ResourceCreateRequest request) {
-        validateAvailabilityWindow(request.getType(), request.getAvailableFrom(), request.getAvailableTo());
+
+        validateRequiredFields(request.getName(), request.getLocation(), request.getCapacity());
+
+        validateAvailabilityWindow(
+                request.getType(),
+                request.getAvailableFrom(),
+                request.getAvailableTo());
 
         Resource resource = Resource.builder()
-                .name(request.getName().trim())
+                .name(safeTrim(request.getName()))
                 .type(request.getType())
                 .capacity(request.getCapacity())
-                .location(request.getLocation().trim())
-                .description(request.getDescription() != null ? request.getDescription().trim() : null)
+                .location(safeTrim(request.getLocation()))
+                .description(safeTrim(request.getDescription()))
                 .status(request.getStatus())
-                .imageUrl(request.getImageUrl() != null ? request.getImageUrl().trim() : null)
+                .imageUrl(safeTrim(request.getImageUrl()))
                 .availableFrom(request.getAvailableFrom())
                 .availableTo(request.getAvailableTo())
                 .active(true)
@@ -55,38 +63,46 @@ public class ResourceService {
         return resourceRepository.save(resource);
     }
 
+    // ================= READ =================
     public List<Resource> getResources(String type, String location, Integer minCapacity, String status, String q) {
-        List<Resource> resources = resourceRepository.findAll();
 
-        return resources.stream()
-                .filter(resource -> matchesType(resource, type))
-                .filter(resource -> matchesLocation(resource, location))
-                .filter(resource -> matchesMinCapacity(resource, minCapacity))
-                .filter(resource -> matchesStatus(resource, status))
-                .filter(resource -> matchesKeyword(resource, q))
+        return resourceRepository.findAll().stream()
+                .filter(r -> matchesType(r, type))
+                .filter(r -> matchesLocation(r, location))
+                .filter(r -> matchesMinCapacity(r, minCapacity))
+                .filter(r -> matchesStatus(r, status))
+                .filter(r -> matchesKeyword(r, q))
                 .collect(Collectors.toList());
     }
 
     public Resource getResourceById(String id) {
         return resourceRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Resource not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Resource", id));
     }
 
+    // ================= UPDATE =================
     public Resource updateResource(String id, ResourceUpdateRequest request) {
-        validateAvailabilityWindow(request.getType(), request.getAvailableFrom(), request.getAvailableTo());
 
         Resource existing = resourceRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Resource not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Resource", id));
 
-        existing.setName(request.getName().trim());
+        validateRequiredFields(request.getName(), request.getLocation(), request.getCapacity());
+
+        // ONLY validate time if both are provided
+        if (request.getAvailableFrom() != null && request.getAvailableTo() != null) {
+            validateAvailabilityWindow(
+                    request.getType(),
+                    request.getAvailableFrom(),
+                    request.getAvailableTo());
+        }
+
+        existing.setName(safeTrim(request.getName()));
         existing.setType(request.getType());
         existing.setCapacity(request.getCapacity());
-        existing.setLocation(request.getLocation().trim());
-        existing.setDescription(request.getDescription() != null ? request.getDescription().trim() : null);
+        existing.setLocation(safeTrim(request.getLocation()));
+        existing.setDescription(safeTrim(request.getDescription()));
         existing.setStatus(request.getStatus());
-        existing.setImageUrl(request.getImageUrl() != null ? request.getImageUrl().trim() : null);
+        existing.setImageUrl(safeTrim(request.getImageUrl()));
         existing.setAvailableFrom(request.getAvailableFrom());
         existing.setAvailableTo(request.getAvailableTo());
 
@@ -97,151 +113,148 @@ public class ResourceService {
         return resourceRepository.save(existing);
     }
 
+    // ================= DELETE =================
     public void deleteResource(String id) {
         Resource existing = resourceRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Resource not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Resource", id));
 
         resourceRepository.delete(existing);
     }
 
+    // ================= FILTERS =================
     private boolean matchesType(Resource resource, String type) {
-        if (type == null || type.isBlank()) {
+        if (type == null || type.isBlank())
             return true;
-        }
 
         try {
-            ResourceType requestedType = ResourceType.valueOf(type.trim().toUpperCase(Locale.ROOT));
-            return resource.getType() == requestedType;
-        } catch (IllegalArgumentException ex) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid resource type: " + type);
+            ResourceType t = ResourceType.valueOf(type.trim().toUpperCase(Locale.ROOT));
+            return resource.getType() == t;
+        } catch (Exception e) {
+            throw new BadRequestException("Invalid resource type: " + type);
         }
     }
 
     private boolean matchesLocation(Resource resource, String location) {
-        if (location == null || location.isBlank()) {
+        if (location == null || location.isBlank())
             return true;
-        }
 
-        return resource.getLocation() != null
-                && resource.getLocation().toLowerCase(Locale.ROOT)
-                        .contains(location.trim().toLowerCase(Locale.ROOT));
+        return resource.getLocation() != null &&
+                resource.getLocation().toLowerCase(Locale.ROOT)
+                        .contains(location.toLowerCase(Locale.ROOT));
     }
 
     private boolean matchesMinCapacity(Resource resource, Integer minCapacity) {
-        if (minCapacity == null) {
+        if (minCapacity == null)
             return true;
-        }
 
         if (minCapacity < 0) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "minCapacity cannot be negative");
+            throw new BadRequestException("minCapacity cannot be negative");
         }
 
-        return resource.getCapacity() != null && resource.getCapacity() >= minCapacity;
+        return resource.getCapacity() != null &&
+                resource.getCapacity() >= minCapacity;
     }
 
     private boolean matchesStatus(Resource resource, String status) {
-        if (status == null || status.isBlank()) {
+        if (status == null || status.isBlank())
             return true;
-        }
 
         try {
-            ResourceStatus requestedStatus = ResourceStatus.valueOf(status.trim().toUpperCase(Locale.ROOT));
-            return resource.getStatus() == requestedStatus;
-        } catch (IllegalArgumentException ex) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid resource status: " + status);
+            ResourceStatus s = ResourceStatus.valueOf(status.trim().toUpperCase(Locale.ROOT));
+            return resource.getStatus() == s;
+        } catch (Exception e) {
+            throw new BadRequestException("Invalid resource status: " + status);
         }
     }
 
     private boolean matchesKeyword(Resource resource, String q) {
-        if (q == null || q.isBlank()) {
+        if (q == null || q.isBlank())
             return true;
-        }
 
-        String keyword = q.trim().toLowerCase(Locale.ROOT);
+        String k = q.toLowerCase(Locale.ROOT);
 
-        return containsIgnoreCase(resource.getName(), keyword)
-                || containsIgnoreCase(resource.getLocation(), keyword)
-                || containsIgnoreCase(resource.getDescription(), keyword)
-                || (resource.getType() != null
-                        && resource.getType().name().toLowerCase(Locale.ROOT).contains(keyword));
+        return contains(resource.getName(), k)
+                || contains(resource.getLocation(), k)
+                || contains(resource.getDescription(), k)
+                || (resource.getType() != null &&
+                        resource.getType().name().toLowerCase(Locale.ROOT).contains(k));
     }
 
-    private boolean containsIgnoreCase(String value, String keyword) {
+    private boolean contains(String value, String keyword) {
         return value != null && value.toLowerCase(Locale.ROOT).contains(keyword);
     }
 
-    private void validateAvailabilityWindow(ResourceType resourceType, String availableFrom, String availableTo) {
-        boolean fromMissing = availableFrom == null || availableFrom.isBlank();
-        boolean toMissing = availableTo == null || availableTo.isBlank();
+    // ================= VALIDATION =================
+    private void validateAvailabilityWindow(ResourceType type, String from, String to) {
 
-        if (fromMissing && toMissing) {
+        if ((from == null) != (to == null)) {
+            throw new BadRequestException("Both availableFrom and availableTo must be provided together");
+        }
+
+        if (from == null && to == null)
             return;
-        }
 
-        if (fromMissing || toMissing) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Both availableFrom and availableTo must be provided together");
-        }
-
-        String from = availableFrom.trim();
-        String to = availableTo.trim();
+        from = from.trim();
+        to = to.trim();
 
         if (!TIME_PATTERN.matcher(from).matches() || !TIME_PATTERN.matcher(to).matches()) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Time must be in HH:mm format");
+            throw new BadRequestException("Time must be in HH:mm format");
         }
 
-        int fromMinutes = toMinutes(from);
-        int toMinutes = toMinutes(to);
+        int fromMin = toMinutes(from);
+        int toMin = toMinutes(to);
 
-        if (fromMinutes >= toMinutes) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "availableFrom must be earlier than availableTo");
+        if (fromMin >= toMin) {
+            throw new BadRequestException("availableFrom must be earlier than availableTo");
         }
 
-        int duration = toMinutes - fromMinutes;
+        int duration = toMin - fromMin;
 
         if (duration < MIN_DURATION_MINUTES) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Availability duration must be at least 30 minutes");
+            throw new BadRequestException("Minimum availability is 30 minutes");
         }
 
         if (duration > MAX_DURATION_MINUTES) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Availability duration cannot exceed 12 hours");
+            throw new BadRequestException("Maximum availability is 12 hours");
         }
 
-        if (fromMinutes < GLOBAL_MIN_TIME || toMinutes > GLOBAL_MAX_TIME) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Availability time must be between 06:00 and 22:00");
+        if (fromMin < GLOBAL_MIN_TIME || toMin > GLOBAL_MAX_TIME) {
+            throw new BadRequestException("Availability must be between 06:00 and 22:00");
         }
 
-        if (resourceType != null && TYPE_WINDOWS.containsKey(resourceType)) {
-            TimeWindow window = TYPE_WINDOWS.get(resourceType);
-            int typeMin = toMinutes(window.from());
-            int typeMax = toMinutes(window.to());
+        if (type != null && TYPE_WINDOWS.containsKey(type)) {
+            TimeWindow w = TYPE_WINDOWS.get(type);
 
-            if (fromMinutes < typeMin || toMinutes > typeMax) {
-                throw new ResponseStatusException(
-                        HttpStatus.BAD_REQUEST,
-                        resourceType.name() + " resources must be available only between "
-                                + window.from() + " and " + window.to());
+            int min = toMinutes(w.from());
+            int max = toMinutes(w.to());
+
+            if (fromMin < min || toMin > max) {
+                throw new BadRequestException(
+                        type.name() + " must be between " + w.from() + " and " + w.to());
             }
         }
     }
 
+    // ================= HELPERS =================
+    private void validateRequiredFields(String name, String location, Integer capacity) {
+        if (name == null || name.isBlank()) {
+            throw new BadRequestException("Name is required");
+        }
+        if (location == null || location.isBlank()) {
+            throw new BadRequestException("Location is required");
+        }
+        if (capacity == null || capacity < 0) {
+            throw new BadRequestException("Capacity must be a positive number");
+        }
+    }
+
+    private String safeTrim(String value) {
+        return value == null ? null : value.trim();
+    }
+
     private static int toMinutes(String time) {
-        String[] parts = time.split(":");
-        int hours = Integer.parseInt(parts[0]);
-        int minutes = Integer.parseInt(parts[1]);
-        return (hours * 60) + minutes;
+        String[] p = time.split(":");
+        return Integer.parseInt(p[0]) * 60 + Integer.parseInt(p[1]);
     }
 
     private record TimeWindow(String from, String to) {

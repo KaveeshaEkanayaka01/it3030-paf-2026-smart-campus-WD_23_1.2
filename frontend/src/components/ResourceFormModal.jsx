@@ -43,10 +43,14 @@ export default function ResourceFormModal({
 
   useEffect(() => {
     if (initialData) {
-      setForm({ ...defaultForm, ...initialData })
+      setForm({
+  ...defaultForm,
+  ...initialData,
+  capacity: initialData.capacity?.toString() || '',
+})
       setImagePreview(initialData.imageUrl || '')
     } else {
-      setForm(defaultForm)
+      setForm({ ...defaultForm })
       setImagePreview('')
     }
 
@@ -65,39 +69,48 @@ export default function ResourceFormModal({
   }
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    if (readOnly) return
+  e.preventDefault()
+  if (readOnly) return
 
-    // Validate required fields
-    const newErrors = {}
-    if (!form.name) newErrors.name = 'Name is required'
-    if (!form.capacity) newErrors.capacity = 'Capacity is required'
-    if (!form.location) newErrors.location = 'Location is required'
-    
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors)
-      return
-    }
+  const newErrors = {}
+  if (!form.name?.trim()) newErrors.name = 'Name is required'
+  if (!form.capacity) newErrors.capacity = 'Capacity is required'
+  if (!form.location?.trim()) newErrors.location = 'Location is required'
 
-    try {
-      let finalImageUrl = form.imageUrl
-
-      if (imageFile) {
-        setUploadingImage(true)
-        finalImageUrl = await uploadResourceImage(imageFile)
-      }
-
-      await onSubmit({
-        ...form,
-        imageUrl: finalImageUrl,
-        capacity: Number(form.capacity),
-      })
-    } finally {
-      setUploadingImage(false)
-    }
+  if (Object.keys(newErrors).length > 0) {
+    setErrors(newErrors)
+    return
   }
 
-  // Light theme styles
+  try {
+    let finalImageUrl = form.imageUrl
+
+    if (imageFile) {
+      setUploadingImage(true)
+      finalImageUrl = await uploadResourceImage(imageFile)
+    }
+
+    
+    const payload = {
+      name: form.name?.trim(),
+      type: form.type,
+      capacity: form.capacity ? Number(form.capacity) : null,
+      location: form.location?.trim(),
+      description: form.description?.trim() || null,
+      status: form.status,
+      imageUrl: finalImageUrl || null,
+      availableFrom: form.availableFrom || null,
+      availableTo: form.availableTo || null,
+    }
+
+    await onSubmit(payload)
+  } catch (err) {
+    console.error('Submit error:', err)
+  } finally {
+    setUploadingImage(false)
+  }
+}
+
   const inputStyle = {
     backgroundColor: '#f9fafb',
     border: '1px solid #e5e7eb',
@@ -119,6 +132,9 @@ export default function ResourceFormModal({
 
   const getFieldStyle = (field) =>
     errors[field] ? errorInputStyle : inputStyle
+
+  // ✅ ADDED ONLY THIS LINE (no other changes)
+  const currentRule = TYPE_TIME_RULES[form.type]
 
   return (
     <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm">
@@ -149,6 +165,7 @@ export default function ResourceFormModal({
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="grid md:grid-cols-2 gap-4">
+
               {/* Name Field */}
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-1">Resource Name *</label>
@@ -183,6 +200,11 @@ export default function ResourceFormModal({
                     <option key={t} value={t}>{t.replace('_', ' ')}</option>
                   ))}
                 </select>
+
+                {/* ADDED TIME WINDOW INFO ONLY */}
+                <p className="text-xs text-gray-500 mt-1">
+                  Allowed: {currentRule.from} - {currentRule.to} | Global: {GLOBAL_MIN_TIME} - {GLOBAL_MAX_TIME}
+                </p>
               </div>
 
               {/* Capacity Field */}
@@ -288,7 +310,7 @@ export default function ResourceFormModal({
                       onClick={() => {
                         setImageFile(null)
                         setImagePreview('')
-                        setForm(prev => ({ ...prev, imageUrl: '' }))
+                        setForm(prev => ({ ...prev, imageUrl: null }))
                       }}
                       className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
                     >
