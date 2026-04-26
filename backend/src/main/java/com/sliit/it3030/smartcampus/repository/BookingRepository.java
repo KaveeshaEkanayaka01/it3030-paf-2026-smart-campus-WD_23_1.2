@@ -24,11 +24,12 @@ public interface BookingRepository extends MongoRepository<Booking, String> {
 
     /**
      * CONFLICT DETECTION ALGORITHM for MongoDB
-     * Checks for overlapping time slots on the same resource with APPROVED status.
+     * Checks for overlapping time slots on the same resource for active bookings.
+     * Excludes REJECTED and CANCELLED statuses.
      * Condition: existing.startTime < newEndTime AND existing.endTime > newStartTime
      * An optional excludeId allows skipping the current booking when re-checking on approval.
      */
-    @Query("{ 'resourceId': ?0, 'status': 'APPROVED', 'startTime': { $lt: ?2 }, 'endTime': { $gt: ?1 }, $or: [ { '_id': { $ne: ?3 } }, { '_id': null } ] }")
+    @Query("{ 'resourceId': ?0, 'status': { $nin: ['REJECTED', 'CANCELLED'] }, 'startTime': { $lt: ?2 }, 'endTime': { $gt: ?1 }, $or: [ { '_id': { $ne: ?3 } }, { '_id': null } ] }")
     List<Booking> findConflictingBookings(String resourceId, Date startTime, Date endTime, String excludeId);
 
     // Count pending bookings (for admin dashboard badge)

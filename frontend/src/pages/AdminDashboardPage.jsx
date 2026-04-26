@@ -45,6 +45,31 @@ import {
 
 const FILTER_OPTIONS = ['ALL', 'PENDING', 'APPROVED', 'REJECTED', 'CANCELLED'];
 
+function getBookingSortTimestamp(booking) {
+  const createdAtMs = new Date(booking?.createdAt || '').getTime();
+  if (Number.isFinite(createdAtMs) && createdAtMs > 0) return createdAtMs;
+
+  const rawId = String(booking?.id || '').trim();
+  const objectIdPrefix = rawId.slice(0, 8);
+  if (/^[0-9a-fA-F]{8}$/.test(objectIdPrefix)) {
+    const epochSeconds = Number.parseInt(objectIdPrefix, 16);
+    if (Number.isFinite(epochSeconds) && epochSeconds > 0) {
+      return epochSeconds * 1000;
+    }
+  }
+
+  const startTimeMs = new Date(booking?.startTime || '').getTime();
+  if (Number.isFinite(startTimeMs) && startTimeMs > 0) return startTimeMs;
+
+  return 0;
+}
+
+function sortBookingsNewestFirst(bookings) {
+  return [...(bookings || [])].sort(
+    (a, b) => getBookingSortTimestamp(b) - getBookingSortTimestamp(a)
+  );
+}
+
 export default function AdminDashboardPage() {
   const navigate = useNavigate();
   const { currentUser } = useUser();
@@ -76,7 +101,7 @@ export default function AdminDashboardPage() {
         bookingApi.getAll(),
         bookingApi.getStats(),
       ]);
-      setBookings(bookingsRes.data);
+      setBookings(sortBookingsNewestFirst(bookingsRes.data));
       setStats(statsRes.data);
     } catch {
       toast.error('Failed to load dashboard data.');
@@ -164,8 +189,26 @@ export default function AdminDashboardPage() {
       String(b.purpose || '').toLowerCase().includes(search.toLowerCase())
     )
     .sort((a, b) => {
-      let va = a[sortField], vb = b[sortField];
-      if (typeof va === 'string') va = va.toLowerCase(), vb = vb.toLowerCase();
+      let va;
+      let vb;
+
+      if (sortField === 'createdAt') {
+        va = getBookingSortTimestamp(a);
+        vb = getBookingSortTimestamp(b);
+      } else if (['startTime', 'endTime'].includes(sortField)) {
+        va = new Date(a?.[sortField] || '').getTime();
+        vb = new Date(b?.[sortField] || '').getTime();
+        va = Number.isFinite(va) ? va : 0;
+        vb = Number.isFinite(vb) ? vb : 0;
+      } else {
+        va = a[sortField];
+        vb = b[sortField];
+        if (typeof va === 'string') {
+          va = va.toLowerCase();
+          vb = String(vb || '').toLowerCase();
+        }
+      }
+
       if (va < vb) return sortDir === 'asc' ? -1 : 1;
       if (va > vb) return sortDir === 'asc' ? 1 : -1;
       return 0;
@@ -607,11 +650,9 @@ export default function AdminDashboardPage() {
                           <td style={{ padding: '14px 16px', color: 'var(--text-secondary)' }} className="text-xs font-mono">{bookingReferences[b.id]}</td>
                           <td style={{ padding: '14px 16px' }}>
                             <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{b.resourceName}</p>
-                            <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>{b.resourceId}</p>
                           </td>
                           <td style={{ padding: '14px 16px' }}>
                             <p className="text-sm" style={{ color: 'var(--text-primary)' }}>{b.userName}</p>
-                            <p className="text-xs font-mono" style={{ color: 'var(--text-secondary)' }}>{b.userId}</p>
                           </td>
                           <td style={{ padding: '14px 16px' }}>
                             <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>{format(new Date(b.startTime), 'MMM d, yyyy')}</p>
@@ -619,8 +660,14 @@ export default function AdminDashboardPage() {
                               {format(new Date(b.startTime), 'hh:mm a')} - {format(new Date(b.endTime), 'hh:mm a')}
                             </p>
                           </td>
-                          <td style={{ padding: '14px 16px', maxWidth: 180 }}>
-                            <p className="truncate text-xs" style={{ color: 'var(--text-secondary)' }}>{b.purpose}</p>
+                          <td style={{ padding: '14px 16px', maxWidth: 280, minWidth: 220 }}>
+                            <p
+                              className="text-xs leading-5 whitespace-normal break-words"
+                              style={{ color: 'var(--text-secondary)' }}
+                              title={b.purpose || 'No purpose provided'}
+                            >
+                              {b.purpose || 'No purpose provided'}
+                            </p>
                             {b.status === 'REJECTED' && b.rejectionReason && (
                               <p className="mt-1 text-xs" style={{ color: 'var(--status-rejected)' }} title={b.rejectionReason}>
                                 {b.rejectionReason.substring(0, 40)}{b.rejectionReason.length > 40 ? '...' : ''}

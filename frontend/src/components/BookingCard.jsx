@@ -1,10 +1,16 @@
-import { format } from 'date-fns';
+import { format, formatDistanceToNow } from 'date-fns';
 import { Clock, MapPin, User, CalendarDays, FileText, XCircle } from 'lucide-react';
 import StatusBadge from './StatusBadge';
 import { toBookingReference } from '../utils/bookingReference';
 
 export default function BookingCard({ booking, onCancel, showUser = false, bookingReference }) {
   const canCancel = booking.status === 'PENDING' || booking.status === 'APPROVED';
+  const resolvedReference = bookingReference || toBookingReference(booking.id);
+  const createdDate = booking.createdAt ? new Date(booking.createdAt) : null;
+  const hasValidCreatedDate = createdDate && !Number.isNaN(createdDate.getTime());
+  const footerTimeText = hasValidCreatedDate
+    ? `Requested ${formatDistanceToNow(createdDate, { addSuffix: true })}`
+    : `Scheduled for ${format(new Date(booking.startTime), 'MMM d, yyyy')}`;
 
   return (
     <div
@@ -18,7 +24,7 @@ export default function BookingCard({ booking, onCancel, showUser = false, booki
             <MapPin size={14} style={{ color: 'var(--accent-mid)' }} className="flex-shrink-0" />
             <h3 className="font-semibold truncate" style={{ color: 'var(--text-primary)' }}>{booking.resourceName}</h3>
           </div>
-          <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>ID: {booking.resourceId}</p>
+          <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>Ref: {resolvedReference}</p>
         </div>
         <StatusBadge status={booking.status} />
       </div>
@@ -64,7 +70,7 @@ export default function BookingCard({ booking, onCancel, showUser = false, booki
       {/* Footer */}
       <div className="flex items-center justify-between mt-4 pt-4" style={{ borderTop: '1px solid var(--border)' }}>
         <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>
-          {(bookingReference || toBookingReference(booking.id))} · {booking.createdAt ? format(new Date(booking.createdAt), 'MMM d') : 'Just now'}
+          {footerTimeText}
         </span>
         {onCancel && canCancel && (
           <button
@@ -73,7 +79,7 @@ export default function BookingCard({ booking, onCancel, showUser = false, booki
             style={{ color: 'var(--status-rejected)', background: 'var(--status-rejected-bg)', border: '1px solid var(--status-rejected-border)' }}
           >
             <XCircle size={13} />
-            Cancel
+            Cancel and Delete
           </button>
         )}
       </div>

@@ -46,8 +46,8 @@ public class BookingService {
             log.warn("Booking conflict detected for resourceId={} from {} to {}",
                     request.getResourceId(), request.getStartTime(), request.getEndTime());
             throw new BookingConflictException(
-                    "This resource is already booked during the selected time slot. " +
-                    "Please choose a different time."
+                "This resource already has a booking request during the selected time slot. " +
+                "Please choose a different time."
             );
         }
 
@@ -60,6 +60,7 @@ public class BookingService {
                 .endTime(request.getEndTime())
                 .purpose(request.getPurpose())
                 .status(BookingStatus.PENDING)
+            .createdAt(new java.util.Date())
                 .build();
 
         Booking saved = bookingRepository.save(booking);
@@ -104,7 +105,7 @@ public class BookingService {
 
         if (!conflicts.isEmpty()) {
             throw new BookingConflictException(
-                    "Cannot approve: another booking was already approved for this time slot."
+                    "Cannot approve: another active booking already exists for this time slot."
             );
         }
 
@@ -171,6 +172,27 @@ public class BookingService {
         booking.setStatus(BookingStatus.CANCELLED);
         log.info("Booking id={} CANCELLED by userId={} (role={})", id, cancelRequest.getUserId(), cancelRequest.getRole());
         return bookingRepository.save(booking);
+    }
+
+    // =============================================================
+    // PUT /api/bookings/{id}/cancel-delete — Cancel and delete (USER/ADMIN)
+    // =============================================================
+    @Transactional
+    public void cancelAndDeleteBooking(String id, CancelRequest cancelRequest) {
+        Booking booking = findById(id);
+
+        if ("USER".equalsIgnoreCase(cancelRequest.getRole())
+                && !booking.getUserId().equals(cancelRequest.getUserId())) {
+            throw new UnauthorizedException("You can only delete your own bookings.");
+        }
+
+        if (booking.getStatus() != BookingStatus.CANCELLED) {
+            booking.setStatus(BookingStatus.CANCELLED);
+            bookingRepository.save(booking);
+        }
+
+        bookingRepository.deleteById(id);
+        log.info("Booking id={} CANCELLED and DELETED by userId={} (role={})", id, cancelRequest.getUserId(), cancelRequest.getRole());
     }
 
     // =============================================================

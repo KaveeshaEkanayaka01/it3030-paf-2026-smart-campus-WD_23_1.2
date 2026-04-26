@@ -20,6 +20,9 @@ export const bookingApi = {
   // 6. PUT /api/bookings/{id}/cancel
   cancel: (id, userId, role) => api.put(`/bookings/${id}/cancel`, { userId: userId, role: role }),
 
+  // 6b. PUT /api/bookings/{id}/cancel-delete
+  cancelAndDelete: (id, userId, role) => api.put(`/bookings/${id}/cancel-delete`, { userId: userId, role: role }),
+
   // 7. GET /api/bookings/resource/{resourceId}
   getByResource: (resourceId) => api.get(`/bookings/resource/${resourceId}`),
 
