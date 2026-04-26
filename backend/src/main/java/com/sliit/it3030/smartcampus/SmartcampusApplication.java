@@ -6,7 +6,7 @@ import org.springframework.data.mongodb.config.EnableMongoAuditing;
 
 @SpringBootApplication
 @EnableMongoAuditing
-public class SmartcampusApplication {
+public class SmartCampusApplication {
     public static void main(String[] args) {
         SpringApplication.run(SmartcampusApplication.class, args);
     }
