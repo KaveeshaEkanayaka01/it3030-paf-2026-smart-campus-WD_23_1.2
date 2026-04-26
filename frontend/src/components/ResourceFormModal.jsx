@@ -14,8 +14,6 @@ const TYPE_TIME_RULES = {
 
 const GLOBAL_MIN_TIME = '06:00'
 const GLOBAL_MAX_TIME = '22:00'
-const MIN_DURATION_MINUTES = 30
-const MAX_DURATION_MINUTES = 12 * 60
 
 const defaultForm = {
   name: '',
@@ -27,11 +25,6 @@ const defaultForm = {
   imageUrl: '',
   availableFrom: '',
   availableTo: '',
-}
-
-const toMinutes = (time) => {
-  const [hours, minutes] = time.split(':').map(Number)
-  return hours * 60 + minutes
 }
 
 export default function ResourceFormModal({
@@ -50,17 +43,7 @@ export default function ResourceFormModal({
 
   useEffect(() => {
     if (initialData) {
-      setForm({
-        name: initialData.name || '',
-        type: initialData.type || 'LECTURE_HALL',
-        capacity: initialData.capacity ?? '',
-        location: initialData.location || '',
-        description: initialData.description || '',
-        status: initialData.status || 'ACTIVE',
-        imageUrl: initialData.imageUrl || '',
-        availableFrom: initialData.availableFrom || '',
-        availableTo: initialData.availableTo || '',
-      })
+      setForm({ ...defaultForm, ...initialData })
       setImagePreview(initialData.imageUrl || '')
     } else {
       setForm(defaultForm)
@@ -72,157 +55,32 @@ export default function ResourceFormModal({
     setUploadingImage(false)
   }, [initialData, open])
 
-  useEffect(() => {
-    return () => {
-      if (imagePreview && imagePreview.startsWith('blob:')) {
-        URL.revokeObjectURL(imagePreview)
-      }
-    }
-  }, [imagePreview])
-
   if (!open) return null
 
   const handleChange = (e) => {
     if (readOnly) return
-
     const { name, value } = e.target
     setForm((prev) => ({ ...prev, [name]: value }))
     setErrors((prev) => ({ ...prev, [name]: '' }))
-
-    if (name === 'imageUrl' && !imageFile) {
-      setImagePreview(value.trim())
-    }
-  }
-
-  const handleFileChange = (e) => {
-    if (readOnly) return
-
-    const file = e.target.files?.[0]
-    if (!file) return
-
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
-    const maxSize = 5 * 1024 * 1024
-
-    if (!allowedTypes.includes(file.type)) {
-      setErrors((prev) => ({
-        ...prev,
-        imageFile: 'Only JPG, PNG, and WEBP images are allowed',
-      }))
-      return
-    }
-
-    if (file.size > maxSize) {
-      setErrors((prev) => ({
-        ...prev,
-        imageFile: 'Image size must be less than 5MB',
-      }))
-      return
-    }
-
-    if (imagePreview && imagePreview.startsWith('blob:')) {
-      URL.revokeObjectURL(imagePreview)
-    }
-
-    setImageFile(file)
-    setErrors((prev) => ({
-      ...prev,
-      imageFile: '',
-      imageUrl: '',
-    }))
-
-    setImagePreview(URL.createObjectURL(file))
-  }
-
-  const validateForm = () => {
-    const newErrors = {}
-    const trimmedName = form.name.trim()
-    const trimmedLocation = form.location.trim()
-    const trimmedImageUrl = form.imageUrl.trim()
-
-    if (!trimmedName) {
-      newErrors.name = 'Resource name is required'
-    } else if (trimmedName.length < 3) {
-      newErrors.name = 'Resource name must be at least 3 characters'
-    }
-
-    if (!trimmedLocation) {
-      newErrors.location = 'Location is required'
-    } else if (trimmedLocation.length < 2) {
-      newErrors.location = 'Location must be at least 2 characters'
-    }
-
-    if (form.capacity === '') {
-      newErrors.capacity = 'Capacity is required'
-    } else if (Number.isNaN(Number(form.capacity))) {
-      newErrors.capacity = 'Capacity must be a valid number'
-    } else if (Number(form.capacity) <= 0) {
-      newErrors.capacity = 'Capacity must be greater than 0'
-    }
-
-    if (
-      (form.availableFrom && !form.availableTo) ||
-      (!form.availableFrom && form.availableTo)
-    ) {
-      newErrors.availableFrom = 'Please select both start and end time'
-      newErrors.availableTo = 'Please select both start and end time'
-    }
-
-    if (form.availableFrom && form.availableTo) {
-      const fromMinutes = toMinutes(form.availableFrom)
-      const toMinutesValue = toMinutes(form.availableTo)
-      const duration = toMinutesValue - fromMinutes
-
-      if (form.availableFrom >= form.availableTo) {
-        newErrors.availableTo = 'Available To must be later than Available From'
-      } else {
-        if (duration < MIN_DURATION_MINUTES) {
-          newErrors.availableTo = 'Availability duration must be at least 30 minutes'
-        }
-
-        if (duration > MAX_DURATION_MINUTES) {
-          newErrors.availableTo = 'Availability duration cannot exceed 12 hours'
-        }
-
-        if (
-          form.availableFrom < GLOBAL_MIN_TIME ||
-          form.availableTo > GLOBAL_MAX_TIME
-        ) {
-          newErrors.availableFrom = `Availability time must be between ${GLOBAL_MIN_TIME} and ${GLOBAL_MAX_TIME}`
-          newErrors.availableTo = `Availability time must be between ${GLOBAL_MIN_TIME} and ${GLOBAL_MAX_TIME}`
-        }
-
-        const typeRule = TYPE_TIME_RULES[form.type]
-        if (
-          typeRule &&
-          (form.availableFrom < typeRule.from || form.availableTo > typeRule.to)
-        ) {
-          newErrors.availableFrom = `${form.type.replaceAll('_', ' ')} must be available only between ${typeRule.from} and ${typeRule.to}`
-          newErrors.availableTo = `${form.type.replaceAll('_', ' ')} must be available only between ${typeRule.from} and ${typeRule.to}`
-        }
-      }
-    }
-
-    if (!imageFile && trimmedImageUrl) {
-      try {
-        new URL(trimmedImageUrl)
-      } catch {
-        newErrors.imageUrl = 'Please enter a valid image URL'
-      }
-    }
-
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-
     if (readOnly) return
-    if (loading || uploadingImage) return
-    if (!validateForm()) return
+
+    // Validate required fields
+    const newErrors = {}
+    if (!form.name) newErrors.name = 'Name is required'
+    if (!form.capacity) newErrors.capacity = 'Capacity is required'
+    if (!form.location) newErrors.location = 'Location is required'
+    
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors)
+      return
+    }
 
     try {
-      let finalImageUrl = form.imageUrl.trim()
+      let finalImageUrl = form.imageUrl
 
       if (imageFile) {
         setUploadingImage(true)
@@ -231,87 +89,77 @@ export default function ResourceFormModal({
 
       await onSubmit({
         ...form,
-        name: form.name.trim(),
-        location: form.location.trim(),
-        description: form.description.trim(),
         imageUrl: finalImageUrl,
         capacity: Number(form.capacity),
       })
-    } catch (error) {
-      setErrors((prev) => ({
-        ...prev,
-        imageFile: error?.message || 'Image upload failed',
-      }))
     } finally {
       setUploadingImage(false)
     }
   }
 
+  // Light theme styles
   const inputStyle = {
+<<<<<<< HEAD
     background: 'var(--bg-primary)',
     border: '1px solid var(--border)',
     color: 'var(--text-primary)',
+=======
+    backgroundColor: '#f9fafb',
+    border: '1px solid #e5e7eb',
+    color: '#111827',
+    transition: 'all 0.2s ease',
+>>>>>>> 8c600a85 (Refactor ResourceFormModal and ResourcePage for improved UI and functionality)
   }
 
-  const disabledInputStyle = {
-    ...inputStyle,
-    opacity: 0.85,
-    cursor: 'not-allowed',
+  const focusStyle = {
+    borderColor: '#f97316',
+    boxShadow: '0 0 0 3px rgba(249,115,22,0.1)',
+    outline: 'none',
   }
 
   const errorInputStyle = {
     ...inputStyle,
-    border: '1px solid #f87171',
+    border: '1px solid #ef4444',
+    backgroundColor: '#fef2f2',
   }
 
-  const errorTextStyle = {
-    color: '#f87171',
-    fontSize: '12px',
-    marginTop: '6px',
-  }
-
-  const getFieldStyle = (fieldName) => {
-    if (readOnly) return disabledInputStyle
-    return errors[fieldName] ? errorInputStyle : inputStyle
-  }
+  const getFieldStyle = (field) =>
+    errors[field] ? errorInputStyle : inputStyle
 
   return (
     <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm">
       <div className="flex min-h-screen items-center justify-center px-4 py-6">
+<<<<<<< HEAD
         <div className="relative z-10 w-full max-w-2xl rounded-2xl glass-card bg-[rgba(255,255,255,0.98)] p-6 max-h-[90vh] overflow-y-auto shadow-2xl">
           <div className="flex items-center justify-between mb-6">
+=======
+        <div
+          className="w-full max-w-2xl rounded-2xl p-6 max-h-[90vh] overflow-y-auto bg-white shadow-xl"
+          style={{ border: '1px solid #f3f4f6' }}
+        >
+          {/* Header */}
+          <div className="flex justify-between items-start mb-6">
+>>>>>>> 8c600a85 (Refactor ResourceFormModal and ResourcePage for improved UI and functionality)
             <div>
-              <h2
-                className="text-xl font-bold"
-                style={{ color: 'var(--text-primary)' }}
-              >
-                {readOnly
-                  ? 'View Resource'
-                  : initialData
-                  ? 'Edit Resource'
-                  : 'Create Resource'}
+              <h2 className="text-xl font-bold text-gray-900">
+                {readOnly ? 'View Resource' : initialData ? 'Edit Resource' : 'Create Resource'}
               </h2>
-              <p
-                className="text-sm"
-                style={{ color: 'var(--text-secondary)' }}
-              >
-                {readOnly
-                  ? 'Resource details in view-only mode'
-                  : 'Manage resource catalogue details'}
+              <p className="text-sm text-gray-500 mt-0.5">
+                {readOnly ? 'View all resource details' : 'Manage resource details and availability'}
               </p>
             </div>
 
-            <button
-              type="button"
-              onClick={onClose}
-              className="w-10 h-10 rounded-xl flex items-center justify-center hover:bg-white/10"
-              style={{ color: 'var(--text-secondary)' }}
+            <button 
+              onClick={onClose} 
+              className="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-gray-100 transition-colors text-gray-500 hover:text-gray-700"
             >
-              <X size={18} />
+              <X size={20} />
             </button>
           </div>
 
+          {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-5">
+<<<<<<< HEAD
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm mb-2" style={{ color: 'var(--text-primary)' }}>
@@ -385,38 +233,110 @@ export default function ResourceFormModal({
                 </select>
               </div>
 
+=======
+            <div className="grid md:grid-cols-2 gap-4">
+              {/* Name Field */}
+>>>>>>> 8c600a85 (Refactor ResourceFormModal and ResourcePage for improved UI and functionality)
               <div className="md:col-span-2">
-                <label className="block text-sm mb-2" style={{ color: 'var(--text-primary)' }}>
-                  Location
-                </label>
-                <input
-                  name="location"
-                  value={form.location}
-                  onChange={handleChange}
-                  disabled={readOnly}
-                  className="w-full px-4 py-3 rounded-xl text-sm outline-none"
-                  style={getFieldStyle('location')}
+                <label className="block text-sm font-medium text-gray-700 mb-1">Resource Name *</label>
+                <input 
+                  name="name" 
+                  value={form.name} 
+                  onChange={handleChange} 
+                  placeholder="e.g., Main Lecture Hall, Chemistry Lab"
+                  className="px-4 py-3 rounded-xl outline-none w-full transition-all focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20"
+                  style={getFieldStyle('name')}
+                  onFocus={(e) => e.target.style.borderColor = '#f97316'}
+                  onBlur={(e) => {
+                    if (!errors.name) e.target.style.borderColor = '#e5e7eb'
+                  }}
+                  readOnly={readOnly}
                 />
-                {!readOnly && errors.location && <p style={errorTextStyle}>{errors.location}</p>}
+                {errors.name && <p className="text-xs text-red-500 mt-1">{errors.name}</p>}
               </div>
 
+              {/* Type Field */}
               <div>
-                <label className="block text-sm mb-2" style={{ color: 'var(--text-primary)' }}>
-                  Image URL
-                </label>
-                <input
-                  name="imageUrl"
-                  value={form.imageUrl}
+                <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
+                <select 
+                  name="type" 
+                  value={form.type} 
                   onChange={handleChange}
+                  className="px-4 py-3 rounded-xl outline-none w-full transition-all focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20"
+                  style={inputStyle}
                   disabled={readOnly}
-                  className="w-full px-4 py-3 rounded-xl text-sm outline-none"
-                  style={getFieldStyle('imageUrl')}
-                  placeholder="https://example.com/image.jpg"
-                />
-                {!readOnly && errors.imageUrl && <p style={errorTextStyle}>{errors.imageUrl}</p>}
+                >
+                  {TYPES.map(t => (
+                    <option key={t} value={t}>{t.replace('_', ' ')}</option>
+                  ))}
+                </select>
               </div>
 
+              {/* Capacity Field */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Capacity *</label>
+                <input 
+                  name="capacity" 
+                  type="number" 
+                  value={form.capacity} 
+                  onChange={handleChange}
+                  placeholder="Number of people"
+                  className="px-4 py-3 rounded-xl outline-none w-full transition-all focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20"
+                  style={getFieldStyle('capacity')}
+                  readOnly={readOnly}
+                />
+                {errors.capacity && <p className="text-xs text-red-500 mt-1">{errors.capacity}</p>}
+              </div>
+
+              {/* Status Field */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                <select 
+                  name="status" 
+                  value={form.status} 
+                  onChange={handleChange}
+                  className="px-4 py-3 rounded-xl outline-none w-full transition-all focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20"
+                  style={inputStyle}
+                  disabled={readOnly}
+                >
+                  {STATUSES.map(s => (
+                    <option key={s} value={s}>{s.replace('_', ' ')}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Location Field */}
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Location *</label>
+                <input 
+                  name="location" 
+                  value={form.location} 
+                  onChange={handleChange}
+                  placeholder="Building, Floor, Room number"
+                  className="px-4 py-3 rounded-xl outline-none w-full transition-all focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20"
+                  style={getFieldStyle('location')}
+                  readOnly={readOnly}
+                />
+                {errors.location && <p className="text-xs text-red-500 mt-1">{errors.location}</p>}
+              </div>
+
+              {/* Image URL Field */}
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Image URL</label>
+                <input 
+                  name="imageUrl" 
+                  value={form.imageUrl} 
+                  onChange={handleChange}
+                  placeholder="https://example.com/image.jpg"
+                  className="px-4 py-3 rounded-xl outline-none w-full transition-all focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20"
+                  style={inputStyle}
+                  readOnly={readOnly}
+                />
+              </div>
+
+              {/* Image Upload */}
               {!readOnly && (
+<<<<<<< HEAD
                 <div className="md:col-span-2">
                   <label className="block text-sm mb-2" style={{ color: 'var(--text-primary)' }}>
                     Upload Image
@@ -455,123 +375,146 @@ export default function ResourceFormModal({
                           ...prev,
                           imageUrl: 'Unable to load image from the provided URL',
                         }))
+=======
+                <label
+                  className="md:col-span-2 flex items-center justify-center gap-2 px-4 py-4 rounded-xl cursor-pointer transition-all hover:bg-orange-50"
+                  style={{
+                    backgroundColor: '#fef3c7',
+                    border: '1px dashed #f97316',
+                    color: '#ea580c',
+                  }}
+                >
+                  <Upload size={16} />
+                  <span className="text-sm font-medium">Upload Image</span>
+                  <input 
+                    type="file" 
+                    className="hidden" 
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files[0]
+                      if (file) {
+                        setImageFile(file)
+                        setImagePreview(URL.createObjectURL(file))
+>>>>>>> 8c600a85 (Refactor ResourceFormModal and ResourcePage for improved UI and functionality)
                       }
-                    }}
+                    }} 
                   />
+                </label>
+              )}
+
+              {/* Image Preview */}
+              {imagePreview && (
+                <div className="md:col-span-2 relative">
+                  <img 
+                    src={imagePreview} 
+                    alt="Preview" 
+                    className="rounded-xl h-56 w-full object-cover border border-gray-200"
+                  />
+                  {!readOnly && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setImageFile(null)
+                        setImagePreview('')
+                        setForm(prev => ({ ...prev, imageUrl: '' }))
+                      }}
+                      className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                    >
+                      <X size={14} />
+                    </button>
+                  )}
                 </div>
               )}
 
+              {/* Time Fields */}
               <div>
-                <label className="block text-sm mb-2" style={{ color: 'var(--text-primary)' }}>
-                  Available From
-                </label>
-                <input
-                  name="availableFrom"
-                  type="time"
+                <label className="block text-sm font-medium text-gray-700 mb-1">Available From</label>
+                <input 
+                  type="time" 
+                  name="availableFrom" 
                   value={form.availableFrom}
                   onChange={handleChange}
-                  disabled={readOnly}
-                  min={GLOBAL_MIN_TIME}
-                  max={GLOBAL_MAX_TIME}
-                  className="w-full px-4 py-3 rounded-xl text-sm outline-none"
-                  style={getFieldStyle('availableFrom')}
+                  className="px-4 py-3 rounded-xl outline-none w-full transition-all focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20"
+                  style={inputStyle}
+                  readOnly={readOnly}
                 />
-                {!readOnly && errors.availableFrom && (
-                  <p style={errorTextStyle}>{errors.availableFrom}</p>
-                )}
               </div>
 
               <div>
-                <label className="block text-sm mb-2" style={{ color: 'var(--text-primary)' }}>
-                  Available To
-                </label>
-                <input
-                  name="availableTo"
-                  type="time"
+                <label className="block text-sm font-medium text-gray-700 mb-1">Available To</label>
+                <input 
+                  type="time" 
+                  name="availableTo" 
                   value={form.availableTo}
                   onChange={handleChange}
-                  disabled={readOnly}
-                  min={GLOBAL_MIN_TIME}
-                  max={GLOBAL_MAX_TIME}
-                  className="w-full px-4 py-3 rounded-xl text-sm outline-none"
-                  style={getFieldStyle('availableTo')}
+                  className="px-4 py-3 rounded-xl outline-none w-full transition-all focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20"
+                  style={inputStyle}
+                  readOnly={readOnly}
                 />
-                {!readOnly && errors.availableTo && (
-                  <p style={errorTextStyle}>{errors.availableTo}</p>
-                )}
               </div>
 
-              {!readOnly && (
-                <div className="md:col-span-2">
-                  <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
-                    Allowed general time range: {GLOBAL_MIN_TIME} to {GLOBAL_MAX_TIME}. Minimum duration: 30 minutes. Maximum duration: 12 hours.
-                  </p>
-                  <p className="text-xs mt-1" style={{ color: 'var(--text-secondary)' }}>
-                    Type rules — Lecture Hall: 07:00–20:00, Lab: 08:00–18:00, Meeting Room: 08:00–17:00, Equipment: 06:00–22:00.
-                  </p>
-                </div>
-              )}
-
+              {/* Description Field */}
               <div className="md:col-span-2">
-                <label className="block text-sm mb-2" style={{ color: 'var(--text-primary)' }}>
-                  Description
-                </label>
-                <textarea
-                  name="description"
-                  rows="4"
-                  value={form.description}
+                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                <textarea 
+                  name="description" 
+                  value={form.description} 
                   onChange={handleChange}
-                  disabled={readOnly}
-                  className="w-full px-4 py-3 rounded-xl text-sm outline-none resize-none"
-                  style={getFieldStyle('description')}
+                  placeholder="Describe the resource, its features, and any special notes..."
+                  rows={4}
+                  className="px-4 py-3 rounded-xl outline-none w-full transition-all focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 resize-none"
+                  style={inputStyle}
+                  readOnly={readOnly}
                 />
               </div>
             </div>
 
+            {/* Actions */}
             <div className="flex justify-end gap-3 pt-2">
-              <button
+              <button 
+                onClick={onClose} 
                 type="button"
-                onClick={onClose}
-                className="px-5 py-3 rounded-xl text-sm font-semibold"
+                className="px-5 py-2.5 rounded-xl font-medium transition-all hover:bg-gray-100 text-gray-700"
                 style={{
-                  background: 'transparent',
-                  color: 'var(--text-secondary)',
-                  border: '1px solid rgba(148,163,184,0.22)',
+                  border: '1px solid #e5e7eb',
+                  backgroundColor: '#ffffff',
                 }}
               >
-                {readOnly ? 'Close' : 'Cancel'}
+                Cancel
               </button>
 
               {!readOnly && (
-                <button
+                <button 
                   type="submit"
-                  disabled={loading || uploadingImage}
-                  className="px-5 py-3 rounded-xl text-sm font-semibold text-white flex items-center gap-2 disabled:opacity-60"
+                  disabled={uploadingImage}
+                  className="px-5 py-2.5 rounded-xl font-semibold text-white flex items-center gap-2 transition-all hover:shadow-lg hover:scale-105 disabled:opacity-70 disabled:cursor-not-allowed"
                   style={{
-                    background:
-                      'linear-gradient(135deg, var(--accent-start), var(--accent-end))',
+                    background: 'linear-gradient(135deg, #f97316, #ea580c)',
+                    boxShadow: '0 2px 8px rgba(249,115,22,0.25)',
                   }}
                 >
-                  {initialData ? <Save size={16} /> : <PlusCircle size={16} />}
-                  {loading || uploadingImage
-                    ? 'Saving...'
-                    : initialData
-                    ? 'Update'
-                    : 'Create'}
+                  {initialData ? <Save size={18} /> : <PlusCircle size={18} />}
+                  {uploadingImage ? 'Uploading...' : (initialData ? 'Update' : 'Create')}
                 </button>
               )}
 
               {readOnly && (
-                <div
-                  className="px-5 py-3 rounded-xl text-sm font-semibold flex items-center gap-2"
+                <div 
+                  className="px-5 py-2.5 rounded-xl flex items-center gap-2 font-medium"
                   style={{
+<<<<<<< HEAD
                     background: 'var(--status-approved-bg)',
                     color: 'var(--status-approved)',
                     border: '1px solid var(--status-approved-border)',
+=======
+                    backgroundColor: '#fff7ed',
+                    color: '#ea580c',
+                    border: '1px solid #fed7aa',
+>>>>>>> 8c600a85 (Refactor ResourceFormModal and ResourcePage for improved UI and functionality)
                   }}
                 >
-                  <Eye size={16} />
-                  View Only
+                  <Eye size={18} />
+                  View Only Mode
                 </div>
               )}
             </div>
