@@ -17,8 +17,36 @@ const BUSINESS_HOUR_START = 7;
 const BUSINESS_HOUR_END = 22;
 
 function toDate(value) {
+  if (typeof value === 'string') {
+    // Parse datetime-local values as local time to avoid browser-dependent parsing.
+    const localMatch = value.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?$/);
+    if (localMatch) {
+      const [, y, mo, d, h, mi, s = '0'] = localMatch;
+      const localDate = new Date(
+        Number(y),
+        Number(mo) - 1,
+        Number(d),
+        Number(h),
+        Number(mi),
+        Number(s)
+      );
+
+      if (!Number.isNaN(localDate.getTime())) {
+        return localDate;
+      }
+    }
+  }
+
   const parsed = new Date(value);
   return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
+function toLocalDateTimeInputValue(date) {
+  const value = date instanceof Date ? date : new Date(date);
+  if (Number.isNaN(value.getTime())) return '';
+
+  const offsetMs = value.getTimezoneOffset() * 60 * 1000;
+  return new Date(value.getTime() - offsetMs).toISOString().slice(0, 16);
 }
 
 function getDurationHours(start, end) {
@@ -153,7 +181,8 @@ export default function CreateBookingPage() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const today = new Date().toISOString().slice(0, 16);
+  const now = new Date();
+  const today = toLocalDateTimeInputValue(now);
 
   const [form, setForm] = useState({
     resourceId: '',
@@ -242,7 +271,18 @@ export default function CreateBookingPage() {
   };
 
   const handleStartTimeChange = (value) => {
-    setForm(prev => ({ ...prev, startTime: value }));
+    setForm(prev => {
+      const nextForm = { ...prev, startTime: value };
+      const start = toDate(value);
+      const end = toDate(prev.endTime);
+
+      if (start && (!end || end <= start)) {
+        const suggestedEnd = new Date(start.getTime() + 60 * 60 * 1000);
+        nextForm.endTime = toLocalDateTimeInputValue(suggestedEnd);
+      }
+
+      return nextForm;
+    });
     setErrors(prev => ({ ...prev, startTime: '', endTime: '' }));
   };
 
@@ -276,13 +316,16 @@ export default function CreateBookingPage() {
 
     setLoading(true);
     try {
+      const start = toDate(form.startTime);
+      const end = toDate(form.endTime);
+
       await bookingApi.create({
         ...form,
         purpose: form.purpose.trim(),
         userId: currentUser.userId,
         userName: currentUser.userName,
-        startTime: form.startTime + ':00',
-        endTime: form.endTime + ':00',
+        startTime: start ? start.getTime() : form.startTime,
+        endTime: end ? end.getTime() : form.endTime,
       });
       toast.success('Booking created successfully! Awaiting approval.');
       navigate('/my-bookings');

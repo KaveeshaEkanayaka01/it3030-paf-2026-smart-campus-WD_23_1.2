@@ -43,6 +43,8 @@ public class TicketServiceImpl implements TicketService {
         ticket.setStatus(TicketStatus.OPEN);
         ticket.setRejectionReason(null);
         ticket.setResolutionNotes(null);
+        
+        /*starting time */
         ticket.setCreatedAt(LocalDateTime.now());
         ticket.setUpdatedAt(LocalDateTime.now());
         return ticketRepository.save(ticket);
@@ -138,11 +140,12 @@ public class TicketServiceImpl implements TicketService {
 
         ticket.setStatus(status);
         ticket.setUpdatedAt(LocalDateTime.now());
-        
+
+        /*get first response */
         if (ticket.getFirstRespondedAt() == null && isStaffOrAdmin(actorRole)) {
             ticket.setFirstRespondedAt(LocalDateTime.now());
         }
-        
+        /*resolution time */
         if (status == TicketStatus.RESOLVED || status == TicketStatus.CLOSED || status == TicketStatus.REJECTED) {
             if (ticket.getResolvedAt() == null) {
                 ticket.setResolvedAt(LocalDateTime.now());

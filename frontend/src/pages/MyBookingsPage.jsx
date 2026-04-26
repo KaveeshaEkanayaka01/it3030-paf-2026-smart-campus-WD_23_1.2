@@ -9,6 +9,22 @@ import { buildBookingReferenceMap } from '../utils/bookingReference';
 
 const FILTER_OPTIONS = ['ALL', 'PENDING', 'APPROVED', 'REJECTED', 'CANCELLED'];
 
+function getBookingSortTimestamp(booking) {
+  const createdAtMs = new Date(booking?.createdAt || '').getTime();
+  if (Number.isFinite(createdAtMs) && createdAtMs > 0) return createdAtMs;
+
+  const startTimeMs = new Date(booking?.startTime || '').getTime();
+  if (Number.isFinite(startTimeMs) && startTimeMs > 0) return startTimeMs;
+
+  return 0;
+}
+
+function sortBookingsNewestFirst(bookings) {
+  return [...(bookings || [])].sort(
+    (a, b) => getBookingSortTimestamp(b) - getBookingSortTimestamp(a)
+  );
+}
+
 export default function MyBookingsPage() {
   const { currentUser } = useUser();
   const [bookings, setBookings] = useState([]);
@@ -20,7 +36,7 @@ export default function MyBookingsPage() {
     setLoading(true);
     try {
       const res = await bookingApi.getMyBookings(currentUser.userId);
-      setBookings(res.data);
+      setBookings(sortBookingsNewestFirst(res.data));
     } catch {
       toast.error('Failed to load your bookings.');
     } finally {
@@ -33,13 +49,13 @@ export default function MyBookingsPage() {
 
 
   const handleCancel = async (id) => {
-    if (!window.confirm('Cancel this booking?')) return;
+    if (!window.confirm('Cancel and delete this booking?')) return;
     try {
-      await bookingApi.cancel(id, currentUser.userId, 'USER');
-      toast.success('Booking cancelled.');
-      fetchBookings();
+      await bookingApi.cancelAndDelete(id, currentUser.userId, 'USER');
+      setBookings(prev => prev.filter(booking => booking.id !== id));
+      toast.success('Booking cancelled and deleted.');
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to cancel booking.');
+      toast.error(err.response?.data?.message || 'Failed to cancel and delete booking.');
     }
   };
 

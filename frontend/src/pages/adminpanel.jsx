@@ -276,10 +276,10 @@ export const AdminPanelPage = () => {
       <section className="rounded-3xl border p-4 md:p-6" style={{ borderColor: 'var(--border)', background: 'linear-gradient(135deg, rgba(255,255,255,0.96), rgba(249,250,251,0.94))' }}>
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <p className="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[10px] font-black uppercase tracking-wider" style={{ borderColor: 'rgba(249,115,22,0.22)', color: 'var(--primary)', background: 'rgba(249,115,22,0.06)' }}>
+            <p className="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[10px] font-black uppercase tracking-wider" style={{ borderColor: 'rgba(99, 102, 241, 0.22)', color: 'var(--accent-indigo)', background: 'rgba(99, 102, 241, 0.06)' }}>
               <Shield size={10} /> Admin Ticket Control
             </p>
-            <h1 className="mt-2 text-2xl font-black md:text-3xl" style={{ color: 'var(--text-primary)' }}>Incident Operations Desk</h1>
+            <h1 className="mt-2 text-2xl font-black md:text-3xl text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-purple-500 to-rose-500">Incident Operations Desk</h1>
             
           </div>
 
@@ -370,7 +370,7 @@ export const AdminPanelPage = () => {
                   <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                     <div className="min-w-0">
                       <p className="text-[10px] font-black uppercase tracking-[0.24em]" style={{ color: 'var(--text-secondary)' }}>{ticket.category || 'Ticket'}</p>
-                      <p className="mt-2 text-sm font-black leading-6 line-clamp-2" style={{ color: 'var(--text-primary)' }}>{ticket.location || 'No location provided'}</p>
+                      <p className="mt-2 text-sm font-black leading-6 line-clamp-2 transition-colors group-hover:text-indigo-600" style={{ color: 'var(--text-primary)' }}>{ticket.location || 'No location provided'}</p>
                     </div>
                     <TicketStatusBadge status={ticket.status} />
                   </div>

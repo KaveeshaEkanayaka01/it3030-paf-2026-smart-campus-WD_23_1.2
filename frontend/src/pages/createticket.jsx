@@ -227,7 +227,7 @@ export const CreateTicketPage = () => {
               <Sparkles size={12} style={{ color: 'var(--primary)' }} />
               Incident Desk
             </p>
-            <h1 className="text-4xl font-extrabold uppercase tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-amber-500 md:text-5xl">Create Ticket</h1>
+            <h1 className="text-4xl font-extrabold uppercase tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-orange-500 via-rose-500 to-indigo-600 md:text-5xl">Create Ticket</h1>
             <p className="mt-4 max-w-md text-sm leading-relaxed font-medium" style={{ color: 'var(--text-secondary)' }}>
               Report maintenance issues with clear details so technicians can respond faster and accurately.
             </p>
@@ -244,14 +244,14 @@ export const CreateTicketPage = () => {
                 <p className="mt-1 text-[10px] font-bold uppercase tracking-widest truncate" style={{ color: 'var(--muted)' }}>ID: {currentUser}</p>
               )}
             </div>
-            <div className="glass-panel rounded-xl p-5 border-l-[3px] border-l-amber-500 relative overflow-hidden group" style={{ background: 'var(--bg-primary)', border: '1px solid var(--border)', borderLeftWidth: '3px' }}>
+            <div className="glass-panel rounded-xl p-5 border-l-[3px] border-l-rose-500 relative overflow-hidden group" style={{ background: 'var(--bg-primary)', border: '1px solid var(--border)', borderLeftWidth: '3px' }}>
               <div className="absolute right-[-10px] top-[-10px] opacity-5 group-hover:opacity-10 transition-opacity">
                  <Tag size={100} />
               </div>
               <p className="text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color: 'var(--text-secondary)' }}>Attachment Limit</p>
               <p className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>Up to 3 images per ticket</p>
             </div>
-            <div className="glass-panel rounded-xl p-5 border-l-[3px] border-l-orange-600 relative overflow-hidden group" style={{ background: 'var(--bg-primary)', border: '1px solid var(--border)', borderLeftWidth: '3px' }}>
+            <div className="glass-panel rounded-xl p-5 border-l-[3px] border-l-indigo-600 relative overflow-hidden group" style={{ background: 'var(--bg-primary)', border: '1px solid var(--border)', borderLeftWidth: '3px' }}>
               <div className="absolute right-[-10px] top-[-10px] opacity-5 group-hover:opacity-10 transition-opacity">
                  <Send size={100} />
               </div>

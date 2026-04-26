@@ -11,10 +11,12 @@ import {
   MessageCircleWarning,
   Wrench,
   Timer,
-  Clock
+  Clock,
+  X
 } from 'lucide-react';
 import { getCurrentUserId, getCurrentUserRole, ticketService } from '../api/ticketService';
 import { authApi } from '../api/authApi';
+import { API_BASE_URL } from '../api/httpClient';
 import { useAuth } from '../context/AuthContext';
 import { TicketStatusBadge } from '../components/TicketStatusBadge';
 import { CommentSection } from '../components/commentSection';
@@ -41,6 +43,7 @@ export const TicketDetailsPage = () => {
   const [technicianOptions, setTechnicianOptions] = useState([]);
   const [userDisplayMap, setUserDisplayMap] = useState({});
   const [assigning, setAssigning] = useState(false);
+  const [selectedModalImage, setSelectedModalImage] = useState(null);
   const currentUserId = user?.id || '';
   const currentUserRole = useMemo(() => {
     const roles = Array.isArray(user?.roles) ? user.roles : [];
@@ -397,7 +400,7 @@ export const TicketDetailsPage = () => {
           <div className="glass-panel rounded-3xl p-5 shadow-xl backdrop-blur-md" style={{ background: 'rgba(255, 255, 255, 0.7)', border: '1px solid var(--border)' }}>
             <div className="mb-4 flex items-center justify-between gap-4 border-b pb-4" style={{ borderColor: 'var(--border)' }}>
               <div>
-                <h1 className="text-xl font-extrabold uppercase tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-amber-500">{ticket.category || 'Ticket'}</h1>
+                <h1 className="text-xl font-extrabold uppercase tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-orange-500 via-rose-500 to-indigo-600">{ticket.category || 'Ticket'}</h1>
                 <p className="text-[10px] font-bold font-mono tracking-wider" style={{ color: 'var(--muted)' }}>#{ticket.id}</p>
               </div>
               <div className="scale-125 origin-right">
@@ -407,20 +410,21 @@ export const TicketDetailsPage = () => {
 
             <div className="mb-6 flex flex-wrap gap-3 border-b pb-6" style={{ borderColor: 'var(--border)' }}>
               <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border text-[10px] font-bold uppercase tracking-wider" style={{ background: 'var(--bg-primary)', borderColor: 'var(--border)', color: 'var(--text-secondary)' }}>
-                <User size={12} style={{ color: 'var(--primary)' }} />
+                <User size={12} style={{ color: 'var(--accent-indigo)' }} />
                 <span>By: {createdByDisplayName}</span>
               </div>
               <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border text-[10px] font-bold uppercase tracking-wider" style={{ background: 'var(--bg-primary)', borderColor: 'var(--border)', color: 'var(--text-secondary)' }}>
-                <Calendar size={12} style={{ color: 'var(--accent-mid)' }} />
+                <Calendar size={12} style={{ color: 'var(--accent-purple)' }} />
                 <span>{ticket.createdAt ? new Date(ticket.createdAt).toLocaleDateString() : 'N/A'}</span>
               </div>
               <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border text-[10px] font-bold uppercase tracking-wider" style={{ background: 'var(--bg-primary)', borderColor: 'var(--border)', color: 'var(--text-secondary)' }}>
-                <MapPin size={12} style={{ color: 'var(--status-approved)' }} />
+                <MapPin size={12} style={{ color: 'var(--accent-rose)' }} />
                 <span className="max-w-[150px] truncate">{ticket.location || 'N/A'}</span>
               </div>
             </div>
 
             {/* Service-Level Agreement Timers (SLA) */}
+            
             <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2">
               <div className="glass-panel-strong p-4 rounded-2xl relative overflow-hidden group" style={{ background: 'var(--status-approved-bg)', border: '1px solid var(--status-approved-border)' }}>
                 <div className="absolute -right-4 -top-4 opacity-5 group-hover:opacity-10 transition-opacity">
@@ -492,7 +496,7 @@ export const TicketDetailsPage = () => {
 
             <div className="mt-8">
               <h3 className="mb-4 flex items-center gap-2 text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--text-primary)' }}>
-                <ImageIcon size={14} style={{ color: 'var(--primary)' }} />
+                <ImageIcon size={14} style={{ color: 'var(--accent-cyan)' }} />
                 Attachments ({attachments.length})
               </h3>
 
@@ -501,10 +505,29 @@ export const TicketDetailsPage = () => {
               ) : (
                 <div className="flex flex-wrap gap-2">
                   {attachments.map((attachment) => (
-                    <div key={attachment.id} className="flex items-center gap-2 glass-panel px-3 py-1.5 rounded-lg border transition-all hover:glass-panel-strong" style={{ background: 'var(--bg-primary)', border: '1px solid var(--border)' }}>
-                      <span className="truncate text-xs font-semibold" style={{ color: 'var(--text-primary)' }}>{attachment.fileName}</span>
-                      <span className="text-[8px] font-bold uppercase tracking-wider bg-black/5 px-1.5 py-0.5 rounded" style={{ color: 'var(--text-secondary)' }}>{attachment.fileType || 'file'}</span>
-                    </div>
+                    <button
+                      key={attachment.id}
+                      type="button"
+                      onClick={() => setSelectedModalImage(attachment)}
+                      className="group flex items-center gap-2 glass-panel px-3 py-1.5 rounded-lg border transition-all hover:glass-panel-strong hover:scale-105 active:scale-95"
+                      style={{ background: 'var(--bg-primary)', border: '1px solid var(--border)' }}
+                    >
+                      <div className="h-6 w-6 overflow-hidden rounded bg-slate-100 flex items-center justify-center border" style={{ borderColor: 'var(--border)' }}>
+                        <img 
+                          src={`${API_BASE_URL}/uploads/${attachment.fileName}`} 
+                          alt=""
+                          className="h-full w-full object-cover"
+                          onError={(e) => {
+                            e.target.style.display = 'none';
+                          }}
+                        />
+                        <ImageIcon size={10} className="text-cyan-500 absolute" />
+                      </div>
+                      <span className="truncate text-xs font-semibold max-w-[120px]" style={{ color: 'var(--text-primary)' }}>{attachment.fileName}</span>
+                      <span className="text-[8px] font-bold uppercase tracking-wider bg-black/5 px-1.5 py-0.5 rounded" style={{ color: 'var(--text-secondary)' }}>
+                        {attachment.fileType || 'IMG'}
+                      </span>
+                    </button>
                   ))}
                 </div>
               )}
@@ -642,6 +665,37 @@ export const TicketDetailsPage = () => {
           )}
         </div>
       </div>
+
+      {/* Image Preview Modal */}
+      {selectedModalImage && (
+        <div 
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-10 animate-in fade-in zoom-in duration-200"
+          style={{ background: 'rgba(15, 23, 42, 0.9)', backdropFilter: 'blur(8px)' }}
+          onClick={() => setSelectedModalImage(null)}
+        >
+          <div className="relative max-h-full max-w-5xl overflow-hidden rounded-3xl shadow-2xl border" style={{ borderColor: 'rgba(255,255,255,0.1)' }} onClick={e => e.stopPropagation()}>
+            <button 
+              onClick={() => setSelectedModalImage(null)}
+              className="absolute right-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-md transition-all hover:bg-black/60 hover:scale-110"
+            >
+              <X size={20} />
+            </button>
+            <img 
+              src={`${API_BASE_URL}/uploads/${selectedModalImage.fileName}`} 
+              alt={selectedModalImage.fileName}
+              className="max-h-[85vh] w-auto object-contain"
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.src = 'https://placehold.co/800x600?text=Image+Unavailable';
+              }}
+            />
+            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6 pt-12">
+               <p className="text-sm font-bold text-white uppercase tracking-widest">{selectedModalImage.fileName}</p>
+               <p className="mt-1 text-[10px] font-medium text-white/60">Ticket Attachment</p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

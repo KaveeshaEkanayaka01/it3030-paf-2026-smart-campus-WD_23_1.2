@@ -92,6 +92,17 @@ public class BookingController {
     }
 
     // ──────────────────────────────────────────────
+    // 6b. PUT /api/bookings/{id}/cancel-delete — Cancel + Delete
+    // ──────────────────────────────────────────────
+    @PutMapping("/{id}/cancel-delete")
+    public ResponseEntity<Void> cancelAndDeleteBooking(
+            @PathVariable String id,
+            @RequestBody CancelRequest cancelRequest) {
+        bookingService.cancelAndDeleteBooking(id, cancelRequest);
+        return ResponseEntity.noContent().build();
+    }
+
+    // ──────────────────────────────────────────────
     // 7. GET /api/bookings/resource/{resourceId} — Resource calendar
     // ──────────────────────────────────────────────
     @GetMapping("/resource/{resourceId}")
