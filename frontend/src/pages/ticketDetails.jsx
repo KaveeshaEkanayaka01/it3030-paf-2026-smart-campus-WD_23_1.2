@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { getCurrentUserId, getCurrentUserRole, ticketService } from '../api/ticketService';
 import { authApi } from '../api/authApi';
+import { API_BASE_URL } from '../api/httpClient';
 import { useAuth } from '../context/AuthContext';
 import { TicketStatusBadge } from '../components/TicketStatusBadge';
 import { CommentSection } from '../components/commentSection';
@@ -397,7 +398,7 @@ export const TicketDetailsPage = () => {
           <div className="glass-panel rounded-3xl p-5 shadow-xl backdrop-blur-md" style={{ background: 'rgba(255, 255, 255, 0.7)', border: '1px solid var(--border)' }}>
             <div className="mb-4 flex items-center justify-between gap-4 border-b pb-4" style={{ borderColor: 'var(--border)' }}>
               <div>
-                <h1 className="text-xl font-extrabold uppercase tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-amber-500">{ticket.category || 'Ticket'}</h1>
+                <h1 className="text-xl font-extrabold uppercase tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-orange-500 via-rose-500 to-indigo-600">{ticket.category || 'Ticket'}</h1>
                 <p className="text-[10px] font-bold font-mono tracking-wider" style={{ color: 'var(--muted)' }}>#{ticket.id}</p>
               </div>
               <div className="scale-125 origin-right">
@@ -407,15 +408,15 @@ export const TicketDetailsPage = () => {
 
             <div className="mb-6 flex flex-wrap gap-3 border-b pb-6" style={{ borderColor: 'var(--border)' }}>
               <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border text-[10px] font-bold uppercase tracking-wider" style={{ background: 'var(--bg-primary)', borderColor: 'var(--border)', color: 'var(--text-secondary)' }}>
-                <User size={12} style={{ color: 'var(--primary)' }} />
+                <User size={12} style={{ color: 'var(--accent-indigo)' }} />
                 <span>By: {createdByDisplayName}</span>
               </div>
               <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border text-[10px] font-bold uppercase tracking-wider" style={{ background: 'var(--bg-primary)', borderColor: 'var(--border)', color: 'var(--text-secondary)' }}>
-                <Calendar size={12} style={{ color: 'var(--accent-mid)' }} />
+                <Calendar size={12} style={{ color: 'var(--accent-purple)' }} />
                 <span>{ticket.createdAt ? new Date(ticket.createdAt).toLocaleDateString() : 'N/A'}</span>
               </div>
               <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border text-[10px] font-bold uppercase tracking-wider" style={{ background: 'var(--bg-primary)', borderColor: 'var(--border)', color: 'var(--text-secondary)' }}>
-                <MapPin size={12} style={{ color: 'var(--status-approved)' }} />
+                <MapPin size={12} style={{ color: 'var(--accent-rose)' }} />
                 <span className="max-w-[150px] truncate">{ticket.location || 'N/A'}</span>
               </div>
             </div>
@@ -492,18 +493,36 @@ export const TicketDetailsPage = () => {
 
             <div className="mt-8">
               <h3 className="mb-4 flex items-center gap-2 text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--text-primary)' }}>
-                <ImageIcon size={14} style={{ color: 'var(--primary)' }} />
+                <ImageIcon size={14} style={{ color: 'var(--accent-cyan)' }} />
                 Attachments ({attachments.length})
               </h3>
 
               {attachments.length === 0 ? (
                 <p className="text-[10px] font-medium p-3 rounded-xl glass-panel" style={{ background: 'var(--bg-primary)', border: '1px solid var(--border)', color: 'var(--muted)' }}>No attachments uploaded for this ticket.</p>
               ) : (
-                <div className="flex flex-wrap gap-2">
+                <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
                   {attachments.map((attachment) => (
-                    <div key={attachment.id} className="flex items-center gap-2 glass-panel px-3 py-1.5 rounded-lg border transition-all hover:glass-panel-strong" style={{ background: 'var(--bg-primary)', border: '1px solid var(--border)' }}>
-                      <span className="truncate text-xs font-semibold" style={{ color: 'var(--text-primary)' }}>{attachment.fileName}</span>
-                      <span className="text-[8px] font-bold uppercase tracking-wider bg-black/5 px-1.5 py-0.5 rounded" style={{ color: 'var(--text-secondary)' }}>{attachment.fileType || 'file'}</span>
+                    <div 
+                      key={attachment.id} 
+                      className="group/item relative flex flex-col gap-2 overflow-hidden rounded-2xl border transition-all hover:shadow-xl" 
+                      style={{ background: 'var(--bg-primary)', borderColor: 'var(--border)' }}
+                    >
+                      <div className="aspect-square w-full overflow-hidden bg-slate-100">
+                        <img 
+                          src={`${API_BASE_URL}/uploads/${attachment.fileName}`} 
+                          alt={attachment.fileName}
+                          className="h-full w-full object-cover transition-transform duration-500 group-hover/item:scale-110"
+                          onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.src = 'https://placehold.co/400x400?text=Image+Unavailable';
+                          }}
+                        />
+                      </div>
+                      <div className="p-2 pt-0">
+                         <p className="truncate text-[9px] font-bold uppercase tracking-tight text-slate-500" title={attachment.fileName}>
+                           {attachment.fileName}
+                         </p>
+                      </div>
                     </div>
                   ))}
                 </div>

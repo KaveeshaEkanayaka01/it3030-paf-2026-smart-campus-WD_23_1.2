@@ -198,10 +198,10 @@ export const TechnicianPanelPage = () => {
       <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between relative z-10">
         <div>
           <p className="inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest mb-3" style={{ borderColor: 'var(--border)', background: 'var(--bg-primary)', color: 'var(--text-secondary)' }}>
-            <Wrench size={12} style={{ color: 'var(--primary)' }} />
+            <Wrench size={12} style={{ color: 'var(--accent-indigo)' }} />
             Technician Workspace
           </p>
-          <h1 className="text-3xl font-black uppercase tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-amber-500">Action Queue</h1>
+          <h1 className="text-3xl font-black uppercase tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-purple-500 to-rose-500">Action Queue</h1>
           <p className="mt-1 text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>
             Focused board for your assigned work and available tickets.
           </p>
@@ -236,10 +236,10 @@ export const TechnicianPanelPage = () => {
         </div>
         <div className="glass-panel-strong rounded-3xl p-5 shadow-xl backdrop-blur-md relative overflow-hidden group" style={{ background: 'rgba(255, 255, 255, 0.8)', border: '1px solid var(--border)' }}>
           <div className="absolute -right-4 -top-4 opacity-5 group-hover:opacity-10 transition-opacity">
-            <ClipboardList size={80} style={{ color: 'var(--status-approved)' }} />
+            <ClipboardList size={80} style={{ color: 'var(--accent-indigo)' }} />
           </div>
           <p className="text-[9px] font-bold uppercase tracking-widest relative z-10" style={{ color: 'var(--text-secondary)' }}>Assigned to me</p>
-          <p className="mt-1 text-3xl font-black relative z-10" style={{ color: 'var(--status-approved)' }}>{assignedToMe.length}</p>
+          <p className="mt-1 text-3xl font-black relative z-10" style={{ color: 'var(--accent-indigo)' }}>{assignedToMe.length}</p>
         </div>
       </div>
 

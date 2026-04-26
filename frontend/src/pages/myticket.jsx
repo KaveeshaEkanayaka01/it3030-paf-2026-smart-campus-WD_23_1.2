@@ -55,8 +55,8 @@ export const MyTicketsPage = () => {
     <div className="max-w-7xl mx-auto px-4 py-12 page-enter">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight" style={{ color: 'var(--text-primary)' }}>Incident Tickets</h1>
-          <p className="mt-2 font-semibold uppercase text-xs tracking-widest" style={{ color: 'var(--text-secondary)' }}>Track and manage your reported issues.</p>
+          <h1 className="text-3xl font-black uppercase tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-orange-500 via-rose-500 to-indigo-600">Incident Tickets</h1>
+          <p className="mt-2 font-bold uppercase text-[10px] tracking-widest" style={{ color: 'var(--text-secondary)' }}>Track and manage your reported issues.</p>
         </div>
         <div className="flex flex-wrap gap-4">
           <button
