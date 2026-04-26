@@ -201,21 +201,10 @@ export default function ResourcePage() {
           </div>
         </div>
 
-<<<<<<< HEAD
-        <div
-          className="glass-card p-4 mb-6 flex flex-col lg:flex-row gap-3 items-stretch"
-          style={{
-            background: 'rgba(255, 255, 255, 0.7)',
-            border: '1px solid var(--border)',
-          }}
-        >
-          <div className="flex-1 relative">
-=======
         {/* Search & Filters Panel - Light Theme */}
         <div className="rounded-2xl mb-6 p-5 bg-white shadow-sm border border-gray-200">
           {/* Search Row */}
           <div className="relative mb-4">
->>>>>>> 8c600a85 (Refactor ResourceFormModal and ResourcePage for improved UI and functionality)
             <Search
               size={18}
               className="absolute left-4 top-1/2 -translate-y-1/2 text-orange-500"
@@ -224,76 +213,6 @@ export default function ResourcePage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search by name, type, location, or description..."
-<<<<<<< HEAD
-              className="w-full pl-11 pr-4 py-4 rounded-2xl text-sm outline-none"
-              style={{
-                background: 'var(--bg-primary)',
-                border: '1px solid var(--border)',
-                color: 'var(--text-primary)',
-              }}
-            />
-          </div>
-
-          <select
-            value={typeFilter}
-            onChange={(e) => setTypeFilter(e.target.value)}
-            className="px-4 py-4 rounded-2xl text-sm outline-none min-w-[160px]"
-            style={{
-              background: 'var(--bg-primary)',
-              border: '1px solid var(--border)',
-              color: 'var(--text-primary)',
-            }}
-          >
-            {FILTER_TYPES.map((type) => (
-              <option key={type} value={type}>
-                {type === 'ALL' ? 'All Types' : type.replaceAll('_', ' ')}
-              </option>
-            ))}
-          </select>
-
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-4 py-4 rounded-2xl text-sm outline-none min-w-[180px]"
-            style={{
-              background: 'var(--bg-primary)',
-              border: '1px solid var(--border)',
-              color: 'var(--text-primary)',
-            }}
-          >
-            {FILTER_STATUS.map((status) => (
-              <option key={status} value={status}>
-                {status === 'ALL' ? 'All Statuses' : status.replaceAll('_', ' ')}
-              </option>
-            ))}
-          </select>
-
-          <input
-            value={locationFilter}
-            onChange={(e) => setLocationFilter(e.target.value)}
-            placeholder="Filter by location"
-            className="px-4 py-4 rounded-2xl text-sm outline-none min-w-[180px]"
-            style={{
-              background: 'var(--bg-primary)',
-              border: '1px solid var(--border)',
-              color: 'var(--text-primary)',
-            }}
-          />
-
-          <input
-            type="number"
-            min="0"
-            value={minCapacityFilter}
-            onChange={(e) => setMinCapacityFilter(e.target.value)}
-            placeholder="Min capacity"
-            className="px-4 py-4 rounded-2xl text-sm outline-none min-w-[160px]"
-            style={{
-              background: 'var(--bg-primary)',
-              border: '1px solid var(--border)',
-              color: 'var(--text-primary)',
-            }}
-          />
-=======
               className="w-full pl-11 pr-4 py-3.5 rounded-xl text-sm outline-none transition-all focus:ring-2 focus:ring-orange-500/30 focus:border-orange-500 border border-gray-200 bg-gray-50 text-gray-900"
             />
           </div>
@@ -372,7 +291,6 @@ export default function ResourcePage() {
                 className="w-full pl-9 pr-3 py-2.5 rounded-xl text-sm outline-none transition-all focus:ring-2 focus:ring-orange-500/30 focus:border-orange-500 border border-gray-200 bg-gray-50 text-gray-900"
               />
             </div>
->>>>>>> 8c600a85 (Refactor ResourceFormModal and ResourcePage for improved UI and functionality)
 
             {/* Layout Toggle */}
             <div className="flex gap-2">
@@ -381,20 +299,6 @@ export default function ResourcePage() {
                 onClick={() => setLayout('grid')}
                 className={`flex-1 rounded-xl flex items-center justify-center gap-2 py-2.5 text-sm font-medium transition-all duration-200 ${
                   layout === 'grid'
-<<<<<<< HEAD
-                    ? 'linear-gradient(135deg, var(--accent-start), var(--accent-end))'
-                    : 'var(--bg-primary)',
-                color: layout === 'grid' ? '#fff' : 'var(--text-secondary)',
-                border: layout === 'grid' ? 'none' : '1px solid var(--border)',
-                boxShadow:
-                  layout === 'grid'
-                    ? '0 8px 20px rgba(249,115,22,0.25)'
-                    : 'none',
-              }}
-            >
-              <Grid2X2 size={18} />
-            </button>
-=======
                     ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-md'
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border border-gray-200'
                 }`}
@@ -402,27 +306,12 @@ export default function ResourcePage() {
                 <Grid2X2 size={16} />
                 Grid
               </button>
->>>>>>> 8c600a85 (Refactor ResourceFormModal and ResourcePage for improved UI and functionality)
 
               <button
                 type="button"
                 onClick={() => setLayout('list')}
                 className={`flex-1 rounded-xl flex items-center justify-center gap-2 py-2.5 text-sm font-medium transition-all duration-200 ${
                   layout === 'list'
-<<<<<<< HEAD
-                    ? 'linear-gradient(135deg, var(--accent-start), var(--accent-end))'
-                    : 'var(--bg-primary)',
-                color: layout === 'list' ? '#fff' : 'var(--text-secondary)',
-                border: layout === 'list' ? 'none' : '1px solid var(--border)',
-                boxShadow:
-                  layout === 'list'
-                    ? '0 8px 20px rgba(249,115,22,0.25)'
-                    : 'none',
-              }}
-            >
-              <List size={18} />
-            </button>
-=======
                     ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-md'
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border border-gray-200'
                 }`}
@@ -431,7 +320,6 @@ export default function ResourcePage() {
                 List
               </button>
             </div>
->>>>>>> 8c600a85 (Refactor ResourceFormModal and ResourcePage for improved UI and functionality)
           </div>
         </div>
 

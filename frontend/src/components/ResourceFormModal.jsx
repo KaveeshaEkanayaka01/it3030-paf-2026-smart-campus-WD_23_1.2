@@ -99,16 +99,10 @@ export default function ResourceFormModal({
 
   // Light theme styles
   const inputStyle = {
-<<<<<<< HEAD
-    background: 'var(--bg-primary)',
-    border: '1px solid var(--border)',
-    color: 'var(--text-primary)',
-=======
     backgroundColor: '#f9fafb',
     border: '1px solid #e5e7eb',
     color: '#111827',
     transition: 'all 0.2s ease',
->>>>>>> 8c600a85 (Refactor ResourceFormModal and ResourcePage for improved UI and functionality)
   }
 
   const focusStyle = {
@@ -129,17 +123,12 @@ export default function ResourceFormModal({
   return (
     <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm">
       <div className="flex min-h-screen items-center justify-center px-4 py-6">
-<<<<<<< HEAD
-        <div className="relative z-10 w-full max-w-2xl rounded-2xl glass-card bg-[rgba(255,255,255,0.98)] p-6 max-h-[90vh] overflow-y-auto shadow-2xl">
-          <div className="flex items-center justify-between mb-6">
-=======
         <div
           className="w-full max-w-2xl rounded-2xl p-6 max-h-[90vh] overflow-y-auto bg-white shadow-xl"
           style={{ border: '1px solid #f3f4f6' }}
         >
           {/* Header */}
           <div className="flex justify-between items-start mb-6">
->>>>>>> 8c600a85 (Refactor ResourceFormModal and ResourcePage for improved UI and functionality)
             <div>
               <h2 className="text-xl font-bold text-gray-900">
                 {readOnly ? 'View Resource' : initialData ? 'Edit Resource' : 'Create Resource'}
@@ -159,84 +148,8 @@ export default function ResourceFormModal({
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-5">
-<<<<<<< HEAD
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm mb-2" style={{ color: 'var(--text-primary)' }}>
-                  Name
-                </label>
-                <input
-                  name="name"
-                  value={form.name}
-                  onChange={handleChange}
-                  disabled={readOnly}
-                  className="w-full px-4 py-3 rounded-xl text-sm outline-none"
-                  style={getFieldStyle('name')}
-                />
-                {!readOnly && errors.name && <p style={errorTextStyle}>{errors.name}</p>}
-              </div>
-
-              <div>
-                <label className="block text-sm mb-2" style={{ color: 'var(--text-primary)' }}>
-                  Type
-                </label>
-                <select
-                  name="type"
-                  value={form.type}
-                  onChange={handleChange}
-                  disabled={readOnly}
-                  className="w-full px-4 py-3 rounded-xl text-sm outline-none"
-                  style={getFieldStyle('type')}
-                >
-                  {TYPES.map((type) => (
-                    <option key={type} value={type}>
-                      {type.replaceAll('_', ' ')}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm mb-2" style={{ color: 'var(--text-primary)' }}>
-                  Capacity
-                </label>
-                <input
-                  name="capacity"
-                  type="number"
-                  min="1"
-                  value={form.capacity}
-                  onChange={handleChange}
-                  disabled={readOnly}
-                  className="w-full px-4 py-3 rounded-xl text-sm outline-none"
-                  style={getFieldStyle('capacity')}
-                />
-                {!readOnly && errors.capacity && <p style={errorTextStyle}>{errors.capacity}</p>}
-              </div>
-
-              <div>
-                <label className="block text-sm mb-2" style={{ color: 'var(--text-primary)' }}>
-                  Status
-                </label>
-                <select
-                  name="status"
-                  value={form.status}
-                  onChange={handleChange}
-                  disabled={readOnly}
-                  className="w-full px-4 py-3 rounded-xl text-sm outline-none"
-                  style={getFieldStyle('status')}
-                >
-                  {STATUSES.map((status) => (
-                    <option key={status} value={status}>
-                      {status.replaceAll('_', ' ')}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-=======
             <div className="grid md:grid-cols-2 gap-4">
               {/* Name Field */}
->>>>>>> 8c600a85 (Refactor ResourceFormModal and ResourcePage for improved UI and functionality)
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-1">Resource Name *</label>
                 <input 
@@ -336,46 +249,6 @@ export default function ResourceFormModal({
 
               {/* Image Upload */}
               {!readOnly && (
-<<<<<<< HEAD
-                <div className="md:col-span-2">
-                  <label className="block text-sm mb-2" style={{ color: 'var(--text-primary)' }}>
-                    Upload Image
-                  </label>
-
-                  <label
-                    className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl cursor-pointer text-sm"
-                    style={{
-                      background: 'var(--bg-primary)',
-                      border: '1px dashed var(--border)',
-                      color: 'var(--text-primary)',
-                    }}
-                  >
-                    <Upload size={16} />
-                    <span>{imageFile ? imageFile.name : 'Choose image from device'}</span>
-                    <input
-                      type="file"
-                      accept="image/png,image/jpeg,image/jpg,image/webp"
-                      onChange={handleFileChange}
-                      className="hidden"
-                    />
-                  </label>
-                  {errors.imageFile && <p style={errorTextStyle}>{errors.imageFile}</p>}
-                </div>
-              )}
-
-              {imagePreview && (
-                <div className="md:col-span-2">
-                  <img
-                    src={imagePreview}
-                    alt="Preview"
-                    className="w-full h-56 object-cover rounded-xl"
-                    onError={() => {
-                      if (!imageFile) {
-                        setErrors((prev) => ({
-                          ...prev,
-                          imageUrl: 'Unable to load image from the provided URL',
-                        }))
-=======
                 <label
                   className="md:col-span-2 flex items-center justify-center gap-2 px-4 py-4 rounded-xl cursor-pointer transition-all hover:bg-orange-50"
                   style={{
@@ -395,7 +268,6 @@ export default function ResourceFormModal({
                       if (file) {
                         setImageFile(file)
                         setImagePreview(URL.createObjectURL(file))
->>>>>>> 8c600a85 (Refactor ResourceFormModal and ResourcePage for improved UI and functionality)
                       }
                     }} 
                   />
@@ -502,15 +374,9 @@ export default function ResourceFormModal({
                 <div 
                   className="px-5 py-2.5 rounded-xl flex items-center gap-2 font-medium"
                   style={{
-<<<<<<< HEAD
-                    background: 'var(--status-approved-bg)',
-                    color: 'var(--status-approved)',
-                    border: '1px solid var(--status-approved-border)',
-=======
                     backgroundColor: '#fff7ed',
                     color: '#ea580c',
                     border: '1px solid #fed7aa',
->>>>>>> 8c600a85 (Refactor ResourceFormModal and ResourcePage for improved UI and functionality)
                   }}
                 >
                   <Eye size={18} />
